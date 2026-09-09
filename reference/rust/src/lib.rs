@@ -30,6 +30,7 @@ pub enum ReferenceError {
     DirectionsMustDiffer,
     NonFiniteBeta,
     NegativeBeta,
+    NonFiniteAction,
 }
 
 impl fmt::Display for ReferenceError {
@@ -46,6 +47,7 @@ impl fmt::Display for ReferenceError {
             Self::DirectionsMustDiffer => "plaquette directions must differ",
             Self::NonFiniteBeta => "beta must be finite",
             Self::NegativeBeta => "beta must be non-negative",
+            Self::NonFiniteAction => "Wilson action evaluation produced a non-finite result",
         };
         f.write_str(message)
     }
@@ -255,7 +257,15 @@ impl Lattice4 {
                 }
             }
         });
-        Ok(beta * sum)
+
+        if !sum.is_finite() {
+            return Err(ReferenceError::NonFiniteAction);
+        }
+        let action = beta * sum;
+        if !action.is_finite() {
+            return Err(ReferenceError::NonFiniteAction);
+        }
+        Ok(action)
     }
 
     pub fn gauge_transform<F>(&self, omega: F) -> Result<Self, ReferenceError>
@@ -417,6 +427,17 @@ mod tests {
             lattice.wilson_action(beta).unwrap(),
             6.0 * beta,
             DEFAULT_TOLERANCE,
+        );
+    }
+
+    #[test]
+    fn non_finite_action_result_fails_closed() {
+        let mut lattice = Lattice4::new_identity([3, 3, 3, 3]).unwrap();
+        let traceless = Su2::from_normalized_components([0.0, 1.0, 0.0, 0.0]).unwrap();
+        lattice.set_link([0, 0, 0, 0], 0, traceless).unwrap();
+        assert_eq!(
+            lattice.wilson_action(f64::MAX).unwrap_err(),
+            ReferenceError::NonFiniteAction
         );
     }
 

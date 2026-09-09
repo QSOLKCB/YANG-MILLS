@@ -7,6 +7,7 @@ import copy
 
 from check_contracts import (
     load,
+    parse_json_text,
     validate_evidence_contract,
     validate_gauge_contract,
     validate_lattice_contract,
@@ -76,6 +77,40 @@ def main() -> None:
     broken = copy.deepcopy(vectors)
     broken["vectors"][0]["tolerance"] = -1.0
     expect_reject(validate_vectors, broken, "negative regression tolerance")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][0]["expected_action"] = 1.0
+    expect_reject(validate_vectors, broken, "identity expected-action semantic drift")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][1]["expected_action"] = 11.0
+    expect_reject(validate_vectors, broken, "single-link expected-action semantic drift")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][1]["configuration"] = "unrelated configuration text"
+    expect_reject(validate_vectors, broken, "single-link configuration semantic drift")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][1]["affected_plaquettes"] = 5
+    expect_reject(validate_vectors, broken, "single-link affected-plaquette drift")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][1]["id"] = broken["vectors"][0]["id"]
+    expect_reject(validate_vectors, broken, "duplicate Phase 0 vector id")
+
+    duplicate_key_json = '{"dimension": 3, "dimension": 4}'
+    expect_reject(
+        lambda text: parse_json_text(text, "duplicate-key fixture"),
+        duplicate_key_json,
+        "duplicate JSON object key",
+    )
+
+    nonstandard_number_json = '{"beta": NaN}'
+    expect_reject(
+        lambda text: parse_json_text(text, "non-standard-number fixture"),
+        nonstandard_number_json,
+        "non-standard JSON numeric constant",
+    )
 
     print("Negative contract regression checks: passed")
 

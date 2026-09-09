@@ -30,11 +30,43 @@ EXPECTED_EVIDENCE_IDENTITY_CLASSES = [
     "claim_class",
 ]
 
+PHASE0_VECTOR_IDS = {
+    "identity-3x3x3x3-beta2",
+    "single-traceless-link-3x3x3x3-beta2",
+}
+
+
+class DuplicateKeyError(ValueError):
+    """Raised when a JSON object contains the same key more than once."""
+
+
+def reject_duplicate_object_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise DuplicateKeyError(f"duplicate object key {key!r}")
+        result[key] = value
+    return result
+
+
+def reject_nonstandard_constant(token: str) -> Any:
+    raise ValueError(f"non-standard JSON numeric constant {token!r}")
+
+
+def parse_json_text(text: str, context: str) -> Any:
+    try:
+        return json.loads(
+            text,
+            object_pairs_hook=reject_duplicate_object_pairs,
+            parse_constant=reject_nonstandard_constant,
+        )
+    except (json.JSONDecodeError, DuplicateKeyError, ValueError) as exc:
+        raise SystemExit(f"contract check failed: {context}: invalid JSON: {exc}") from exc
+
 
 def load(relative: str) -> Any:
     path = ROOT / relative
-    with path.open("r", encoding="utf-8") as handle:
-        return json.load(handle)
+    return parse_json_text(path.read_text(encoding="utf-8"), relative)
 
 
 def require(condition: bool, message: str) -> None:
@@ -241,6 +273,55 @@ def validate_evidence_contract(data: Any) -> None:
         require(evidence[key] is False, f"{key} boundary weakened")
 
 
+def validate_identity_vector(vector: dict[str, Any], context: str, beta: float, expected_action: float, tolerance: float) -> None:
+    require_exact_keys(
+        vector,
+        {"id", "extents", "beta", "configuration", "expected_action", "tolerance", "claim_class"},
+        context,
+    )
+    require(vector["extents"] == [3, 3, 3, 3], f"{context}: identity extents drift")
+    require(beta == 2.0, f"{context}: identity beta drift")
+    require(vector["configuration"] == "all links identity", f"{context}: identity configuration drift")
+    require(expected_action == 0.0, f"{context}: identity action must be exactly zero")
+    require(tolerance == 0.0, f"{context}: identity tolerance drift")
+
+
+def validate_single_traceless_vector(
+    vector: dict[str, Any],
+    context: str,
+    beta: float,
+    expected_action: float,
+    tolerance: float,
+) -> None:
+    require_exact_keys(
+        vector,
+        {
+            "id",
+            "extents",
+            "beta",
+            "configuration",
+            "affected_plaquettes",
+            "expected_action",
+            "tolerance",
+            "claim_class",
+        },
+        context,
+    )
+    require(vector["extents"] == [3, 3, 3, 3], f"{context}: single-link extents drift")
+    require(beta == 2.0, f"{context}: single-link beta drift")
+    require(
+        vector["configuration"] == "all identity except U_0([0,0,0,0])=(0,1,0,0)",
+        f"{context}: single-link configuration drift",
+    )
+    require_type(vector["affected_plaquettes"], int, f"{context}.affected_plaquettes")
+    require(vector["affected_plaquettes"] == 6, f"{context}: affected-plaquette count drift")
+    require(
+        expected_action == 6.0 * beta,
+        f"{context}: expected action must equal analytic 6*beta",
+    )
+    require(tolerance == 1.0e-12, f"{context}: single-link tolerance drift")
+
+
 def validate_vectors(data: Any) -> None:
     relative = "test-vectors/su2-wilson-v1.json"
     require_type(data, dict, relative)
@@ -252,39 +333,38 @@ def validate_vectors(data: Any) -> None:
     require_type(data["status"], str, f"{relative}.status")
     require(data["status"] == "phase-0-draft", "test-vector status drift")
     require_type(data["vectors"], list, f"{relative}.vectors")
-    require(len(data["vectors"]) >= 2, "expected Phase 0 regression vectors")
+    require(len(data["vectors"]) == 2, "Phase 0 vector set must contain exactly two vectors")
 
-    required_vector_keys = {
-        "id",
-        "extents",
-        "beta",
-        "configuration",
-        "expected_action",
-        "tolerance",
-        "claim_class",
-    }
+    seen_ids: set[str] = set()
     for index, vector in enumerate(data["vectors"]):
         context = f"{relative}.vectors[{index}]"
         require_type(vector, dict, context)
-        missing = required_vector_keys - set(vector)
-        require(not missing, f"{context}: missing required keys {sorted(missing)}")
-        require_type(vector["id"], str, f"{context}.id")
-        require_type(vector["extents"], list, f"{context}.extents")
+        require_type(vector.get("id"), str, f"{context}.id")
+        vector_id = vector["id"]
+        require(vector_id in PHASE0_VECTOR_IDS, f"{context}: unknown Phase 0 vector id {vector_id!r}")
+        require(vector_id not in seen_ids, f"{context}: duplicate vector id {vector_id!r}")
+        seen_ids.add(vector_id)
+
+        require_type(vector.get("extents"), list, f"{context}.extents")
         require(
             len(vector["extents"]) == 4 and all(type(n) is int and n >= 2 for n in vector["extents"]),
             f"{context}.extents must be four integer extents >= 2",
         )
-        beta = require_finite_number(vector["beta"], f"{context}.beta")
+        beta = require_finite_number(vector.get("beta"), f"{context}.beta")
         require(beta >= 0.0, f"{context}.beta must be non-negative")
-        require_finite_number(vector["expected_action"], f"{context}.expected_action")
-        tolerance = require_finite_number(vector["tolerance"], f"{context}.tolerance")
+        expected_action = require_finite_number(vector.get("expected_action"), f"{context}.expected_action")
+        tolerance = require_finite_number(vector.get("tolerance"), f"{context}.tolerance")
         require(tolerance >= 0.0, f"{context}.tolerance must be non-negative")
-        require_type(vector["configuration"], str, f"{context}.configuration")
-        require_type(vector["claim_class"], str, f"{context}.claim_class")
+        require_type(vector.get("configuration"), str, f"{context}.configuration")
+        require_type(vector.get("claim_class"), str, f"{context}.claim_class")
         require(vector["claim_class"] == "C1", f"{context}: claim class drift")
-        if "affected_plaquettes" in vector:
-            require_type(vector["affected_plaquettes"], int, f"{context}.affected_plaquettes")
-            require(vector["affected_plaquettes"] > 0, f"{context}.affected_plaquettes must be positive")
+
+        if vector_id == "identity-3x3x3x3-beta2":
+            validate_identity_vector(vector, context, beta, expected_action, tolerance)
+        else:
+            validate_single_traceless_vector(vector, context, beta, expected_action, tolerance)
+
+    require(seen_ids == PHASE0_VECTOR_IDS, "Phase 0 vector identity set drift")
 
 
 def main() -> None:
