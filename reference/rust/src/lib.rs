@@ -127,14 +127,15 @@ impl Su2 {
     pub fn mul(self, rhs: Self) -> Self {
         let [a0, a1, a2, a3] = self.c;
         let [b0, b1, b2, b3] = rhs.c;
-        Self {
-            c: [
-                a0 * b0 - a1 * b1 - a2 * b2 - a3 * b3,
-                a0 * b1 + a1 * b0 + a2 * b3 - a3 * b2,
-                a0 * b2 - a1 * b3 + a2 * b0 + a3 * b1,
-                a0 * b3 + a1 * b2 - a2 * b1 + a3 * b0,
-            ],
-        }
+        let raw = [
+            a0 * b0 - a1 * b1 - a2 * b2 - a3 * b3,
+            a0 * b1 + a1 * b0 + a2 * b3 - a3 * b2,
+            a0 * b2 - a1 * b3 + a2 * b0 + a3 * b1,
+            a0 * b3 + a1 * b2 - a2 * b1 + a3 * b0,
+        ];
+        let c = normalize_scaled(raw)
+            .expect("product of finite unit quaternions must have non-zero finite norm");
+        Self { c }
     }
 
     pub const fn half_real_trace(self) -> f64 {
@@ -392,6 +393,20 @@ mod tests {
         assert_close(c[1], 0.0, DEFAULT_TOLERANCE);
         assert_close(c[2], 0.0, DEFAULT_TOLERANCE);
         assert_close(c[3], 0.0, DEFAULT_TOLERANCE);
+    }
+
+    #[test]
+    fn repeated_multiplication_preserves_unit_quaternion_invariant() {
+        let mut q = Su2::from_axis_angle([1.0, 2.0, 3.0], 0.91).unwrap();
+        for _ in 0..100 {
+            q = q.mul(q);
+            assert_close(q.norm_sq(), 1.0, DEFAULT_TOLERANCE);
+        }
+
+        let mut lattice = Lattice4::new_identity([3, 3, 3, 3]).unwrap();
+        lattice.set_link([0, 0, 0, 0], 0, q).unwrap();
+        assert!(lattice.max_link_unit_residual() <= DEFAULT_TOLERANCE);
+        assert!(lattice.wilson_action(2.0).unwrap().is_finite());
     }
 
     #[test]

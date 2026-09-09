@@ -8,6 +8,7 @@ import copy
 from check_contracts import (
     load,
     parse_json_text,
+    validate_claim_policy,
     validate_evidence_contract,
     validate_gauge_contract,
     validate_lattice_contract,
@@ -27,11 +28,13 @@ def main() -> None:
     gauge = load("contracts/YM-GAUGE-GROUP-V1.json")
     lattice = load("contracts/YM-LATTICE-V1.json")
     evidence = load("contracts/YM-EVIDENCE-V1.json")
+    policy = load("contracts/YM-CLAIM-POLICY-V1.json")
     vectors = load("test-vectors/su2-wilson-v1.json")
 
     validate_gauge_contract(gauge)
     validate_lattice_contract(lattice)
     validate_evidence_contract(evidence)
+    validate_claim_policy(policy)
     validate_vectors(vectors)
 
     broken = copy.deepcopy(lattice)
@@ -53,6 +56,24 @@ def main() -> None:
     broken = copy.deepcopy(evidence)
     broken["required_identity_classes"] = broken["required_identity_classes"][:-1]
     expect_reject(validate_evidence_contract, broken, "incomplete evidence identity classes")
+
+    broken = copy.deepcopy(policy)
+    broken["forbidden_equivalences"][
+        "positive_finite_lattice_mass_implies_positive_continuum_mass_gap"
+    ] = True
+    expect_reject(validate_claim_policy, broken, "weakened finite-lattice/continuum boundary")
+
+    broken = copy.deepcopy(policy)
+    broken["numerical_release_disclaimer_required"] = False
+    expect_reject(validate_claim_policy, broken, "disabled numerical disclaimer requirement")
+
+    broken = copy.deepcopy(policy)
+    broken["claim_classes"]["C5"] = "ordinary-numerical-result"
+    expect_reject(validate_claim_policy, broken, "weakened C5 meaning")
+
+    broken = copy.deepcopy(policy)
+    broken["clay_solution_requires_official_problem_proof"] = False
+    expect_reject(validate_claim_policy, broken, "weakened Clay proof requirement")
 
     broken = copy.deepcopy(vectors)
     del broken["vectors"][0]["expected_action"]

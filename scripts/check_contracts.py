@@ -14,6 +14,7 @@ EXPECTED = {
     "contracts/YM-GAUGE-GROUP-V1.json": "YM-GAUGE-GROUP-V1",
     "contracts/YM-LATTICE-V1.json": "YM-LATTICE-V1",
     "contracts/YM-EVIDENCE-V1.json": "YM-EVIDENCE-V1",
+    "contracts/YM-CLAIM-POLICY-V1.json": "YM-CLAIM-POLICY-V1",
 }
 
 EXPECTED_EVIDENCE_IDENTITY_CLASSES = [
@@ -29,6 +30,30 @@ EXPECTED_EVIDENCE_IDENTITY_CLASSES = [
     "analysis_version",
     "claim_class",
 ]
+
+EXPECTED_CLAIM_CLASSES = {
+    "C0": "software-contract",
+    "C1": "finite-lattice-exact",
+    "C2": "finite-lattice-numerical",
+    "C3": "physical-scaling-inference",
+    "C4": "continuum-mathematical-theorem",
+    "C5": "clay-solution-claim",
+}
+
+EXPECTED_FORBIDDEN_EQUIVALENCES = {
+    "positive_finite_lattice_mass_implies_positive_continuum_mass_gap",
+    "stable_fit_implies_theorem",
+    "continuum_extrapolation_implies_continuum_qft_existence",
+    "cpu_gpu_agreement_implies_physical_truth",
+    "literature_agreement_implies_proof",
+    "formal_finite_lattice_theorem_implies_clay_solution",
+}
+
+REQUIRED_NUMERICAL_RELEASE_SENTENCE = (
+    "A numerical release must explicitly say that its numerical results are "
+    "evidence/observations within a specified lattice model and are not a proof "
+    "of the Yang–Mills existence and mass-gap problem."
+)
 
 PHASE0_VECTOR_IDS = {
     "identity-3x3x3x3-beta2",
@@ -124,7 +149,6 @@ def validate_gauge_contract(data: Any) -> None:
         "YM-GAUGE-GROUP-V1",
         {"contract_id", "status", "gauge_group", "representation", "claim_scope"},
     )
-
     require_type(gauge["gauge_group"], str, f"{relative}.gauge_group")
     require(gauge["gauge_group"] == "SU(2)", "Phase 0 gauge group must be SU(2)")
 
@@ -135,16 +159,10 @@ def validate_gauge_contract(data: Any) -> None:
         {"storage", "components", "matrix_convention", "unit_condition", "dagger", "real_trace"},
         f"{relative}.representation",
     )
-    require_type(representation["storage"], str, f"{relative}.representation.storage")
     require(representation["storage"] == "unit-quaternion-f64", "SU(2) storage drift")
-    require_type(representation["components"], list, f"{relative}.representation.components")
     require(
         representation["components"] == ["a0", "a1", "a2", "a3"],
         "SU(2) component ordering drift",
-    )
-    require(
-        all(type(component) is str for component in representation["components"]),
-        "SU(2) components must be strings",
     )
     for key, expected in {
         "matrix_convention": "U(q)=a0*I-i*(a1*sigma1+a2*sigma2+a3*sigma3)",
@@ -154,8 +172,6 @@ def validate_gauge_contract(data: Any) -> None:
     }.items():
         require_type(representation[key], str, f"{relative}.representation.{key}")
         require(representation[key] == expected, f"SU(2) {key} drift")
-
-    require_type(gauge["claim_scope"], str, f"{relative}.claim_scope")
     require(
         gauge["claim_scope"] == "finite-lattice reference mathematics only",
         "SU(2) claim scope drift",
@@ -181,12 +197,9 @@ def validate_lattice_contract(data: Any) -> None:
             "numerics",
         },
     )
-
     require_type(lattice["dimension"], int, f"{relative}.dimension")
     require(lattice["dimension"] == 4, "lattice dimension must remain four")
-    require_type(lattice["boundary_conditions"], str, f"{relative}.boundary_conditions")
     require(lattice["boundary_conditions"] == "periodic", "boundary condition drift")
-    require_type(lattice["link_directions_stored"], str, f"{relative}.link_directions_stored")
     require(lattice["link_directions_stored"] == "positive-only", "stored-link direction drift")
     require_type(
         lattice["minimum_extent_per_dimension"],
@@ -194,20 +207,16 @@ def validate_lattice_contract(data: Any) -> None:
         f"{relative}.minimum_extent_per_dimension",
     )
     require(lattice["minimum_extent_per_dimension"] == 2, "minimum lattice extent drift")
-    require_type(lattice["plaquette_orientation"], str, f"{relative}.plaquette_orientation")
     require(
         lattice["plaquette_orientation"]
         == "U_mu(x) U_nu(x+mu) U_mu(x+nu)^dagger U_nu(x)^dagger",
         "plaquette orientation drift",
     )
-    require_type(lattice["plaquette_sum"], str, f"{relative}.plaquette_sum")
     require(lattice["plaquette_sum"] == "mu<nu", "plaquette counting drift")
 
     action = lattice["action"]
     require_type(action, dict, f"{relative}.action")
     require_exact_keys(action, {"name", "formula", "beta_domain"}, f"{relative}.action")
-    for key in ("name", "formula", "beta_domain"):
-        require_type(action[key], str, f"{relative}.action.{key}")
     require(action["name"] == "Wilson", "Wilson action name drift")
     require(
         action["formula"] == "S=beta*sum_p(1-(1/2)*ReTr(U_p))",
@@ -222,7 +231,6 @@ def validate_lattice_contract(data: Any) -> None:
         {"scalar_type", "bitwise_cross_platform_identity_claimed"},
         f"{relative}.numerics",
     )
-    require_type(numerics["scalar_type"], str, f"{relative}.numerics.scalar_type")
     require(numerics["scalar_type"] == "f64", "lattice scalar type drift")
     require_type(
         numerics["bitwise_cross_platform_identity_claimed"],
@@ -251,15 +259,9 @@ def validate_evidence_contract(data: Any) -> None:
             "clay_solution_claimed",
         },
     )
-
     classes = evidence["required_identity_classes"]
     require_type(classes, list, f"{relative}.required_identity_classes")
-    require(
-        all(type(item) is str for item in classes),
-        "evidence identity classes must all be strings",
-    )
     require(classes == EXPECTED_EVIDENCE_IDENTITY_CLASSES, "evidence identity-class drift")
-    require_type(evidence["hash_semantics"], str, f"{relative}.hash_semantics")
     require(
         evidence["hash_semantics"] == "identity-and-integrity-only",
         "hash semantics drift",
@@ -273,7 +275,74 @@ def validate_evidence_contract(data: Any) -> None:
         require(evidence[key] is False, f"{key} boundary weakened")
 
 
-def validate_identity_vector(vector: dict[str, Any], context: str, beta: float, expected_action: float, tolerance: float) -> None:
+def validate_claim_policy(data: Any) -> None:
+    relative = "contracts/YM-CLAIM-POLICY-V1.json"
+    policy = validate_header(
+        data,
+        relative,
+        "YM-CLAIM-POLICY-V1",
+        {
+            "contract_id",
+            "status",
+            "claim_classes",
+            "forbidden_equivalences",
+            "numerical_release_disclaimer_required",
+            "required_numerical_release_sentence",
+            "clay_solution_requires_official_problem_proof",
+        },
+    )
+
+    classes = policy["claim_classes"]
+    require_type(classes, dict, f"{relative}.claim_classes")
+    require(classes == EXPECTED_CLAIM_CLASSES, "claim-class semantics drift")
+
+    forbidden = policy["forbidden_equivalences"]
+    require_type(forbidden, dict, f"{relative}.forbidden_equivalences")
+    require_exact_keys(
+        forbidden,
+        EXPECTED_FORBIDDEN_EQUIVALENCES,
+        f"{relative}.forbidden_equivalences",
+    )
+    for key in EXPECTED_FORBIDDEN_EQUIVALENCES:
+        require_type(forbidden[key], bool, f"{relative}.forbidden_equivalences.{key}")
+        require(forbidden[key] is False, f"forbidden equivalence weakened: {key}")
+
+    require_type(
+        policy["numerical_release_disclaimer_required"],
+        bool,
+        f"{relative}.numerical_release_disclaimer_required",
+    )
+    require(
+        policy["numerical_release_disclaimer_required"] is True,
+        "numerical release disclaimer requirement weakened",
+    )
+    require_type(
+        policy["required_numerical_release_sentence"],
+        str,
+        f"{relative}.required_numerical_release_sentence",
+    )
+    require(
+        policy["required_numerical_release_sentence"] == REQUIRED_NUMERICAL_RELEASE_SENTENCE,
+        "required numerical release sentence drift",
+    )
+    require_type(
+        policy["clay_solution_requires_official_problem_proof"],
+        bool,
+        f"{relative}.clay_solution_requires_official_problem_proof",
+    )
+    require(
+        policy["clay_solution_requires_official_problem_proof"] is True,
+        "Clay solution proof requirement weakened",
+    )
+
+
+def validate_identity_vector(
+    vector: dict[str, Any],
+    context: str,
+    beta: float,
+    expected_action: float,
+    tolerance: float,
+) -> None:
     require_exact_keys(
         vector,
         {"id", "extents", "beta", "configuration", "expected_action", "tolerance", "claim_class"},
@@ -315,10 +384,7 @@ def validate_single_traceless_vector(
     )
     require_type(vector["affected_plaquettes"], int, f"{context}.affected_plaquettes")
     require(vector["affected_plaquettes"] == 6, f"{context}: affected-plaquette count drift")
-    require(
-        expected_action == 6.0 * beta,
-        f"{context}: expected action must equal analytic 6*beta",
-    )
+    require(expected_action == 6.0 * beta, f"{context}: expected action must equal analytic 6*beta")
     require(tolerance == 1.0e-12, f"{context}: single-link tolerance drift")
 
 
@@ -326,11 +392,8 @@ def validate_vectors(data: Any) -> None:
     relative = "test-vectors/su2-wilson-v1.json"
     require_type(data, dict, relative)
     require_exact_keys(data, {"contract_id", "vector_set", "status", "vectors"}, relative)
-    require_type(data["contract_id"], str, f"{relative}.contract_id")
     require(data["contract_id"] == "YM-LATTICE-V1", "test-vector contract drift")
-    require_type(data["vector_set"], str, f"{relative}.vector_set")
     require(data["vector_set"] == "SU2-WILSON-PHASE0-V1", "vector-set identity drift")
-    require_type(data["status"], str, f"{relative}.status")
     require(data["status"] == "phase-0-draft", "test-vector status drift")
     require_type(data["vectors"], list, f"{relative}.vectors")
     require(len(data["vectors"]) == 2, "Phase 0 vector set must contain exactly two vectors")
@@ -347,12 +410,16 @@ def validate_vectors(data: Any) -> None:
 
         require_type(vector.get("extents"), list, f"{context}.extents")
         require(
-            len(vector["extents"]) == 4 and all(type(n) is int and n >= 2 for n in vector["extents"]),
+            len(vector["extents"]) == 4
+            and all(type(n) is int and n >= 2 for n in vector["extents"]),
             f"{context}.extents must be four integer extents >= 2",
         )
         beta = require_finite_number(vector.get("beta"), f"{context}.beta")
         require(beta >= 0.0, f"{context}.beta must be non-negative")
-        expected_action = require_finite_number(vector.get("expected_action"), f"{context}.expected_action")
+        expected_action = require_finite_number(
+            vector.get("expected_action"),
+            f"{context}.expected_action",
+        )
         tolerance = require_finite_number(vector.get("tolerance"), f"{context}.tolerance")
         require(tolerance >= 0.0, f"{context}.tolerance must be non-negative")
         require_type(vector.get("configuration"), str, f"{context}.configuration")
@@ -372,15 +439,26 @@ def main() -> None:
     validate_gauge_contract(loaded["contracts/YM-GAUGE-GROUP-V1.json"])
     validate_lattice_contract(loaded["contracts/YM-LATTICE-V1.json"])
     validate_evidence_contract(loaded["contracts/YM-EVIDENCE-V1.json"])
+    validate_claim_policy(loaded["contracts/YM-CLAIM-POLICY-V1.json"])
     validate_vectors(load("test-vectors/su2-wilson-v1.json"))
 
     claim_text = (ROOT / "docs/CLAIM_BOUNDARY.md").read_text(encoding="utf-8")
-    require("finite-lattice" in claim_text.lower(), "claim boundary lost finite-lattice distinction")
-    require("Clay" in claim_text, "claim boundary must retain Clay distinction")
+    require(
+        "`contracts/YM-CLAIM-POLICY-V1.json` is the machine-readable authority"
+        in claim_text,
+        "claim boundary must identify the machine-readable authority",
+    )
+    require(
+        REQUIRED_NUMERICAL_RELEASE_SENTENCE in claim_text,
+        "claim boundary lost required numerical-release refusal language",
+    )
 
     donor_text = (ROOT / "docs/DONOR_BOUNDARY.md").read_text(encoding="utf-8")
     require("engineering donor" in donor_text, "donor semantics drift")
-    require("80941183d14531093117e122da0fc32c13d2464b" in donor_text, "GLUBALL donor SHA drift")
+    require(
+        "80941183d14531093117e122da0fc32c13d2464b" in donor_text,
+        "GLUBALL donor SHA drift",
+    )
 
     print("Phase 0 contract checks: passed")
 

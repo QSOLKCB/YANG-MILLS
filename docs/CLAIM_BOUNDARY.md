@@ -2,6 +2,8 @@
 
 Every significant result in YANG-MILLS should be classified before publication.
 
+`contracts/YM-CLAIM-POLICY-V1.json` is the machine-readable authority for claim classes, forbidden equivalences, and release disclaimers. This prose may explain that policy but may not override or weaken it.
+
 ## C0 — software / contract result
 
 Examples:
