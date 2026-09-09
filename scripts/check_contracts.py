@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -56,6 +57,16 @@ def require_exact_keys(value: dict[str, Any], expected: set[str], context: str) 
         not missing and not extra,
         f"{context}: key mismatch; missing={missing}, extra={extra}",
     )
+
+
+def require_finite_number(value: Any, context: str) -> float:
+    require(
+        type(value) in (int, float) and type(value) is not bool,
+        f"{context} must be numeric",
+    )
+    numeric = float(value)
+    require(math.isfinite(numeric), f"{context} must be finite")
+    return numeric
 
 
 def validate_header(
@@ -263,11 +274,11 @@ def validate_vectors(data: Any) -> None:
             len(vector["extents"]) == 4 and all(type(n) is int and n >= 2 for n in vector["extents"]),
             f"{context}.extents must be four integer extents >= 2",
         )
-        for key in ("beta", "expected_action", "tolerance"):
-            require(
-                type(vector[key]) in (int, float) and type(vector[key]) is not bool,
-                f"{context}.{key} must be numeric",
-            )
+        beta = require_finite_number(vector["beta"], f"{context}.beta")
+        require(beta >= 0.0, f"{context}.beta must be non-negative")
+        require_finite_number(vector["expected_action"], f"{context}.expected_action")
+        tolerance = require_finite_number(vector["tolerance"], f"{context}.tolerance")
+        require(tolerance >= 0.0, f"{context}.tolerance must be non-negative")
         require_type(vector["configuration"], str, f"{context}.configuration")
         require_type(vector["claim_class"], str, f"{context}.claim_class")
         require(vector["claim_class"] == "C1", f"{context}: claim class drift")
