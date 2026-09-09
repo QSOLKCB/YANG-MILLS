@@ -1,6 +1,6 @@
 # YANG-MILLS roadmap
 
-The roadmap is ordered to keep implementation validation, numerical evidence, physical inference, and mathematical proof claims distinct.
+The roadmap is ordered to keep implementation validation, numerical evidence, physical inference, classical continuum geometry, and mathematical proof claims distinct.
 
 ## Phase 0 — constitution + minimal `SU(2)` reference core
 
@@ -101,6 +101,30 @@ Reference lead: [Wolfram MathWorld — Cyclic Group C3](https://mathworld.wolfra
 - [ ] Keep finite-lattice holonomy measurements distinct from continuum confinement theorems.
 - [ ] Prepare the later static-potential analysis surface `<W(R,T)> ~ exp(-V(R) T)` without claiming an area law before ensemble evidence exists.
 
+### Phase 1E — classical continuum bundle/connection dictionary
+
+This checkpoint records the standard geometric objects that the lattice theory approximates. It is a classical mathematical layer and must not be confused with construction of the quantum theory required by the Clay problem.
+
+Reference leads include Wolfram MathWorld entries on [Principal Bundles](https://mathworld.wolfram.com/PrincipalBundle.html) and [Vector Bundle Connections](https://mathworld.wolfram.com/VectorBundleConnection.html).
+
+- [ ] Define a principal `G`-bundle `pi:P -> M` with compact Lie group `G` acting freely on each fiber.
+- [ ] Distinguish the principal bundle from an associated vector bundle `E = P x_rho V` obtained from a representation `rho:G -> GL(V)`.
+- [ ] Record that matter/vector fields are sections of associated bundles, while the gauge connection is fundamentally a connection on the principal bundle.
+- [ ] Define the induced covariant derivative `nabla_A: Gamma(E) -> Gamma(T^*M tensor E)` and its Leibniz rule on sections.
+- [ ] Record the local connection form `A` only after choosing a trivialization; do not mistake local gauge potentials for globally defined ordinary one-forms on a nontrivial bundle.
+- [ ] Define curvature geometrically and locally: `F_A = dA + A wedge A`, with convention choices stated explicitly.
+- [ ] Define flatness by `F_A = 0` and distinguish local gauge triviality from global bundle topology/holonomy.
+- [ ] Record the Bianchi identity `d_A F_A = 0`.
+- [ ] Define the classical Yang–Mills functional using an invariant inner product on the Lie algebra, schematically `YM(A) = integral_M <F_A, F_A> dvol`.
+- [ ] Derive the Euler–Lagrange equation `d_A^* F_A = 0` from variation of the classical functional.
+- [ ] State explicitly that a Yang–Mills connection is a **critical point** of the functional; it is not automatically a global minimizer.
+- [ ] In four dimensions, define self-duality/anti-self-duality `F_A = +/- *F_A` and verify that, together with the Bianchi identity, it implies the Yang–Mills equation.
+- [ ] Keep instanton/topological applications (Chern classes, second Chern number, Donaldson-theory connections) as a separate classical/topological research branch unless they become directly relevant to the mass-gap route.
+- [ ] Add a precise lattice-continuum dictionary connecting link holonomy, plaquette holonomy, continuum connection, and curvature without claiming equality at finite lattice spacing.
+- [ ] Treat principal-bundle, associated-vector-bundle, connection, covariant derivative, curvature, holonomy, Wilson loop, and gauge transformation as separately versioned definitions before formalisation.
+
+**Classical-continuum boundary:** establishing the classical equations, bundle geometry, instanton identities, or finite-lattice approximations does not construct the interacting quantum Yang–Mills theory and does not establish a mass gap.
+
 ### Cross-domain donor quarantine
 
 Previous QSOL-IMC work involving triadic `SU(3)`, semantic gauge fields, relational curvature, or semantic mass-gap language may inspire software tests or invariant-first methodology, but the following boundaries are mandatory.
@@ -115,8 +139,9 @@ Research leads currently include *A Triadic Ontology with SU(3) Invariants*, *Sp
 - [ ] Holonomy/Wilson-loop ideas may motivate test surfaces only after they are independently restated in standard gauge-theory form.
 - [ ] Any imported equation is checked against standard gauge-theory conventions; notation errors or missing operators are corrected by derivation rather than copied as authority.
 - [ ] Gauge-dependent implementation state is not promoted to scientific output; preferred published observables are gauge invariant or have an explicitly justified gauge fixing.
+- [ ] “Mills” number-theory objects such as Mills' theorem, Mills' constant/primes, and Mills ratio are surname collisions and remain outside this project unless an independent mathematical connection is explicitly proved.
 
-**Graduation gate:** all advertised `SU(2)` observables are gauge invariant under independent local transformations within declared numerical tolerances; all selected `SU(3)` algebra identities are independently verified; the abstract `C3 ~= Z3` relation is distinguished from concrete subgroup embeddings; genuine center elements are distinguished from non-central cyclic operators; and all golden vectors are sealed.
+**Graduation gate:** all advertised `SU(2)` observables are gauge invariant under independent local transformations within declared numerical tolerances; all selected `SU(3)` algebra identities are independently verified; the abstract `C3 ~= Z3` relation is distinguished from concrete subgroup embeddings; genuine center elements are distinguished from non-central cyclic operators; the classical bundle/connection dictionary is internally consistent; and all golden vectors are sealed.
 
 ## Phase 2 — statistical ensemble generation
 
@@ -196,9 +221,13 @@ Potential targets include:
 - combinatorial facts behind analytic regression configurations;
 - `SU(3)` generator identities and Casimir statements after the algebra contract is frozen;
 - distinction between the non-central `<Omega> ~= C3` embedding and the central `Z(SU(3)) ~= C3` embedding;
+- principal-bundle and associated-vector-bundle definitions;
+- induced covariant derivatives on associated bundles;
+- curvature covariance and the Bianchi identity;
+- the implication `F_A = +/- *F_A => d_A^*F_A = 0` in four dimensions, once conventions are fixed;
 - finite-lattice statements that can be proved without floating-point assumptions.
 
-Continuum existence and the positive mass gap remain separate theorem targets and may not be represented as established unless a genuine proof exists.
+Continuum quantum existence and the positive mass gap remain separate theorem targets and may not be represented as established unless a genuine proof exists.
 
 ## Publication discipline
 
