@@ -57,6 +57,26 @@ def main() -> None:
     del broken["vectors"][0]["expected_action"]
     expect_reject(validate_vectors, broken, "incomplete regression vector")
 
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][0]["beta"] = float("nan")
+    expect_reject(validate_vectors, broken, "NaN regression beta")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][0]["expected_action"] = float("inf")
+    expect_reject(validate_vectors, broken, "infinite expected action")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][0]["tolerance"] = float("-inf")
+    expect_reject(validate_vectors, broken, "non-finite tolerance")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][0]["beta"] = -1.0
+    expect_reject(validate_vectors, broken, "negative regression beta")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][0]["tolerance"] = -1.0
+    expect_reject(validate_vectors, broken, "negative regression tolerance")
+
     print("Negative contract regression checks: passed")
 
 
