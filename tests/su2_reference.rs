@@ -25,8 +25,7 @@ fn public_gauge_transform_surface_preserves_action() {
     let beta = 1.7;
     let lattice = deterministic_nontrivial_field();
     let transformed = lattice.gauge_transform(deterministic_site_gauge).unwrap();
-    let residual = (lattice.wilson_action(beta).unwrap()
-        - transformed.wilson_action(beta).unwrap())
-    .abs();
+    let residual =
+        (lattice.wilson_action(beta).unwrap() - transformed.wilson_action(beta).unwrap()).abs();
     assert!(residual <= 2.0e-11, "gauge-action residual={residual:.17e}");
 }

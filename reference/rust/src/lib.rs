@@ -39,7 +39,9 @@ impl fmt::Display for ReferenceError {
             Self::ZeroSu2Norm => "SU(2) components must have non-zero norm",
             Self::InvalidAxis => "axis must be finite and have non-zero norm",
             Self::InvalidLatticeExtent => "every lattice extent must be >= 2",
-            Self::CoordinateOutOfRange => "lattice coordinate is outside its periodic fundamental domain",
+            Self::CoordinateOutOfRange => {
+                "lattice coordinate is outside its periodic fundamental domain"
+            }
             Self::DirectionOutOfRange => "lattice direction must be in 0..4",
             Self::DirectionsMustDiffer => "plaquette directions must differ",
             Self::NonFiniteBeta => "beta must be finite",
@@ -179,9 +181,7 @@ impl Lattice4 {
         if x.iter().zip(self.extents).any(|(&v, n)| v >= n) {
             return Err(ReferenceError::CoordinateOutOfRange);
         }
-        Ok((((x[0] * self.extents[1] + x[1]) * self.extents[2] + x[2])
-            * self.extents[3])
-            + x[3])
+        Ok((((x[0] * self.extents[1] + x[1]) * self.extents[2] + x[2]) * self.extents[3]) + x[3])
     }
 
     fn link_index(&self, x: [usize; DIM], mu: usize) -> Result<usize, ReferenceError> {
@@ -215,12 +215,7 @@ impl Lattice4 {
         Ok(())
     }
 
-    pub fn plaquette(
-        &self,
-        x: [usize; DIM],
-        mu: usize,
-        nu: usize,
-    ) -> Result<Su2, ReferenceError> {
+    pub fn plaquette(&self, x: [usize; DIM], mu: usize, nu: usize) -> Result<Su2, ReferenceError> {
         Self::validate_direction(mu)?;
         Self::validate_direction(nu)?;
         if mu == nu {
@@ -247,7 +242,9 @@ impl Lattice4 {
         self.for_each_site(|x| {
             for mu in 0..DIM {
                 for nu in (mu + 1)..DIM {
-                    let p = self.plaquette(x, mu, nu).expect("valid plaquette directions");
+                    let p = self
+                        .plaquette(x, mu, nu)
+                        .expect("valid plaquette directions");
                     sum += 1.0 - p.half_real_trace();
                 }
             }
@@ -267,9 +264,7 @@ impl Lattice4 {
                 let value = gx
                     .mul(self.link(x, mu).expect("valid direction"))
                     .mul(omega(xp).dagger());
-                transformed
-                    .set_link(x, mu, value)
-                    .expect("valid direction");
+                transformed.set_link(x, mu, value).expect("valid direction");
             }
         });
         Ok(transformed)
@@ -356,14 +351,23 @@ mod tests {
     #[test]
     fn periodic_neighbor_wraps() {
         let lattice = Lattice4::new_identity([2, 3, 4, 5]).unwrap();
-        assert_eq!(lattice.neighbor_plus([1, 2, 3, 4], 0).unwrap(), [0, 2, 3, 4]);
-        assert_eq!(lattice.neighbor_plus([1, 2, 3, 4], 3).unwrap(), [1, 2, 3, 0]);
+        assert_eq!(
+            lattice.neighbor_plus([1, 2, 3, 4], 0).unwrap(),
+            [0, 2, 3, 4]
+        );
+        assert_eq!(
+            lattice.neighbor_plus([1, 2, 3, 4], 3).unwrap(),
+            [1, 2, 3, 0]
+        );
     }
 
     #[test]
     fn identity_plaquette_and_action_are_exact() {
         let lattice = Lattice4::new_identity([2, 2, 2, 2]).unwrap();
-        assert_eq!(lattice.plaquette([0, 0, 0, 0], 0, 1).unwrap(), Su2::IDENTITY);
+        assert_eq!(
+            lattice.plaquette([0, 0, 0, 0], 0, 1).unwrap(),
+            Su2::IDENTITY
+        );
         assert_eq!(lattice.wilson_action(2.0).unwrap(), 0.0);
     }
 
@@ -373,7 +377,11 @@ mod tests {
         let mut lattice = Lattice4::new_identity([3, 3, 3, 3]).unwrap();
         let traceless = Su2::from_normalized_components([0.0, 1.0, 0.0, 0.0]).unwrap();
         lattice.set_link([0, 0, 0, 0], 0, traceless).unwrap();
-        assert_close(lattice.wilson_action(beta).unwrap(), 6.0 * beta, DEFAULT_TOLERANCE);
+        assert_close(
+            lattice.wilson_action(beta).unwrap(),
+            6.0 * beta,
+            DEFAULT_TOLERANCE,
+        );
     }
 
     #[test]
