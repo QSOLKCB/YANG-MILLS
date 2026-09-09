@@ -285,10 +285,19 @@ impl Lattice4 {
     }
 
     pub fn max_link_unit_residual(&self) -> f64 {
-        self.links
-            .iter()
-            .map(|u| (u.norm_sq() - 1.0).abs())
-            .fold(0.0, f64::max)
+        let mut max_residual = 0.0;
+        for link in &self.links {
+            let norm_sq = link.norm_sq();
+            if !norm_sq.is_finite() {
+                return f64::INFINITY;
+            }
+            let residual = (norm_sq - 1.0).abs();
+            if !residual.is_finite() {
+                return f64::INFINITY;
+            }
+            max_residual = max_residual.max(residual);
+        }
+        max_residual
     }
 
     fn for_each_site<F>(&self, mut f: F)
@@ -440,6 +449,16 @@ mod tests {
 
         assert_eq!(calls.get(), lattice.site_count());
         assert_close(transformed.wilson_action(2.0).unwrap(), 0.0, 2.0e-11);
+    }
+
+    #[test]
+    fn non_finite_link_residual_fails_closed() {
+        let mut lattice = Lattice4::new_identity([2, 2, 2, 2]).unwrap();
+        let non_finite = Su2 {
+            c: [f64::NAN, 0.0, 0.0, 0.0],
+        };
+        lattice.set_link([0, 0, 0, 0], 0, non_finite).unwrap();
+        assert_eq!(lattice.max_link_unit_residual(), f64::INFINITY);
     }
 
     #[test]
