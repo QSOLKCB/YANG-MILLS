@@ -92,12 +92,24 @@ Reference lead: [Wolfram MathWorld — Cyclic Group C3](https://mathworld.wolfra
 - [ ] Treat “same abstract group” and “same embedded subgroup/action” as different claims in tests and documentation.
 - [ ] Add center transformations to the Polyakov-loop test surface before making any confinement/deconfinement inference.
 
-### Phase 1D — Wilson/Polyakov holonomy surface
+### Phase 1D — paths, parallel transport, Wilson/Polyakov holonomy
 
+This checkpoint connects the differential geometry of curves to the gauge-theory observables used on the lattice. Curve geometry is useful here because a connection is sampled along an oriented path; the curvature of the path itself is not Yang–Mills curvature.
+
+- [ ] Define `YM-PATH-HOLONOMY-V1` for oriented piecewise-smooth paths and their lattice discretisations.
+- [ ] Define a path `gamma:[0,1] -> M`, its tangent `gamma_dot(t) in T_(gamma(t))M`, and the pullback of the local gauge connection along the path.
+- [ ] Define continuum parallel transport by the connection along `gamma`, with path ordering and sign/convention choices stated explicitly.
+- [ ] Record the path-ordered exponential schematically as `U_gamma = P exp(- integral_gamma A)` or the convention-equivalent form chosen by the project.
+- [ ] Verify reparameterisation invariance under orientation-preserving changes of path parameter.
+- [ ] Verify path reversal gives `U_(gamma^-1) = U_gamma^-1`.
+- [ ] Verify path concatenation gives the convention-consistent ordered product `U_(gamma2 o gamma1) = U_gamma2 U_gamma1`.
+- [ ] Distinguish open Wilson lines from closed Wilson loops: open transport transforms at both endpoints, while the normalized trace of closed holonomy is gauge invariant.
 - [ ] Treat Wilson loops as path-ordered closed-loop holonomies with normalized trace as the gauge-invariant observable.
-- [ ] Add deterministic ordered-product tests for arbitrary closed paths.
+- [ ] Add deterministic ordered-product tests for arbitrary closed lattice paths.
 - [ ] Add Polyakov loops wrapping the periodic Euclidean-time direction.
 - [ ] Add gauge-transformation regression vectors for Wilson and Polyakov observables.
+- [ ] Relate infinitesimal closed-loop holonomy to the gauge curvature `F_A` only through a stated small-loop expansion; do not identify a finite loop directly with a pointwise curvature tensor.
+- [ ] State explicitly that Frenet curvature, torsion, osculating circles/planes, and other embedded-curve invariants are distinct from the bundle curvature `F_A` unless a separate theorem connects them in a specific construction.
 - [ ] Keep finite-lattice holonomy measurements distinct from continuum confinement theorems.
 - [ ] Prepare the later static-potential analysis surface `<W(R,T)> ~ exp(-V(R) T)` without claiming an area law before ensemble evidence exists.
 
@@ -105,15 +117,24 @@ Reference lead: [Wolfram MathWorld — Cyclic Group C3](https://mathworld.wolfra
 
 This checkpoint records the standard geometric objects that the lattice theory approximates. It is a classical mathematical layer and must not be confused with construction of the quantum theory required by the Clay problem.
 
-Reference leads include Wolfram MathWorld entries on [Principal Bundles](https://mathworld.wolfram.com/PrincipalBundle.html) and [Vector Bundle Connections](https://mathworld.wolfram.com/VectorBundleConnection.html).
+Reference leads include Wolfram MathWorld entries on [Principal Bundles](https://mathworld.wolfram.com/PrincipalBundle.html), [Vector Bundle Connections](https://mathworld.wolfram.com/VectorBundleConnection.html), [Fiber Bundles](https://mathworld.wolfram.com/FiberBundle.html), [Tangent Bundles](https://mathworld.wolfram.com/TangentBundle.html), [Parallel Transport](https://mathworld.wolfram.com/ParallelTransport.html), and related differential-geometry entries supplied during Phase 0 research.
 
+- [ ] Define a smooth base manifold `M`, its tangent bundle `TM`, and cotangent bundle `T^*M`; keep these base-manifold objects distinct from gauge fibers.
+- [ ] Define differential `k`-forms and record that a 2-form is an alternating bilinear form on pairs of tangent vectors.
 - [ ] Define a principal `G`-bundle `pi:P -> M` with compact Lie group `G` acting freely on each fiber.
 - [ ] Distinguish the principal bundle from an associated vector bundle `E = P x_rho V` obtained from a representation `rho:G -> GL(V)`.
+- [ ] Define a bundle section `s:M -> E` by `pi o s = id_M`, and distinguish sections of associated bundles from the principal connection itself.
 - [ ] Record that matter/vector fields are sections of associated bundles, while the gauge connection is fundamentally a connection on the principal bundle.
 - [ ] Define the induced covariant derivative `nabla_A: Gamma(E) -> Gamma(T^*M tensor E)` and its Leibniz rule on sections.
 - [ ] Record the local connection form `A` only after choosing a trivialization; do not mistake local gauge potentials for globally defined ordinary one-forms on a nontrivial bundle.
-- [ ] Define curvature geometrically and locally: `F_A = dA + A wedge A`, with convention choices stated explicitly.
+- [ ] State the bundle-valued type of Yang–Mills curvature precisely, e.g. `F_A in Omega^2(M, ad P)` (or the representation-equivalent associated-bundle form).
+- [ ] Define curvature geometrically and locally: `F_A = dA + A wedge A`, with Lie-bracket/wedge conventions stated explicitly.
+- [ ] Distinguish gauge curvature `F_A` from Riemannian curvature of the base manifold, Gaussian/surface curvature, and curvature of an individual path.
+- [ ] Distinguish the gauge connection `A` from the Levi-Civita connection on `TM`: the latter is the unique torsion-free metric-compatible connection determined by a Riemannian metric, while the former is a connection on the gauge bundle.
+- [ ] Record how a Riemannian metric and orientation on `M` induce the Hodge star needed for `*F_A`, the Yang–Mills norm, and the formal adjoint `d_A^*`; freeze sign conventions before theorem work.
+- [ ] Where complex associated bundles are used, record the role of Hermitian fiber metrics and unitary representations without conflating them with the base-manifold Riemannian metric.
 - [ ] Define flatness by `F_A = 0` and distinguish local gauge triviality from global bundle topology/holonomy.
+- [ ] Define parallel transport on associated fibers from the gauge connection and distinguish it from Levi-Civita parallel transport of tangent vectors.
 - [ ] Record the Bianchi identity `d_A F_A = 0`.
 - [ ] Define the classical Yang–Mills functional using an invariant inner product on the Lie algebra, schematically `YM(A) = integral_M <F_A, F_A> dvol`.
 - [ ] Derive the Euler–Lagrange equation `d_A^* F_A = 0` from variation of the classical functional.
@@ -121,9 +142,9 @@ Reference leads include Wolfram MathWorld entries on [Principal Bundles](https:/
 - [ ] In four dimensions, define self-duality/anti-self-duality `F_A = +/- *F_A` and verify that, together with the Bianchi identity, it implies the Yang–Mills equation.
 - [ ] Keep instanton/topological applications (Chern classes, second Chern number, Donaldson-theory connections) as a separate classical/topological research branch unless they become directly relevant to the mass-gap route.
 - [ ] Add a precise lattice-continuum dictionary connecting link holonomy, plaquette holonomy, continuum connection, and curvature without claiming equality at finite lattice spacing.
-- [ ] Treat principal-bundle, associated-vector-bundle, connection, covariant derivative, curvature, holonomy, Wilson loop, and gauge transformation as separately versioned definitions before formalisation.
+- [ ] Treat principal-bundle, associated-vector-bundle, section, tangent/cotangent bundle, connection, covariant derivative, 2-form curvature, parallel transport, holonomy, Wilson loop, Hodge star, and gauge transformation as separately versioned definitions before formalisation.
 
-**Classical-continuum boundary:** establishing the classical equations, bundle geometry, instanton identities, or finite-lattice approximations does not construct the interacting quantum Yang–Mills theory and does not establish a mass gap.
+**Classical-continuum boundary:** establishing the classical equations, bundle geometry, instanton identities, curve/parallel-transport identities, or finite-lattice approximations does not construct the interacting quantum Yang–Mills theory and does not establish a mass gap.
 
 ### Cross-domain donor quarantine
 
@@ -141,7 +162,7 @@ Research leads currently include *A Triadic Ontology with SU(3) Invariants*, *Sp
 - [ ] Gauge-dependent implementation state is not promoted to scientific output; preferred published observables are gauge invariant or have an explicitly justified gauge fixing.
 - [ ] “Mills” number-theory objects such as Mills' theorem, Mills' constant/primes, and Mills ratio are surname collisions and remain outside this project unless an independent mathematical connection is explicitly proved.
 
-**Graduation gate:** all advertised `SU(2)` observables are gauge invariant under independent local transformations within declared numerical tolerances; all selected `SU(3)` algebra identities are independently verified; the abstract `C3 ~= Z3` relation is distinguished from concrete subgroup embeddings; genuine center elements are distinguished from non-central cyclic operators; the classical bundle/connection dictionary is internally consistent; and all golden vectors are sealed.
+**Graduation gate:** all advertised `SU(2)` observables are gauge invariant under independent local transformations within declared numerical tolerances; all selected `SU(3)` algebra identities are independently verified; the abstract `C3 ~= Z3` relation is distinguished from concrete subgroup embeddings; genuine center elements are distinguished from non-central cyclic operators; path/holonomy composition and gauge-covariance rules are internally consistent; the classical bundle/connection dictionary is internally consistent; and all golden vectors are sealed.
 
 ## Phase 2 — statistical ensemble generation
 
@@ -221,9 +242,14 @@ Potential targets include:
 - combinatorial facts behind analytic regression configurations;
 - `SU(3)` generator identities and Casimir statements after the algebra contract is frozen;
 - distinction between the non-central `<Omega> ~= C3` embedding and the central `Z(SU(3)) ~= C3` embedding;
+- path reversal, concatenation, and reparameterisation identities for parallel transport;
+- endpoint covariance of open transport and gauge invariance of closed Wilson-loop traces;
 - principal-bundle and associated-vector-bundle definitions;
+- bundle-section and tangent/cotangent-bundle definitions;
 - induced covariant derivatives on associated bundles;
-- curvature covariance and the Bianchi identity;
+- the bundle-valued 2-form type of curvature and curvature covariance;
+- separation of Levi-Civita curvature from gauge curvature;
+- the Bianchi identity;
 - the implication `F_A = +/- *F_A => d_A^*F_A = 0` in four dimensions, once conventions are fixed;
 - finite-lattice statements that can be proved without floating-point assumptions.
 
