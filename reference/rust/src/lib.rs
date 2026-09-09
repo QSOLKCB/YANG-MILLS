@@ -100,12 +100,7 @@ impl Su2 {
         let half = 0.5 * angle;
         let s = half.sin();
         Ok(Self {
-            c: [
-                half.cos(),
-                s * axis[0],
-                s * axis[1],
-                s * axis[2],
-            ],
+            c: [half.cos(), s * axis[0], s * axis[1], s * axis[2]],
         })
     }
 
