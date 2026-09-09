@@ -285,7 +285,7 @@ impl Lattice4 {
     }
 
     pub fn max_link_unit_residual(&self) -> f64 {
-        let mut max_residual = 0.0;
+        let mut max_residual: f64 = 0.0;
         for link in &self.links {
             let norm_sq = link.norm_sq();
             if !norm_sq.is_finite() {
