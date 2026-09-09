@@ -1,0 +1,14 @@
+{
+  "contract_id": "YM-GAUGE-GROUP-V1",
+  "status": "phase-0-draft",
+  "gauge_group": "SU(2)",
+  "representation": {
+    "storage": "unit-quaternion-f64",
+    "components": ["a0", "a1", "a2", "a3"],
+    "matrix_convention": "U(q)=a0*I-i*(a1*sigma1+a2*sigma2+a3*sigma3)",
+    "unit_condition": "a0^2+a1^2+a2^2+a3^2=1",
+    "dagger": "quaternion-conjugate",
+    "real_trace": "2*a0"
+  },
+  "claim_scope": "finite-lattice reference mathematics only"
+}

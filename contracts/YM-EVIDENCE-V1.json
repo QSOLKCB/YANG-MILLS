@@ -1,0 +1,21 @@
+{
+  "contract_id": "YM-EVIDENCE-V1",
+  "status": "phase-0-draft",
+  "required_identity_classes": [
+    "source_commit",
+    "contract_ids",
+    "gauge_group",
+    "lattice",
+    "algorithm",
+    "parameters",
+    "runtime_toolchain",
+    "numerical_tolerances",
+    "evidence_reference",
+    "analysis_version",
+    "claim_class"
+  ],
+  "hash_semantics": "identity-and-integrity-only",
+  "numerical_evidence_is_proof": false,
+  "accelerator_is_mathematical_authority": false,
+  "clay_solution_claimed": false
+}

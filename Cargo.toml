@@ -1,0 +1,20 @@
+[package]
+name = "yang-mills-reference"
+version = "0.0.1"
+edition = "2021"
+license = "MPL-2.0"
+repository = "https://github.com/QSOLKCB/YANG-MILLS"
+description = "Minimal deterministic SU(2) Wilson-lattice reference core for YANG-MILLS Phase 0"
+default-run = "ym-su2-reference"
+
+[lib]
+path = "reference/rust/src/lib.rs"
+
+[[bin]]
+name = "ym-su2-reference"
+path = "reference/rust/src/main.rs"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+panic = "abort"

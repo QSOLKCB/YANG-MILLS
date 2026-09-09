@@ -1,0 +1,19 @@
+{
+  "contract_id": "YM-LATTICE-V1",
+  "status": "phase-0-draft",
+  "dimension": 4,
+  "boundary_conditions": "periodic",
+  "link_directions_stored": "positive-only",
+  "minimum_extent_per_dimension": 2,
+  "plaquette_orientation": "U_mu(x) U_nu(x+mu) U_mu(x+nu)^dagger U_nu(x)^dagger",
+  "plaquette_sum": "mu<nu",
+  "action": {
+    "name": "Wilson",
+    "formula": "S=beta*sum_p(1-(1/2)*ReTr(U_p))",
+    "beta_domain": "finite and >=0"
+  },
+  "numerics": {
+    "scalar_type": "f64",
+    "bitwise_cross_platform_identity_claimed": false
+  }
+}
