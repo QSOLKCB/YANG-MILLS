@@ -29,3 +29,6 @@ jobs:
 
       - name: Contract checks
         run: python3 scripts/check_contracts.py
+
+      - name: Negative contract regressions
+        run: python3 scripts/test_contract_validation.py

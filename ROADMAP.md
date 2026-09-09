@@ -41,19 +41,82 @@ The roadmap is ordered to keep implementation validation, numerical evidence, ph
 - GPU/CUDA authority;
 - GLUBALL knot/topology import.
 
-## Phase 1 — finite lattice core
+## Phase 1 — finite lattice core and invariant observables
+
+Phase 1 grows the reference surface from elementary plaquettes to gauge-invariant loop observables, then introduces `SU(3)` only after the `SU(2)` conventions are stable.
+
+### Phase 1A — `SU(2)` observables and local mechanics
 
 - [ ] Freeze `YM-SU2-LATTICE-V1` after independent review of conventions.
 - [ ] Add validated deterministic configuration serialisation.
+- [ ] Define `YM-WILSON-LOOP-V1` for arbitrary closed oriented lattice paths.
 - [ ] Add Wilson loops beyond elementary plaquettes.
+- [ ] Add rectangular `R x T` Wilson-loop golden vectors.
+- [ ] Check path closure, reverse-link dagger handling, cyclic trace invariance, and local gauge invariance.
+- [ ] Check the identity configuration gives `W(C) = 1` for every valid closed loop.
 - [ ] Add Polyakov loops as observables without prematurely assigning a confinement claim.
 - [ ] Add staple construction and local action-difference checks.
 - [ ] Add `SU(2)` update-kernel primitives needed by later ensemble algorithms.
 - [ ] Add bounded lattice-size and overflow validation.
 - [ ] Add independent golden vectors derived from analytic configurations.
-- [ ] Add `SU(3)` algebra/group representation only after the `SU(2)` reference is stable.
+- [ ] Make the lattice-to-continuum bridge explicit: plaquette holonomy is the discrete object whose small-spacing expansion contains `F_mu_nu`; do not treat a finite-spacing plaquette as the continuum field-strength tensor itself.
 
-**Graduation gate:** all advertised observables are gauge invariant under independent local transformations within declared numerical tolerances, and all golden vectors are sealed.
+### Phase 1B — `SU(3)` algebra and invariant layer
+
+The `SU(3)` layer must be independently derived and tested as gauge mathematics. Cross-domain QSOL-IMC work may suggest useful invariant checks, but it is not physics authority.
+
+- [ ] Add the canonical eight Gell-Mann matrices `lambda_1 ... lambda_8`.
+- [ ] Verify Hermiticity and tracelessness of every generator.
+- [ ] Verify `Tr(lambda_a lambda_b) = 2 delta_ab`.
+- [ ] Define `T^a = lambda_a / 2` and verify `[T^a,T^b] = i f^{abc} T^c`.
+- [ ] Verify the symmetric `d^{abc}` anticommutator structure where used.
+- [ ] Verify the fundamental quadratic Casimir `sum_a T^a T^a = (4/3) I`.
+- [ ] Add a separately specified cubic-Casimir regression surface before using cubic invariants computationally.
+- [ ] Add stable exponentiation from traceless Hermitian algebra elements into `SU(3)`.
+- [ ] Fail closed on unitarity and determinant-one residuals outside declared tolerances.
+- [ ] Add `SU(3)` lattice links only after the standalone algebra/group tests are sealed.
+
+### Phase 1C — `C3`, `Z3`, and the genuine `SU(3)` center
+
+`C3` is the unique abstract group of order three and is isomorphic to the additive group `Z3`. The research task is therefore not merely to recognize the abstract group, but to distinguish different embeddings and actions inside `SU(3)`.
+
+Reference lead: [Wolfram MathWorld — Cyclic Group C3](https://mathworld.wolfram.com/CyclicGroupC3.html).
+
+- [ ] Define the abstract cyclic group `C3 = <g | g^3 = e>` and record `C3 ~= Z3` as an abstract-group isomorphism.
+- [ ] Define the three-cycle basis permutation `Omega |k> = |k+1 mod 3>` and verify `Omega^3 = I`.
+- [ ] Verify the canonical three-cycle permutation matrix has determinant `+1` and is unitary, so `<Omega>` can form a non-central `C3` subgroup of `SU(3)`.
+- [ ] Exhibit an explicit `SU(3)` element or generator that does not commute with `Omega`, proving that this embedding is not central.
+- [ ] Define the center of `SU(3)` explicitly as `Z(SU(3)) = {I, omega I, omega^2 I}`, with `omega = exp(2 pi i/3)`.
+- [ ] Verify every center element is unitary, has determinant one, and commutes with arbitrary tested `SU(3)` matrices.
+- [ ] Verify `Z(SU(3)) ~= C3 ~= Z3` while keeping it distinct from the non-central subgroup `<Omega>`.
+- [ ] Treat “same abstract group” and “same embedded subgroup/action” as different claims in tests and documentation.
+- [ ] Add center transformations to the Polyakov-loop test surface before making any confinement/deconfinement inference.
+
+### Phase 1D — Wilson/Polyakov holonomy surface
+
+- [ ] Treat Wilson loops as path-ordered closed-loop holonomies with normalized trace as the gauge-invariant observable.
+- [ ] Add deterministic ordered-product tests for arbitrary closed paths.
+- [ ] Add Polyakov loops wrapping the periodic Euclidean-time direction.
+- [ ] Add gauge-transformation regression vectors for Wilson and Polyakov observables.
+- [ ] Keep finite-lattice holonomy measurements distinct from continuum confinement theorems.
+- [ ] Prepare the later static-potential analysis surface `<W(R,T)> ~ exp(-V(R) T)` without claiming an area law before ensemble evidence exists.
+
+### Cross-domain donor quarantine
+
+Previous QSOL-IMC work involving triadic `SU(3)`, semantic gauge fields, relational curvature, or semantic mass-gap language may inspire software tests or invariant-first methodology, but the following boundaries are mandatory.
+
+Research leads currently include *A Triadic Ontology with SU(3) Invariants*, *Spectral Signatures of Relational Curvature in Generative Models: An SU(3) Gauge Theoretic Framework*, and *Relational Gauge Thermodynamics: Curvature as Entropy Production in Generative Cognition*. These are cross-domain research inputs, not Yang–Mills physics authorities.
+
+- [ ] Algebraic identities are re-derived independently before entering the Yang–Mills contract surface.
+- [ ] The triadic paper's `Omega` may motivate `C3` subgroup tests, but its semantic ontology is not imported as QCD physics.
+- [ ] Query/Key/Value-to-color assignments are semantic-model hypotheses, not QCD color physics.
+- [ ] A semantic or cognitive “mass gap” is not evidence for the physical Yang–Mills mass gap.
+- [ ] Semantic confinement, hallucination curvature, thermodynamic cognition, and similar analogies remain outside physical evidence and theorem claims.
+- [ ] Holonomy/Wilson-loop ideas may motivate test surfaces only after they are independently restated in standard gauge-theory form.
+- [ ] Any imported equation is checked against standard gauge-theory conventions; notation errors or missing operators are corrected by derivation rather than copied as authority.
+- [ ] Gauge-dependent implementation state is not promoted to scientific output; preferred published observables are gauge invariant or have an explicitly justified gauge fixing.
+
+**Graduation gate:** all advertised `SU(2)` observables are gauge invariant under independent local transformations within declared numerical tolerances; all selected `SU(3)` algebra identities are independently verified; the abstract `C3 ~= Z3` relation is distinguished from concrete subgroup embeddings; genuine center elements are distinguished from non-central cyclic operators; and all golden vectors are sealed.
 
 ## Phase 2 — statistical ensemble generation
 
@@ -131,6 +194,8 @@ Potential targets include:
 - plaquette covariance under local gauge transformations;
 - gauge invariance of the Wilson action;
 - combinatorial facts behind analytic regression configurations;
+- `SU(3)` generator identities and Casimir statements after the algebra contract is frozen;
+- distinction between the non-central `<Omega> ~= C3` embedding and the central `Z(SU(3)) ~= C3` embedding;
 - finite-lattice statements that can be proved without floating-point assumptions.
 
 Continuum existence and the positive mass gap remain separate theorem targets and may not be represented as established unless a genuine proof exists.

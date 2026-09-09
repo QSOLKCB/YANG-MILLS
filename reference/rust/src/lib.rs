@@ -53,6 +53,32 @@ impl fmt::Display for ReferenceError {
 
 impl std::error::Error for ReferenceError {}
 
+fn normalize_scaled<const N: usize>(values: [f64; N]) -> Option<[f64; N]> {
+    let scale = values
+        .iter()
+        .map(|value| value.abs())
+        .fold(0.0_f64, f64::max);
+    if scale == 0.0 {
+        return None;
+    }
+
+    let mut scaled = [0.0; N];
+    for index in 0..N {
+        scaled[index] = values[index] / scale;
+    }
+
+    let norm = scaled.iter().map(|value| value * value).sum::<f64>().sqrt();
+    if norm == 0.0 || !norm.is_finite() {
+        return None;
+    }
+
+    let mut normalized = [0.0; N];
+    for index in 0..N {
+        normalized[index] = scaled[index] / norm;
+    }
+    Some(normalized)
+}
+
 impl Su2 {
     pub const IDENTITY: Self = Self {
         c: [1.0, 0.0, 0.0, 0.0],
@@ -62,38 +88,23 @@ impl Su2 {
         if !c.iter().all(|v| v.is_finite()) {
             return Err(ReferenceError::NonFiniteSu2Component);
         }
-        let norm_sq = c.iter().map(|v| v * v).sum::<f64>();
-        if norm_sq == 0.0 || !norm_sq.is_finite() {
-            return Err(ReferenceError::ZeroSu2Norm);
-        }
-        let inv_norm = norm_sq.sqrt().recip();
-        Ok(Self {
-            c: [
-                c[0] * inv_norm,
-                c[1] * inv_norm,
-                c[2] * inv_norm,
-                c[3] * inv_norm,
-            ],
-        })
+        let c = normalize_scaled(c).ok_or(ReferenceError::ZeroSu2Norm)?;
+        Ok(Self { c })
     }
 
     pub fn from_axis_angle(axis: [f64; 3], angle: f64) -> Result<Self, ReferenceError> {
         if !angle.is_finite() || !axis.iter().all(|v| v.is_finite()) {
             return Err(ReferenceError::InvalidAxis);
         }
-        let axis_norm_sq = axis.iter().map(|v| v * v).sum::<f64>();
-        if axis_norm_sq == 0.0 || !axis_norm_sq.is_finite() {
-            return Err(ReferenceError::InvalidAxis);
-        }
-        let inv_axis_norm = axis_norm_sq.sqrt().recip();
+        let axis = normalize_scaled(axis).ok_or(ReferenceError::InvalidAxis)?;
         let half = 0.5 * angle;
         let s = half.sin();
         Ok(Self {
             c: [
                 half.cos(),
-                s * axis[0] * inv_axis_norm,
-                s * axis[1] * inv_axis_norm,
-                s * axis[2] * inv_axis_norm,
+                s * axis[0],
+                s * axis[1],
+                s * axis[2],
             ],
         })
     }
@@ -256,14 +267,22 @@ impl Lattice4 {
     where
         F: Fn([usize; DIM]) -> Su2,
     {
+        let mut site_gauges = vec![Su2::IDENTITY; self.site_count()];
+        self.for_each_site(|x| {
+            let index = self.site_index(x).expect("enumerated site is valid");
+            site_gauges[index] = omega(x);
+        });
+
         let mut transformed = Self::new_identity(self.extents)?;
         self.for_each_site(|x| {
-            let gx = omega(x);
+            let x_index = self.site_index(x).expect("enumerated site is valid");
+            let gx = site_gauges[x_index];
             for mu in 0..DIM {
                 let xp = self.neighbor_plus(x, mu).expect("valid direction");
+                let xp_index = self.site_index(xp).expect("periodic neighbor is valid");
                 let value = gx
                     .mul(self.link(x, mu).expect("valid direction"))
-                    .mul(omega(xp).dagger());
+                    .mul(site_gauges[xp_index].dagger());
                 transformed.set_link(x, mu, value).expect("valid direction");
             }
         });
@@ -321,6 +340,8 @@ pub fn deterministic_nontrivial_field() -> Lattice4 {
 
 #[cfg(test)]
 mod tests {
+    use std::cell::Cell;
+
     use super::*;
 
     fn assert_close(actual: f64, expected: f64, tolerance: f64) {
@@ -335,6 +356,17 @@ mod tests {
     fn normalized_quaternion_is_unit() {
         let q = Su2::from_normalized_components([1.0, 2.0, -3.0, 4.0]).unwrap();
         assert_close(q.norm_sq(), 1.0, DEFAULT_TOLERANCE);
+    }
+
+    #[test]
+    fn normalization_handles_extreme_finite_magnitudes() {
+        for magnitude in [f64::MAX, f64::MIN_POSITIVE] {
+            let q = Su2::from_normalized_components([magnitude, 0.0, 0.0, 0.0]).unwrap();
+            assert_eq!(q.components(), [1.0, 0.0, 0.0, 0.0]);
+
+            let axis_q = Su2::from_axis_angle([magnitude, 0.0, 0.0], 0.73).unwrap();
+            assert_close(axis_q.norm_sq(), 1.0, DEFAULT_TOLERANCE);
+        }
     }
 
     #[test]
@@ -395,6 +427,24 @@ mod tests {
             2.0e-11,
         );
         assert!(transformed.max_link_unit_residual() <= 2.0e-12);
+    }
+
+    #[test]
+    fn gauge_transform_samples_each_site_field_exactly_once() {
+        let lattice = Lattice4::new_identity([2, 2, 2, 2]).unwrap();
+        let calls = Cell::new(0usize);
+        let transformed = lattice
+            .gauge_transform(|x| {
+                let call = calls.get();
+                calls.set(call + 1);
+                let coordinate_code = x[0] + 2 * x[1] + 3 * x[2] + 5 * x[3];
+                let angle = 0.031 * (call as f64 + 1.0) + 0.017 * coordinate_code as f64;
+                Su2::from_axis_angle([1.0, 2.0, -1.0], angle).unwrap()
+            })
+            .unwrap();
+
+        assert_eq!(calls.get(), lattice.site_count());
+        assert_close(transformed.wilson_action(2.0).unwrap(), 0.0, 2.0e-11);
     }
 
     #[test]
