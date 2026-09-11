@@ -4,6 +4,10 @@
 
 //! Minimal Phase 1B SU(3) lattice-link layer built strictly on the frozen
 //! `YM-SU3-ALGEBRA-V1` conventions.
+//!
+//! This layer adds only bounded periodic links, plaquettes, the Wilson action,
+//! and local gauge transformations. It does not add Monte Carlo sampling,
+//! center-symmetry physics, confinement claims, or glueball observables.
 
 use core::fmt;
 
@@ -40,7 +44,9 @@ impl fmt::Display for Su3LatticeError {
             Self::LatticeSizeOverflow => "SU(3) lattice size arithmetic overflowed",
             Self::LatticeTooLarge => "SU(3) lattice exceeds the bounded reference link limit",
             Self::AllocationFailed => "SU(3) reference lattice allocation failed",
-            Self::CoordinateOutOfRange => "SU(3) lattice coordinate is outside its periodic fundamental domain",
+            Self::CoordinateOutOfRange => {
+                "SU(3) lattice coordinate is outside its periodic fundamental domain"
+            }
             Self::DirectionOutOfRange => "SU(3) lattice direction must be in 0..4",
             Self::DirectionsMustDiffer => "SU(3) plaquette directions must differ",
             Self::NonFiniteBeta => "SU(3) Wilson beta must be finite",
@@ -118,10 +124,16 @@ impl Su3Lattice4 {
     }
 
     fn site_index(&self, x: [usize; DIM]) -> Result<usize, Su3LatticeError> {
-        if x.iter().zip(self.extents).any(|(&value, extent)| value >= extent) {
+        if x
+            .iter()
+            .zip(self.extents)
+            .any(|(&value, extent)| value >= extent)
+        {
             return Err(Su3LatticeError::CoordinateOutOfRange);
         }
-        Ok((((x[0] * self.extents[1] + x[1]) * self.extents[2] + x[2]) * self.extents[3]) + x[3])
+        Ok((((x[0] * self.extents[1] + x[1]) * self.extents[2] + x[2])
+            * self.extents[3])
+            + x[3])
     }
 
     fn link_index(&self, x: [usize; DIM], mu: usize) -> Result<usize, Su3LatticeError> {
@@ -168,27 +180,36 @@ impl Su3Lattice4 {
         }
         let x_mu = self.neighbor_plus(x, mu)?;
         let x_nu = self.neighbor_plus(x, nu)?;
-        let value = self
+        Ok(self
             .link(x, mu)?
             .mul(self.link(x_mu, nu)?)?
             .mul(self.link(x_nu, mu)?.dagger())?
-            .mul(self.link(x, nu)?.dagger())?;
-        Ok(value)
+            .mul(self.link(x, nu)?.dagger())?)
     }
 
     pub fn wilson_action(&self, beta: f64) -> Result<f64, Su3LatticeError> {
         validate_beta(beta)?;
         let mut sum = 0.0_f64;
-        self.for_each_site(|x| {
-            for mu in 0..DIM {
-                for nu in (mu + 1)..DIM {
-                    let plaquette = self
-                        .plaquette(x, mu, nu)
-                        .expect("enumerated SU(3) plaquette must be valid");
-                    sum += 1.0 - normalized_real_trace(plaquette);
+
+        for x0 in 0..self.extents[0] {
+            for x1 in 0..self.extents[1] {
+                for x2 in 0..self.extents[2] {
+                    for x3 in 0..self.extents[3] {
+                        let x = [x0, x1, x2, x3];
+                        for mu in 0..DIM {
+                            for nu in (mu + 1)..DIM {
+                                let plaquette = self.plaquette(x, mu, nu)?;
+                                sum += 1.0 - normalized_real_trace(plaquette);
+                                if !sum.is_finite() {
+                                    return Err(Su3LatticeError::NonFiniteAction);
+                                }
+                            }
+                        }
+                    }
                 }
             }
-        });
+        }
+
         let action = beta * sum;
         if !action.is_finite() {
             return Err(Su3LatticeError::NonFiniteAction);
@@ -206,7 +227,9 @@ impl Su3Lattice4 {
             .map_err(|_| Su3LatticeError::AllocationFailed)?;
         site_gauges.resize(self.site_count(), Su3::IDENTITY);
         self.for_each_site(|x| {
-            let index = self.site_index(x).expect("enumerated SU(3) site is valid");
+            let index = self
+                .site_index(x)
+                .expect("enumerated SU(3) site is valid");
             site_gauges[index] = omega(x);
         });
 
@@ -216,7 +239,9 @@ impl Su3Lattice4 {
             if failure.is_some() {
                 return;
             }
-            let gx = site_gauges[self.site_index(x).expect("enumerated SU(3) site is valid")];
+            let gx = site_gauges[self
+                .site_index(x)
+                .expect("enumerated SU(3) site is valid")];
             for mu in 0..DIM {
                 let result = (|| {
                     let xp = self.neighbor_plus(x, mu)?;
@@ -267,37 +292,29 @@ impl Su3Lattice4 {
     }
 }
 
-pub fn traceless_diagonal_link() -> Result<Su3, Su3LatticeError> {
-    let angle = 2.0 * core::f64::consts::PI / 3.0;
-    let phase = Complex64::new(angle.cos(), angle.sin());
-    let phase_conjugate = phase.conj();
+/// Exact floating-point SU(3) regression fixture: the 3-cycle permutation
+/// matrix has entries only in {0,1}, trace zero, determinant +1, and exact
+/// unitarity in binary64 arithmetic. No center-symmetry interpretation is made.
+pub fn traceless_cycle_link() -> Result<Su3, Su3LatticeError> {
     let matrix = Mat3::from_rows([
+        [Complex64::ZERO, Complex64::ONE, Complex64::ZERO],
+        [Complex64::ZERO, Complex64::ZERO, Complex64::ONE],
         [Complex64::ONE, Complex64::ZERO, Complex64::ZERO],
-        [Complex64::ZERO, phase, Complex64::ZERO],
-        [Complex64::ZERO, Complex64::ZERO, phase_conjugate],
     ]);
     Ok(Su3::from_checked_matrix(matrix)?)
 }
 
 pub fn deterministic_su3_site_gauge(x: [usize; DIM]) -> Su3 {
     let code = x[0] + 3 * x[1] + 7 * x[2] + 11 * x[3];
-    let scale = 0.021 * (code as f64 + 1.0);
-    Su3::from_algebra_coefficients([
-        scale,
-        -0.5 * scale,
-        0.25 * scale,
-        0.125 * scale,
-        -0.375 * scale,
-        0.2 * scale,
-        -0.1 * scale,
-        0.3 * scale,
-    ])
-    .expect("bounded deterministic SU(3) gauge coefficients")
+    let mut coefficients = [0.0; 8];
+    coefficients[2] = 0.031 * (code as f64 + 1.0);
+    Su3::from_algebra_coefficients(coefficients)
+        .expect("bounded deterministic SU(3) diagonal gauge coefficient")
 }
 
 pub fn single_traceless_su3_link_lattice() -> Result<Su3Lattice4, Su3LatticeError> {
     let mut lattice = Su3Lattice4::new_identity([3, 3, 3, 3])?;
-    lattice.set_link([0, 0, 0, 0], 0, traceless_diagonal_link()?)?;
+    lattice.set_link([0, 0, 0, 0], 0, traceless_cycle_link()?)?;
     Ok(lattice)
 }
 
