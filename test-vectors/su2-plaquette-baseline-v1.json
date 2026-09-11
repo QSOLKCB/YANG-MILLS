@@ -35,7 +35,8 @@
       "half_measurements": 24,
       "autocorrelation_max_lag_per_half": 6,
       "maximum_half_drift_z": 5.0,
-      "expected": "each chain's first and second post-thermalization measurement halves are consistent within the frozen autocorrelation-aware drift-z gate",
+      "zero_variance_half_rejected": true,
+      "expected": "each chain's first and second post-thermalization measurement halves have nonzero empirical variance and are consistent within the frozen autocorrelation-aware drift-z gate",
       "claim_class": "C2"
     },
     {
