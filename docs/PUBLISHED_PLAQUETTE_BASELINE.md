@@ -4,6 +4,8 @@
 
 Phase 2B tests the frozen Phase 2A `SU(2)` sampler against a peer-reviewed external finite-lattice observable. It is a validation of the finite-lattice Markov-chain implementation in one declared regime. It is not a confinement result, a continuum construction, or a mass-gap theorem.
 
+`YM-SU2-PLAQUETTE-BASELINE-V1` and `SU2-PLAQUETTE-BASELINE-PHASE2B-V1` are frozen as `phase-2b-frozen` after the predeclared benchmark passed the full reference/contract surface.
+
 ## Primary source
 
 The primary peer-reviewed authority is:
@@ -12,7 +14,7 @@ The primary peer-reviewed authority is:
 
 The paper studies four-dimensional `SU(2)` Wilson gauge theory on `N^4` lattices. Figure 5 presents the average plaquette on a `10^4` lattice and compares density-of-states results with an independent local-hybrid Monte Carlo calculation.
 
-The figure is the relevant published comparison surface, but it does not provide a convenient table of point estimates and statistical errors. The repository therefore does **not** invent a paper uncertainty. Before running the Phase 2B benchmark, it freezes a deliberately conservative graphical source-resolution envelope at
+The figure is the relevant published comparison surface, but it does not provide a convenient table of point estimates and statistical errors. The repository therefore does **not** invent a paper uncertainty. Before running the Phase 2B benchmark, it froze a deliberately conservative graphical source-resolution envelope at
 
 ```text
 lattice: 10^4
@@ -43,7 +45,7 @@ No rescaling or fitted conversion is permitted after seeing the benchmark output
 
 ## Frozen reference run
 
-Before the benchmark result is inspected, Phase 2B freezes two independent chain identities:
+Before the benchmark result was inspected, Phase 2B froze two independent chain identities:
 
 ```text
 master_seed: 2b00201211160101
@@ -58,7 +60,7 @@ max_heatbath_attempts_per_link: 10000
 autocorrelation_max_lag: 12
 ```
 
-The comparison additionally requires:
+The comparison additionally required:
 
 ```text
 minimum ESS per chain: 6
@@ -86,7 +88,43 @@ The Phase 2 graduation candidate passes only if:
 4. final `SU(2)` link-unit residuals remain within tolerance;
 5. heat-bath acceptance statistics remain finite and positive.
 
-The raw measurement series remain available in the two frozen Phase 2A chain reports.
+## First predeclared result
+
+The first run using the frozen benchmark settings passed without changing the source envelope, volume, coupling, observable, seeds, or comparison thresholds after inspection.
+
+```text
+chain 0 mean             = 0.6026867250625984
+chain 1 mean             = 0.6018972107756385
+pooled mean              = 0.6022919679191184
+pooled diagnostic SE     = 0.0004173286094490
+chain-consistency z      = 0.9459144054
+minimum chain ESS        = 7.7458561747
+maximum link-unit resid. = 6.6613381478e-16
+```
+
+Therefore the pooled mean lies inside the predeclared `[0.59,0.62]` source-resolution envelope and the independent-chain diagnostic gates pass.
+
+The frozen Phase 2B authority records
+
+```text
+published_plaquette_baseline_reproduced = true
+phase2_graduation_gate_satisfied       = true
+su3_ensemble_enabled                   = false
+```
+
+## Evidence archive
+
+The canonical `ym-su2-plaquette-baseline` executable emits the complete finite-lattice evidence needed to audit the frozen reference run into the commit-tied GitHub Actions log:
+
+- contract/source identity and DOI;
+- lattice, coupling, and predeclared source envelope;
+- master seed, chain IDs, and derived seeds;
+- full raw measurement series for both chains;
+- per-chain means, standard errors, ESS, integrated autocorrelation times, and heat-bath acceptance;
+- pooled comparison statistics and maximum final link-unit residual;
+- explicit graduation and claim-boundary flags.
+
+The runtime log is a commit/toolchain-bound evidence record. A scientific release should additionally archive those raw measurements as an explicit artifact or content-addressed dataset rather than relying only on CI retention.
 
 ## Evidence classification
 
