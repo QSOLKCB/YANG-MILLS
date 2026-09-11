@@ -118,17 +118,20 @@ pub fn stationarity_diagnostic(values: &[f64]) -> Result<StationarityDiagnostic,
     let second = diagnostics(&values[split..], STATIONARITY_AUTOCORRELATION_MAX_LAG)
         .map_err(|_| BenchmarkError::StationarityDiagnosticFailed)?;
 
+    // A constant half-series is not evidence of equilibrium for this stochastic
+    // benchmark. Phase 2A diagnostics intentionally define a zero-variance
+    // series, but Phase 2B stationarity fails closed rather than interpreting
+    // two stuck halves as perfect agreement.
+    if first.variance == 0.0 || second.variance == 0.0 {
+        return Err(BenchmarkError::StationarityDiagnosticFailed);
+    }
+
     let difference = (first.mean - second.mean).abs();
     let scale = (first.standard_error.powi(2) + second.standard_error.powi(2)).sqrt();
-    let drift_z = if scale == 0.0 {
-        if difference == 0.0 {
-            0.0
-        } else {
-            f64::INFINITY
-        }
-    } else {
-        difference / scale
-    };
+    if scale == 0.0 {
+        return Err(BenchmarkError::StationarityDiagnosticFailed);
+    }
+    let drift_z = difference / scale;
 
     if !first.mean.is_finite()
         || !second.mean.is_finite()
@@ -244,4 +247,92 @@ pub fn summarize_two_chains(
         diagnostics_trustworthy,
         phase2_graduation_gate_satisfied: source_envelope_reproduced && diagnostics_trustworthy,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::su2_ensemble::{derive_chain_seed, EnsembleConfig, RNG_ID, SAMPLER_ID};
+
+    fn benchmark_config(chain_id: u64) -> EnsembleConfig {
+        EnsembleConfig {
+            extents: EXTENTS,
+            beta: BETA,
+            master_seed: MASTER_SEED,
+            chain_id,
+            thermalization_sweeps: THERMALIZATION_SWEEPS,
+            measurements: MEASUREMENTS,
+            sweeps_between_measurements: SWEEPS_BETWEEN_MEASUREMENTS,
+            overrelaxation_sweeps_per_heatbath: OVERRELAXATION_SWEEPS_PER_HEATBATH,
+            max_heatbath_attempts_per_link: MAX_HEATBATH_ATTEMPTS_PER_LINK,
+            autocorrelation_max_lag: AUTOCORRELATION_MAX_LAG,
+        }
+    }
+
+    fn synthetic_report(chain_id: u64, measurements: Vec<f64>) -> ChainReport {
+        let config = benchmark_config(chain_id);
+        let chain_diagnostics = diagnostics(&measurements, AUTOCORRELATION_MAX_LAG)
+            .expect("synthetic benchmark diagnostics must be valid");
+        let total_heatbath_sweeps =
+            THERMALIZATION_SWEEPS + MEASUREMENTS * SWEEPS_BETWEEN_MEASUREMENTS;
+
+        ChainReport {
+            sampler_id: SAMPLER_ID,
+            rng_id: RNG_ID,
+            config,
+            derived_seed: derive_chain_seed(MASTER_SEED, chain_id),
+            total_heatbath_sweeps,
+            total_overrelaxation_sweeps: total_heatbath_sweeps
+                * OVERRELAXATION_SWEEPS_PER_HEATBATH,
+            heatbath_proposals: 100,
+            heatbath_updates: 40,
+            mean_heatbath_acceptance: 0.4,
+            measurements,
+            diagnostics: chain_diagnostics,
+            final_link_unit_residual: 0.0,
+        }
+    }
+
+    #[test]
+    fn zero_variance_stationarity_fails_closed() {
+        let measurements = vec![0.602; MEASUREMENTS];
+        assert_eq!(
+            stationarity_diagnostic(&measurements),
+            Err(BenchmarkError::StationarityDiagnosticFailed)
+        );
+
+        let first = synthetic_report(CHAIN_IDS[0], measurements.clone());
+        let second = synthetic_report(CHAIN_IDS[1], measurements);
+        assert_eq!(
+            summarize_two_chains(&first, &second),
+            Err(BenchmarkError::StationarityDiagnosticFailed)
+        );
+    }
+
+    #[test]
+    fn executable_stationarity_gate_rejects_drift_above_frozen_threshold() {
+        let mut measurements = Vec::with_capacity(MEASUREMENTS);
+        for index in 0..STATIONARITY_HALF_MEASUREMENTS {
+            let alternating = if index % 2 == 0 { 0.001 } else { -0.001 };
+            measurements.push(0.601 + alternating);
+        }
+        for index in 0..STATIONARITY_HALF_MEASUREMENTS {
+            let alternating = if index % 2 == 0 { 0.001 } else { -0.001 };
+            measurements.push(0.603 + alternating);
+        }
+
+        let first = synthetic_report(CHAIN_IDS[0], measurements.clone());
+        let second = synthetic_report(CHAIN_IDS[1], measurements);
+        let summary = summarize_two_chains(&first, &second)
+            .expect("synthetic drifting reports must remain structurally valid");
+
+        assert_eq!(MAX_STATIONARITY_Z, 5.0);
+        assert!(summary.source_envelope_reproduced);
+        assert!(summary.min_effective_sample_size >= MIN_CHAIN_ESS);
+        assert_eq!(summary.chain_consistency_z, 0.0);
+        assert!(summary.max_stationarity_z > MAX_STATIONARITY_Z);
+        assert!(summary.max_stationarity_z < 50.0);
+        assert!(!summary.diagnostics_trustworthy);
+        assert!(!summary.phase2_graduation_gate_satisfied);
+    }
 }
