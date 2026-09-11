@@ -1,6 +1,6 @@
 # Reproducibility
 
-## Deterministic reference surfaces
+## Reference surfaces
 
 The reference implementation is intentionally dependency-free beyond the Rust standard library and pins a Rust toolchain in `rust-toolchain.toml`.
 
@@ -15,80 +15,95 @@ cargo run --quiet --locked --bin ym-su3-lattice
 cargo run --quiet --locked --bin ym-su3-center
 cargo run --quiet --locked --bin ym-path-holonomy
 cargo run --quiet --locked --bin ym-classical-geometry
+cargo run --quiet --locked --bin ym-su2-ensemble
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
 
-The unified contract entry points are authoritative. A phase that adds a new machine-readable contract or vector set must register it there before the phase can be called reproducible or review-ready.
-
-The deterministic reference executables use no random numbers, wall-clock time, network input, thread scheduling, or hardware-specific acceleration.
+The unified contract entry points are authoritative. A phase that adds a machine-readable contract or vector set must register it there before the phase can be called reproducible or review-ready.
 
 ## Floating-point boundary
 
-The reference uses IEEE-754 `f64` arithmetic through Rust. It does not claim bit-identical results across every compiler/architecture. Tests use explicit tolerances where operations are not algebraically exact in machine arithmetic.
+The reference uses IEEE-754 `f64` arithmetic through Rust. It does not claim bit-identical floating results across every compiler/architecture. Tests use explicit tolerances where operations are not algebraically exact in machine arithmetic.
 
-Analytic vectors should preferentially use values such as `0`, `1`, exact integer combinations, or independently specified closed forms where possible, but this preference is not a substitute for an explicit numerical contract.
+The integer `SPLITMIX64-V1` pseudorandom stream is exactly versioned; floating transcendental functions used to turn that stream into Haar directions are not advertised as universally bit-identical across platforms.
 
-Phase 1B's standalone `SU(3)` matrix exponential is a bounded numerical reference calculation. The exact mathematical map is `U(theta)=exp(i theta_a T^a)`, while reproduced floating-point matrix/residual outputs remain implementation facts with declared tolerances rather than finite-lattice exact results.
+## Deterministic Phase 0–1E surfaces
 
-The Phase 1B `SU(3)` lattice layer deliberately separates exact and numerical regressions:
+Earlier phases separate exact contract facts from floating numerical regressions. The Phase 1E Rust fixture is only an oriented Euclidean `R^4` Hodge/sign check; it is not a continuum manifold or PDE solver. The principal-bundle, curvature, Bianchi, Yang–Mills, and transport statements are versioned mathematical/convention rules, not quantum-construction results.
 
-- the identity action and the single exact three-cycle-link combinatorial action are C1 finite-lattice facts;
-- local gauge-invariance residuals and transformed-link residuals are C2 numerical observations with explicit tolerances.
+## Phase 2A stochastic reproducibility
 
-Phase 1C likewise separates exact abstract/embedding checks from numerical center-transform observations:
+`YM-SU2-ENSEMBLE-V1` freezes the complete reference identity needed to replay or compare a finite-lattice `SU(2)` chain.
 
-- `C3` modular composition, `Omega^3=I`, and the exact non-central witness are C0 contract/group regressions;
-- floating-point scalar-center residuals remain C0 implementation facts with explicit tolerances;
-- Polyakov-loop rotation and Wilson-action invariance after a center slice transformation are C2 finite-lattice numerical observations.
+### Pseudorandom stream
 
-Phase 1D separates classical path definitions from discrete numerical transport:
+The reference stream is `SPLITMIX64-V1`. Reproducibility records must preserve:
 
-- continuum path, pullback, transport, endpoint-covariance, reversal, concatenation, reparameterization, and small-loop statements are classical mathematical definitions/rules;
-- exact finite-lattice vectors built from identity links or exact permutation fixtures may be C1;
-- floating-point `SU(3)` path composition, reversal, endpoint covariance, closed-loop gauge invariance, cyclic trace, and Polyakov gauge-invariance residuals are C2;
-- compatibility with frozen `YM-WILSON-LOOP-V1` step semantics is a C0 contract/implementation fact.
+- master seed;
+- chain ID;
+- derived seed rule;
+- exact RNG identifier/version;
+- integer-to-`[0,1)` conversion rule.
 
-## Phase 1E classical geometry boundary
+A seed is not a physical parameter. Distinct chain IDs are distinct stream identities.
 
-`YM-CLASSICAL-GEOMETRY-V1` is primarily a **semantic mathematical contract**. The executable Rust component does not claim to simulate a manifold, principal bundle, covariant derivative, curvature PDE, or continuum Yang–Mills dynamics.
+### Sampler identity
 
-The Rust fixture is only an oriented Euclidean `R^4` 2-form convention check. It verifies:
+A Phase 2A chain must record:
 
-- the frozen Hodge-star basis signs;
-- `*^2=+1` on 2-forms;
-- `alpha wedge *beta = <alpha,beta> vol` for the declared orthonormal fixture;
-- self-dual/anti-self-dual decomposition and orthogonality;
-- fail-closed rejection of non-finite fixture coefficients.
+- `YM-SU2-ENSEMBLE-V1` contract identity;
+- lattice extents and Wilson-action `beta`;
+- cold-start policy;
+- deterministic site/direction update ordering;
+- heat-bath conditional distribution and reconstruction convention;
+- heat-bath rejection-attempt bound;
+- number of over-relaxation sweeps after each heat-bath sweep;
+- discarded thermalisation sweep count;
+- measurement count;
+- complete Markov sweeps between measurements;
+- observable definition;
+- raw measurement series;
+- autocorrelation maximum lag and estimator convention;
+- derived diagnostics, including ESS.
 
-These are C0 implementation/convention regressions. They are not continuum numerical observations, and they are not a proof of the general bundle theorems merely because they agree with the frozen formulas.
+Fixed master seed + chain ID under the same reference implementation/toolchain must replay the same reference measurement series. Independent chain IDs must not be treated as interchangeable replays of one chain.
 
-The principal-bundle, associated-bundle, covariant-derivative, curvature, Bianchi, Hodge, Yang–Mills functional, self-duality, and lattice-continuum statements are frozen as definitions/convention rules in the contract and `docs/CLASSICAL_CONTINUUM.md`. Reproducibility here means that every advertised convention is explicit, versioned, machine-checked for semantic drift, and backed by finite-dimensional sign regressions where executable checks are meaningful.
+### Statistical diagnostics
 
-The Phase 1E contract also freezes the bridge
+Phase 2A freezes a simple positive-window autocorrelation estimator:
 
 ```text
-U_gamma = P_gamma^-1
+tau_int = 1/2 + sum consecutive positive rho_lag
+ESS = min(N, N/(2 tau_int)).
 ```
 
-between Phase 1D's start-left transporter and conventional forward associated-fiber transport. This is a semantic compatibility rule, not a new physical measurement.
+The recorded autocorrelation sequence uses the frozen covariance normalization from the contract. These are finite-sample diagnostics, not guarantees that thermalisation or systematic effects are absent.
 
-No Phase 1E result constructs the interacting quantum theory, performs an infinite-volume/continuum limit, establishes confinement, or proves a positive mass gap.
+Raw measurements are retained in the reference `ChainReport`; a future publication or large campaign must archive them directly or by a stable content-addressed evidence reference.
 
-## Future stochastic work
+### Beta-zero sanity check
 
-Before Monte Carlo work is considered reproducible, records must include:
+At `beta=0`, the exact ensemble plaquette expectation is zero under Haar measure. Phase 2A uses a fixed-seed `2^4` chain to check that the implemented sampler stays inside a deliberately broad near-zero sanity band while preserving link unitarity and producing nontrivial ESS.
 
-- pseudorandom generator algorithm and version;
-- complete seed/stream identity;
-- update algorithm and ordering;
-- thermalisation policy;
-- sweep/measurement cadence;
-- lattice/action parameters;
-- autocorrelation diagnostics;
-- independent-chain strategy;
-- raw measurements or stable content-addressed references.
+This sanity vector is C2 finite-lattice numerical evidence. It is **not** a substitute for a published finite-beta benchmark.
+
+### Phase 2 graduation boundary
+
+The frozen Phase 2A contract retains:
+
+```text
+published_plaquette_baseline_reproduced = false
+phase2_graduation_gate_satisfied       = false
+su3_ensemble_enabled                   = false.
+```
+
+Full Phase 2 graduation requires a separately reviewed comparison to a published pure-gauge plaquette result with matching action, normalization, lattice geometry/volume, coupling regime, observable definition, and uncertainty treatment. Agreement will validate the finite-lattice sampler in that regime; it will not imply confinement, continuum QFT existence, or a mass-gap proof.
+
+## Future ensemble campaigns
+
+Beyond the small bounded reference chain, scientific campaigns should additionally record multiple independent chains, thermalisation diagnostics, chain lengths, measurement thinning/cadence rationale, autocorrelation stability under window changes, uncertainty aggregation across chains, and raw evidence sufficient for independent reanalysis.
 
 ## Future HPC work
 
-Accelerator campaigns must additionally record device model, device count, driver/runtime/compiler versions, build flags, precision mode, launch configuration, and acceptance results against the stable reference implementation.
+Accelerator campaigns must additionally record device model, device count, driver/runtime/compiler versions, build flags, precision mode, launch configuration, and acceptance results against the stable CPU/reference implementation. Accelerator throughput does not make accelerator output mathematical or physical authority.

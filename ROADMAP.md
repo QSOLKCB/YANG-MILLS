@@ -123,44 +123,29 @@ The final lattice slice is intentionally minimal: bounded periodic positive-dire
 - [x] Keep finite-lattice holonomy measurements distinct from continuum confinement theorems and Phase 1C center transformations distinct from ordinary periodic local gauge transformations.
 - [x] Prepare bounded rectangular `R x T` path geometry for later static-potential analysis without evaluating an ensemble expectation or claiming an area law.
 
-**Phase 1D freeze gate:** `YM-PATH-HOLONOMY-V1` and `PATH-HOLONOMY-PHASE1D-V1` are sealed as `phase-1d-frozen`. The contract fixes traversal/product ordering, local-chart containment for its single-chart formula, endpoint covariance, reversal/concatenation, normalized-trace semantics, periodic Polyakov gauge invariance, and the small-loop/curve-geometry firewalls.
+**Phase 1D freeze gate:** `YM-PATH-HOLONOMY-V1` and `PATH-HOLONOMY-PHASE1D-V1` are sealed as `phase-1d-frozen`.
 
 ### Phase 1E — classical continuum bundle/connection dictionary
 
-**Status: implemented, independently reviewed, CI-green, and frozen in PR #6 pending merge.**
+**Status: completed, independently reviewed, CI-green, frozen, and merged in PR #6.**
 
 This checkpoint freezes the standard classical geometric objects that the lattice/path theory approximates. It does not construct the quantum theory required by the Clay problem.
 
-- [x] Define a smooth base manifold `M`, its tangent bundle `TM`, and cotangent bundle `T^*M`; keep these base-manifold objects distinct from gauge fibers.
-- [x] Define differential `k`-forms and record that a 2-form is an alternating bilinear form on pairs of tangent vectors.
-- [x] Define a principal `G`-bundle `pi:P -> M` with compact Lie group `G` acting freely on the right, including the connection-form reproduction/equivariance convention.
-- [x] Distinguish the principal bundle from an associated vector bundle `E = P x_rho V` obtained from a representation `rho:G -> GL(V)`.
-- [x] Define a bundle section `s:M -> E` by `pi_E o s = id_M`, and distinguish sections of associated bundles from the principal connection itself.
-- [x] Record that representation-valued/matter fields are sections of associated bundles while the gauge connection is fundamentally a principal-bundle connection; pure Yang–Mills remains the physical model.
-- [x] Define the induced covariant derivative `nabla_A:Gamma(E)->Gamma(T^*M tensor E)`, its local rule `D_A=d+rho_*(A)`, Leibniz rule, and gauge covariance.
-- [x] Record the local potential as `A=sigma^*omega_P` only after choosing a trivialization; do not mistake it for one global ordinary 1-form on a nontrivial bundle.
-- [x] Reconcile the standard right-bundle section-change rule `A'=g^-1 A g+g^-1 dg` with frozen Phase 1D via `Omega=g^-1`.
-- [x] State the global curvature type precisely as `F_A in Omega^2(M,ad P)`.
-- [x] Freeze local curvature conventions `F_A=dA+A wedge A` and equivalently `F_A=dA+(1/2)[A wedge A]`, plus curvature gauge covariance.
-- [x] Distinguish gauge curvature from Riemann curvature, Gaussian/surface curvature, Frenet curvature, torsion, and osculating geometry.
-- [x] Distinguish the gauge connection from the Levi-Civita connection on `TM` and distinguish their parallel transports/curvatures.
-- [x] Freeze the `SU(3)` Lie-algebra bridge: Phase 1B Hermitian `T^a=lambda_a/2` corresponds to anti-Hermitian basis `iT^a` for mathematical `su(3)`.
-- [x] Record how a Riemannian metric and orientation induce the Hodge star, while an independent `Ad`-invariant Lie-algebra inner product supplies the gauge-fiber norm.
-- [x] Freeze the 4D Euclidean sign convention `*^2=+1` on 2-forms and `D_A^*F_A=-*D_A*F_A`.
-- [x] Record Hermitian fiber metrics/unitary representations as distinct from the base-manifold Riemannian metric.
-- [x] Define flatness by `F_A=0`, local pure-gauge behavior on sufficiently small simply connected trivializing neighborhoods, and the possibility of nontrivial global holonomy.
-- [x] Define forward associated-fiber transport `P_gamma`, freeze `U_gamma=P_gamma^-1` for Phase 1D's start-left transporter, and record multi-chart transition-function patching.
-- [x] Record the Bianchi identity `D_A F_A=0`.
-- [x] Define `YM(A)=(1/2) integral_M |F_A|^2 dvol` using an `Ad`-invariant Lie-algebra inner product.
-- [x] Record the Euler–Lagrange equation `D_A^*F_A=0`.
-- [x] State explicitly that a Yang–Mills connection is a **critical point**, not automatically a global minimizer.
-- [x] In four dimensions, define `F_A^+=(F_A+*F_A)/2`, `F_A^-=(F_A-*F_A)/2`, self-/anti-self-duality, and the Bianchi implication `F_A=+/-*F_A => D_A^*F_A=0`.
-- [x] Keep instanton/Chern/Donaldson applications as a separate future classical/topological branch unless separately contracted.
-- [x] Add a precise lattice-continuum dictionary: link holonomy, plaquette small-loop holonomy, Wilson loop, and Wilson action are approximating/discretized objects rather than finite-spacing equalities with continuum fields/functionals.
-- [x] Assign separately versioned semantic definition IDs for base geometry, forms, bundles, sections, connection, covariant derivative, curvature, Hodge star, parallel transport, Yang–Mills functional, gauge transformation, and lattice-continuum dictionary.
-- [x] Add a bounded executable oriented-Euclidean-`R^4` two-form fixture verifying Hodge signs, `*^2`, wedge/Hodge inner product, self-dual decomposition, and fail-closed finite inputs without pretending to implement a general continuum solver.
+- [x] Define the smooth base-manifold/tangent/cotangent/form dictionary.
+- [x] Define principal and associated bundles, bundle sections, principal connections, local potentials, and induced covariant derivatives.
+- [x] Reconcile the standard right-bundle section-change rule with frozen Phase 1D via `Omega=g^-1`.
+- [x] Freeze `F_A in Omega^2(M,ad P)`, local curvature formulas, gauge covariance, and Bianchi.
+- [x] Keep gauge, Levi-Civita, Riemann, Gaussian, Frenet, torsion, and osculating curvatures/transport distinct.
+- [x] Freeze the `SU(3)` Hermitian↔anti-Hermitian Lie-algebra bridge.
+- [x] Freeze the oriented 4D Riemannian Hodge/formal-adjoint conventions and independent gauge-fiber inner product.
+- [x] Define flatness, local pure-gauge behavior, possible nontrivial global holonomy, and multi-chart transport patching.
+- [x] Define the classical Yang–Mills functional/equation and critical-point boundary.
+- [x] Define self-/anti-self-duality and its Bianchi implication without a quantum mass-gap implication.
+- [x] Keep instanton/Chern/Donaldson work as a separately contracted future branch.
+- [x] Freeze the lattice↔continuum dictionary and separately versioned semantic definition IDs.
+- [x] Add the bounded executable oriented-Euclidean-`R^4` Hodge/two-form convention fixture.
 
-**Phase 1E freeze gate:** `YM-CLASSICAL-GEOMETRY-V1` and `CLASSICAL-GEOMETRY-PHASE1E-V1` are sealed as `phase-1e-frozen` on the reviewed PR #6 surface. The frozen authority fixes the right principal action, local gauge transformation reconciliation, associated-bundle convention, curvature type/formula, `SU(3)` Hermitian↔anti-Hermitian bridge, Hodge/formal-adjoint signs, Bianchi/Yang–Mills/self-duality dictionary, `U_gamma=P_gamma^-1`, Levi-Civita/gauge firewalls, and finite-lattice↔continuum non-equivalence. Incompatible semantic changes require new identifiers.
+**Phase 1E freeze gate:** `YM-CLASSICAL-GEOMETRY-V1` and `CLASSICAL-GEOMETRY-PHASE1E-V1` are sealed as `phase-1e-frozen` on the reviewed PR #6 surface. Incompatible semantic changes require new identifiers.
 
 **Classical-continuum boundary:** establishing these classical equations, bundle definitions, Hodge identities, self-duality implications, or lattice approximations does not construct the interacting quantum Yang–Mills theory and does not establish a mass gap.
 
@@ -178,19 +163,39 @@ Previous QSOL-IMC work involving triadic `SU(3)`, semantic gauge fields, relatio
 - [ ] Gauge-dependent implementation state is not promoted to scientific output; preferred published observables are gauge invariant or have an explicitly justified gauge fixing.
 - [ ] “Mills” number-theory objects such as Mills' theorem, Mills' constant/primes, and Mills ratio are surname collisions and remain outside this project unless an independent mathematical connection is explicitly proved.
 
-**Graduation gate:** all advertised `SU(2)` observables are gauge invariant under independent local transformations within declared numerical tolerances; all selected `SU(3)` algebra identities are independently verified; the abstract `C3 ~= Z3` relation is distinguished from concrete subgroup embeddings; genuine center elements are distinguished from non-central cyclic operators; path/holonomy composition and gauge-covariance rules are internally consistent; the classical bundle/connection dictionary is internally consistent; and all golden vectors are sealed.
-
 ## Phase 2 — statistical ensemble generation
 
-- [ ] Specify a versioned sampling algorithm before implementation.
-- [ ] Implement a standard `SU(2)` heat-bath and/or over-relaxation method from published literature.
-- [ ] Separate pseudorandom seed identity from physical claims.
-- [ ] Record thermalisation, sweep count, measurement cadence, and chain identity.
-- [ ] Measure autocorrelation and effective sample size.
-- [ ] Add independent reproducibility runs.
-- [ ] Add `SU(3)` ensemble generation only after `SU(2)` diagnostics are trustworthy.
+Phase 2 is deliberately split so sampler mechanics can freeze without falsely claiming the published-benchmark graduation gate.
 
-**Graduation gate:** ensemble results reproduce basic published plaquette expectations in a declared parameter regime within statistical uncertainty.
+### Phase 2A — frozen `SU(2)` sampler and diagnostics
+
+**Status: implemented, independently reviewed, CI-green, and frozen in PR #7 pending merge. Full Phase 2 graduation remains open.**
+
+- [x] Specify a versioned sampling algorithm before implementation as `YM-SU2-ENSEMBLE-V1`.
+- [x] Implement a literature-grounded `SU(2)` heat-bath kernel under the frozen local staple/action convention.
+- [x] Implement microcanonical `SU(2)` over-relaxation and verify Wilson-action preservation within declared tolerance.
+- [x] Freeze the reference pseudorandom stream/seed derivation while separating stream identity from physical claims.
+- [x] Record thermalisation, total sweep count, measurement cadence, update order, and chain identity.
+- [x] Retain raw average-plaquette measurements in the reference chain report.
+- [x] Measure a versioned autocorrelation sequence, integrated autocorrelation time, effective sample size, and diagnostic standard error.
+- [x] Add fixed-chain deterministic replay and distinct independent-chain identity regressions.
+- [x] Add a `beta=0` Haar sanity surface with exact ensemble expectation zero, broad finite-sample acceptance band, ESS floor, and unit-link residual gate.
+- [x] Bound heat-bath rejection attempts and fail closed rather than silently biasing an update.
+- [x] Freeze `SPLITMIX64-V1` golden integer outputs while explicitly declining universal cross-platform bitwise floating identity.
+- [x] Keep all Phase 2A ensemble measurements classified as finite-lattice numerical observations rather than physical/theorem claims.
+
+**Phase 2A freeze gate:** `YM-SU2-ENSEMBLE-V1` and `SU2-ENSEMBLE-PHASE2A-V1` are sealed as `phase-2a-frozen`. The frozen contract keeps `published_plaquette_baseline_reproduced=false`, `phase2_graduation_gate_satisfied=false`, and `su3_ensemble_enabled=false`.
+
+### Phase 2B — published plaquette baseline and Phase 2 graduation
+
+- [ ] Select a peer-reviewed pure-`SU(2)` Wilson-action plaquette benchmark before tuning the reference implementation.
+- [ ] Match the benchmark action normalization, lattice geometry/volume, coupling regime, observable definition, and statistical treatment explicitly.
+- [ ] Run multiple independent chains with declared thermalisation and measurement cadence.
+- [ ] Reproduce the selected published plaquette expectation within justified statistical/finite-volume expectations.
+- [ ] Archive exact source commit, contract, toolchain, seeds/chain IDs, raw measurements, diagnostics, and comparison analysis.
+- [ ] Only after the `SU(2)` benchmark/diagnostics are trustworthy, specify a separately versioned `SU(3)` ensemble algorithm rather than extending `YM-SU2-ENSEMBLE-V1` silently.
+
+**Phase 2 graduation gate:** ensemble results reproduce a selected published plaquette expectation in the declared matching regime within justified uncertainty. Literature agreement validates the finite-lattice sampler in that regime; it does not establish confinement, construct continuum quantum Yang–Mills theory, or prove a positive mass gap.
 
 ## Phase 3 — glueball laboratory
 
@@ -267,6 +272,7 @@ Potential targets include:
 - separation of Levi-Civita curvature from gauge curvature;
 - the Bianchi identity;
 - the implication `F_A = +/- *F_A => D_A^*F_A = 0` in four dimensions under the frozen conventions;
+- exact sampler/RNG/update-order statements that can be isolated from floating statistical observations;
 - finite-lattice and finite-dimensional Hodge statements that can be proved without floating-point assumptions.
 
 Continuum quantum existence and the positive mass gap remain separate theorem targets and may not be represented as established unless a genuine proof exists.
@@ -278,7 +284,7 @@ Any release that reports scientific results must include:
 1. exact source commit and release tag;
 2. machine-readable contract versions;
 3. toolchain/runtime identity;
-4. complete input/seed/configuration identity;
+4. complete input/seed/chain/configuration identity;
 5. raw or content-addressed evidence sufficient to reproduce advertised results;
 6. uncertainty and systematic-error treatment where statistical inference is involved;
 7. an explicit claim classification from `docs/CLAIM_BOUNDARY.md`.

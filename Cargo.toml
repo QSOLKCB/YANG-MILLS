@@ -1,10 +1,10 @@
 [package]
 name = "yang-mills-reference"
-version = "0.4.0"
+version = "0.5.0"
 edition = "2021"
 license = "MPL-2.0"
 repository = "https://github.com/QSOLKCB/YANG-MILLS"
-description = "Deterministic SU(2)/SU(3) lattice, holonomy, and classical-geometry reference surfaces for YANG-MILLS"
+description = "Deterministic and stochastic SU(2)/SU(3) lattice, holonomy, classical-geometry, and ensemble reference surfaces for YANG-MILLS"
 default-run = "ym-su2-reference"
 
 [lib]
@@ -33,6 +33,10 @@ path = "reference/rust/src/bin/path_holonomy_reference.rs"
 [[bin]]
 name = "ym-classical-geometry"
 path = "reference/rust/src/bin/classical_geometry_reference.rs"
+
+[[bin]]
+name = "ym-su2-ensemble"
+path = "reference/rust/src/bin/su2_ensemble_reference.rs"
 
 [profile.release]
 lto = "thin"
