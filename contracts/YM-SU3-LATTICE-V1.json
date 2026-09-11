@@ -1,6 +1,6 @@
 {
   "contract_id": "YM-SU3-LATTICE-V1",
-  "status": "phase-1b-lattice-review-candidate",
+  "status": "phase-1b-frozen",
   "depends_on": {
     "contract_id": "YM-SU3-ALGEBRA-V1",
     "required_status": "phase-1b-algebra-frozen"
