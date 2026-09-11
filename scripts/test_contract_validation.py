@@ -71,6 +71,18 @@ def main() -> None:
         "premature confinement claim",
     )
 
+    broken = copy.deepcopy(EXPECTED_CONTRACTS["contracts/YM-WILSON-LOOP-V1.json"])
+    broken["confinement_claimed"] = 0
+    expect_reject(
+        lambda payload: validate_exact(
+            "contracts/YM-WILSON-LOOP-V1.json",
+            payload,
+            EXPECTED_CONTRACTS["contracts/YM-WILSON-LOOP-V1.json"],
+        ),
+        broken,
+        "boolean replaced by numeric zero",
+    )
+
     broken = copy.deepcopy(EXPECTED_PHASE0_VECTORS)
     broken["vectors"][1]["expected_action"] = 11.0
     expect_reject(
@@ -93,6 +105,18 @@ def main() -> None:
         ),
         broken,
         "identity Wilson-loop drift",
+    )
+
+    broken = copy.deepcopy(EXPECTED_PHASE1A_VECTORS)
+    broken["vectors"][0]["expected"] = True
+    expect_reject(
+        lambda payload: validate_exact(
+            "test-vectors/su2-observables-v1.json",
+            payload,
+            EXPECTED_PHASE1A_VECTORS,
+        ),
+        broken,
+        "boolean replacing numeric one",
     )
 
     broken = copy.deepcopy(EXPECTED_PHASE1A_VECTORS)
