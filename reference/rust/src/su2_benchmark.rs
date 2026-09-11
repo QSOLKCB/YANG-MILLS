@@ -179,14 +179,22 @@ pub fn summarize_two_chains(
         return Err(BenchmarkError::DuplicateChainIdentity);
     }
 
-    let chain_means = [first.diagnostics.mean, second.diagnostics.mean];
+    // The retained measurement series are the evidence authority. Recompute
+    // the frozen Phase 2A diagnostics here rather than trusting cached fields
+    // carried by a constructed or stale ChainReport.
+    let first_diagnostics = diagnostics(&first.measurements, AUTOCORRELATION_MAX_LAG)
+        .map_err(|_| BenchmarkError::NonFiniteStatistic)?;
+    let second_diagnostics = diagnostics(&second.measurements, AUTOCORRELATION_MAX_LAG)
+        .map_err(|_| BenchmarkError::NonFiniteStatistic)?;
+
+    let chain_means = [first_diagnostics.mean, second_diagnostics.mean];
     let chain_standard_errors = [
-        first.diagnostics.standard_error,
-        second.diagnostics.standard_error,
+        first_diagnostics.standard_error,
+        second_diagnostics.standard_error,
     ];
     let chain_effective_sample_sizes = [
-        first.diagnostics.effective_sample_size,
-        second.diagnostics.effective_sample_size,
+        first_diagnostics.effective_sample_size,
+        second_diagnostics.effective_sample_size,
     ];
     let stationarity = [
         stationarity_diagnostic(&first.measurements)?,
@@ -320,6 +328,12 @@ mod tests {
     }
 
     #[test]
+    fn executable_diagnostic_thresholds_match_frozen_contract() {
+        assert_eq!(MIN_CHAIN_ESS, 6.0);
+        assert_eq!(MAX_CHAIN_CONSISTENCY_Z, 5.0);
+    }
+
+    #[test]
     fn frozen_chain_report_identity_is_required() {
         let measurements = stationary_measurements();
         let first = synthetic_report(CHAIN_IDS[0], measurements.clone());
@@ -346,6 +360,28 @@ mod tests {
             summarize_two_chains(&wrong_seed, &second),
             Err(BenchmarkError::WrongBenchmarkConfiguration)
         );
+    }
+
+    #[test]
+    fn gate_diagnostics_are_derived_from_retained_measurements() {
+        let raw_measurements: Vec<f64> = (0..MEASUREMENTS)
+            .map(|index| if index % 2 == 0 { 0.899 } else { 0.901 })
+            .collect();
+        let cached = diagnostics(&stationary_measurements(), AUTOCORRELATION_MAX_LAG)
+            .expect("cached synthetic diagnostics must be valid");
+
+        let mut first = synthetic_report(CHAIN_IDS[0], raw_measurements.clone());
+        let mut second = synthetic_report(CHAIN_IDS[1], raw_measurements);
+        first.diagnostics = cached.clone();
+        second.diagnostics = cached;
+
+        let summary = summarize_two_chains(&first, &second)
+            .expect("retained samples should be sufficient to recompute diagnostics");
+
+        assert!(summary.chain_means[0] > 0.89);
+        assert!(summary.chain_means[1] > 0.89);
+        assert!(!summary.source_envelope_reproduced);
+        assert!(!summary.phase2_graduation_gate_satisfied);
     }
 
     #[test]
