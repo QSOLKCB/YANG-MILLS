@@ -27,7 +27,7 @@ exp[ beta * (1/2) ReTr(U V) ],
 
 up to factors independent of `U`, where `V` is the sum of the six oriented staple terms returned by the frozen `Lattice4::staple()` implementation.
 
-Because every `SU(2)` matrix in the repository is represented by a real quaternion, the staple sum has the same quaternion matrix form. For nonzero staple norm,
+For nonzero staple norm,
 
 ```text
 V = k Vhat,
@@ -48,9 +48,9 @@ dP(R) proportional to exp(alpha r0) d_mu_Haar(R),
 alpha = beta k,
 ```
 
-where `r0=(1/2)ReTr(R)` and `d_mu_Haar` is Haar measure on `SU(2)`.
+where `r0=(1/2)ReTr(R)`.
 
-## Exact bounded heat-bath draw
+## Bounded heat-bath draw
 
 Writing a unit quaternion as
 
@@ -58,23 +58,43 @@ Writing a unit quaternion as
 R = (r0, sqrt(1-r0^2) n_hat),
 ```
 
-with `n_hat` uniform on the unit two-sphere, Haar measure gives the scalar marginal
+with `n_hat` uniform on the unit two-sphere, Haar measure gives
 
 ```text
 p(r0) proportional to sqrt(1-r0^2) exp(alpha r0),
 -1 <= r0 <= 1.
 ```
 
-The Phase 2A reference sampler therefore:
+For ordinary positive `alpha`, the Phase 2A reference sampler:
 
-1. proposes `r0` from the exact truncated exponential density proportional to `exp(alpha r0)` on `[-1,1]`;
+1. proposes `r0` from the truncated exponential density proportional to `exp(alpha r0)` on `[-1,1]`;
 2. accepts that proposal with probability `sqrt(1-r0^2)`;
 3. samples the vector direction uniformly on `S^2`;
-4. reconstructs
+4. reconstructs `U_new=R Vhat^dagger`.
+
+### Tiny-alpha numerical branch
+
+The direct inverse CDF contains a division by `alpha`. For subnormal positive `alpha`, evaluating that expression in binary64 collapses the proposal onto a tiny set of values even though the target distribution is indistinguishable from its Haar limit at machine resolution.
+
+The frozen numerical reference therefore uses
 
 ```text
-U_new = R Vhat^dagger.
+ALPHA_ZERO_LIMIT = 1e-300
 ```
+
+and, for
+
+```text
+0 <= alpha <= ALPHA_ZERO_LIMIT,
+```
+
+uses the exact `alpha -> 0` proposal limit
+
+```text
+r0 = 2u - 1.
+```
+
+The usual Haar-Jacobian rejection and uniform `S^2` direction step still follow. This branch is explicitly part of the **floating reference algorithm**; it is not a change to the mathematical conditional density. A regression with `beta=f64::from_bits(1)` requires well-resolved link scalar values instead of the subnormal inverse-CDF collapse found during review.
 
 When the staple norm is exactly zero, the local Wilson weight is independent of the link and the accepted Haar draw `R` is used directly.
 
@@ -82,21 +102,15 @@ The rejection loop is bounded by `max_heatbath_attempts_per_link`. Exhausting th
 
 ## Over-relaxation
 
-For nonzero staple norm Phase 2A also implements the microcanonical reflection
+For nonzero staple norm Phase 2A implements
 
 ```text
 U_new = Vhat^dagger U_old^dagger Vhat^dagger.
 ```
 
-Under the frozen local variable `R=U Vhat`, this sends
+Under `R=U Vhat`, this sends `R -> R^dagger`, preserving `r0=(1/2)ReTr(R)` and the local Wilson action. A zero staple produces a no-op.
 
-```text
-R -> R^dagger,
-```
-
-which preserves `r0=(1/2)ReTr(R)` and therefore preserves the local Wilson action. A zero staple produces a no-op.
-
-Over-relaxation is used only as a decorrelation step. It is **not** described as an ergodic sampler by itself. Each Phase 2A Markov sweep begins with a full heat-bath sweep and may then perform a configured number of full over-relaxation sweeps.
+Over-relaxation is only a decorrelation step. It is **not** an ergodic sampler by itself. Each Phase 2A Markov sweep begins with one full heat-bath sweep and may then perform a configured number of full over-relaxation sweeps.
 
 ## Update order
 
@@ -113,7 +127,7 @@ Changing update order is a semantic sampler change and must not be hidden behind
 
 Phase 2A freezes `SPLITMIX64-V1` as the **reference reproducibility stream**, not as a cryptographic generator and not as a physical object.
 
-The stream state update is
+The state update is
 
 ```text
 state <- state + 0x9e3779b97f4a7c15  (mod 2^64)
@@ -131,7 +145,7 @@ f88bb8a8724c81ec
 1b39896a51a8749b
 ```
 
-A chain is identified by both `master_seed` and `chain_id`. The derived seed is versioned explicitly. Two chain IDs are different stream identities even when every physical/lattice parameter is the same.
+A chain is identified by both `master_seed` and `chain_id`. The derived seed is versioned explicitly. Two chain IDs are different stream identities even when every lattice/action parameter is the same.
 
 The repository does not claim cross-platform bitwise identity for floating-point transcendental functions used in Haar-direction sampling. The integer RNG stream itself is exactly versioned.
 
@@ -139,18 +153,18 @@ The repository does not claim cross-platform bitwise identity for floating-point
 
 The Phase 2A reference chain begins from the cold identity lattice.
 
-The complete schedule records:
+The complete schedule records lattice/action parameters, master seed, chain ID/derived seed, discarded thermalisation sweeps, measurement count, sweeps between measurements, over-relaxation cadence, rejection bound, and autocorrelation maximum lag.
 
-- lattice extents;
-- `beta`;
-- master seed;
-- chain ID and derived seed;
-- number of discarded thermalisation sweeps;
-- number of measurements;
-- full Markov sweeps between measurements;
-- number of over-relaxation sweeps following each heat-bath sweep;
-- heat-bath rejection attempt bound;
-- autocorrelation maximum lag.
+The reference bound applies to the **checked total** number of complete Markov sweeps:
+
+```text
+total = thermalization_sweeps
+      + measurements * sweeps_between_measurements
+
+total <= 2^20.
+```
+
+Both multiplication and addition are checked for overflow before a chain is admitted. Bounding only the two schedule pieces separately is not sufficient.
 
 A recorded measurement is the finite-lattice average plaquette
 
@@ -174,7 +188,7 @@ The integrated autocorrelation estimate is
 tau_int = 1/2 + sum rho_lag
 ```
 
-where the sum includes consecutive positive `rho_lag` values starting at lag one and stops adding after the first non-positive lag. Later requested lags are still reported but are not added to the window.
+where the sum includes consecutive positive `rho_lag` values starting at lag one and stops adding after the first non-positive lag. Later requested lags are still reported but not added to the window.
 
 The effective sample size is
 
@@ -182,25 +196,23 @@ The effective sample size is
 ESS = min(N, N/(2 tau_int)),
 ```
 
-and the diagnostic standard error is
+and the diagnostic standard error is `sqrt(variance / ESS)`.
 
-```text
-sqrt(variance / ESS).
-```
+These diagnostics are finite-sample estimators. A small measured autocorrelation does not make a short chain representative of all physics and does not remove the need for independent chains, thermalisation checks, volume studies, or benchmark comparison.
 
-These diagnostics are finite-sample estimators. A small measured autocorrelation does not magically make a short chain representative of all physics, and it does not remove the need for independent chains, thermalisation checks, volume studies, or later benchmark comparison.
+## Machine-readable fail-closed boundary
+
+The Phase 2A contract checker performs **exact recursive validation of the complete nested contract and vector structures**. Chain identity, schedule, reproducibility, heat-bath, over-relaxation, diagnostic, graduation, and claim-boundary fields are authority surfaces; merely retaining their top-level object names is not sufficient.
 
 ## Beta-zero sanity surface
 
-At `beta=0`, the Wilson Boltzmann weight is constant and every link has Haar conditional distribution. This gives the exact ensemble expectation
+At `beta=0`, the Wilson Boltzmann weight is constant and every link has Haar conditional distribution. This gives exact ensemble expectation
 
 ```text
-< (1/2) ReTr P > = 0
+< (1/2) ReTr P > = 0.
 ```
 
-for a plaquette.
-
-Phase 2A uses a fixed-seed `2^4` chain as a **sanity band**, not as a precision physics result. The reference executable requires the measured average plaquette to stay near zero, checks nontrivial ESS, checks the rejection-sampler acceptance rate, and verifies that all links remain unit `SU(2)` elements.
+Phase 2A uses a fixed-seed `2^4` chain as a **sanity band**, not as a precision physics result. The reference executable checks a near-zero measured average, nontrivial ESS, rejection acceptance, and unit-link residuals.
 
 ## Published-baseline boundary
 
