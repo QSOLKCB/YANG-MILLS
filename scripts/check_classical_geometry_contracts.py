@@ -106,6 +106,7 @@ EXPECTED_CLASSICAL_CONTRACT: dict[str, Any] = {
         "orientation": "e0 wedge e1 wedge e2 wedge e3 positive",
         "two_form_basis_order": ["01", "02", "03", "12", "13", "23"],
         "hodge_basis_rule": ["*01=23", "*02=-13", "*03=12", "*12=03", "*13=-02", "*23=01"],
+        "arithmetic_overflow_rule": "constructor/add/sub/scale reject any non-finite component result",
         "purpose": "finite-dimensional sign/convention regression only; not a continuum solver",
     },
     "flatness_and_parallel_transport": {
