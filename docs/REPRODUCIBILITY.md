@@ -13,6 +13,7 @@ cargo run --quiet --locked --bin ym-su2-reference
 cargo run --quiet --locked --bin ym-su3-algebra
 cargo run --quiet --locked --bin ym-su3-lattice
 cargo run --quiet --locked --bin ym-su3-center
+cargo run --quiet --locked --bin ym-path-holonomy
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
@@ -41,6 +42,17 @@ Phase 1C likewise separates exact abstract/embedding checks from numerical cente
 - Polyakov-loop rotation and Wilson-action invariance after a center slice transformation are C2 finite-lattice numerical observations.
 
 No Phase 1C vector is an ensemble measurement, confinement/deconfinement result, or spontaneous-symmetry-breaking observation.
+
+Phase 1D adds a similar separation for path/holonomy work:
+
+- the continuum path, pullback, transport, endpoint-covariance, reversal, concatenation, reparameterization, and small-loop statements are classical mathematical definitions/rules in the contract/documentation; Phase 1D does not numerically solve the continuum transport equation;
+- exact finite-lattice vectors built from identity links or exact permutation fixtures may be C1;
+- floating-point `SU(3)` path composition, reversal, endpoint covariance, closed-loop gauge invariance, cyclic trace, and Polyakov gauge-invariance residuals are C2 with explicit tolerances;
+- compatibility with frozen `YM-WILSON-LOOP-V1` step semantics is a C0 contract/implementation fact.
+
+The deterministic two-link `SU(3)` path fixture is not a physical ensemble. Its purpose is to exercise noncommuting ordered products and endpoint transformation laws without statistical interpretation.
+
+The Phase 1D rectangular-path helper only prepares deterministic geometry for later static-potential analysis. It does not evaluate `<W(R,T)>`, extract `V(R)`, establish an area law, or infer confinement.
 
 ## Future stochastic work
 
