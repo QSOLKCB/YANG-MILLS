@@ -10,9 +10,10 @@ mod su2_benchmark;
 mod su2_ensemble;
 
 use su2_benchmark::{
-    summarize_two_chains, AUTOCORRELATION_MAX_LAG, BETA, CHAIN_IDS, EXTENTS, MASTER_SEED,
-    MAX_HEATBATH_ATTEMPTS_PER_LINK, MEASUREMENTS, OVERRELAXATION_SWEEPS_PER_HEATBATH,
-    SOURCE_ENVELOPE_MAX, SOURCE_ENVELOPE_MIN, SWEEPS_BETWEEN_MEASUREMENTS, THERMALIZATION_SWEEPS,
+    summarize_two_chains, AUTOCORRELATION_MAX_LAG, BENCHMARK_ID, BETA, CHAIN_IDS, EXTENTS,
+    MASTER_SEED, MAX_HEATBATH_ATTEMPTS_PER_LINK, MEASUREMENTS,
+    OVERRELAXATION_SWEEPS_PER_HEATBATH, PRIMARY_DOI, SOURCE_ENVELOPE_MAX, SOURCE_ENVELOPE_MIN,
+    SWEEPS_BETWEEN_MEASUREMENTS, THERMALIZATION_SWEEPS,
 };
 use su2_ensemble::{run_chain, EnsembleConfig};
 
@@ -29,6 +30,14 @@ fn config(chain_id: u64) -> EnsembleConfig {
         max_heatbath_attempts_per_link: MAX_HEATBATH_ATTEMPTS_PER_LINK,
         autocorrelation_max_lag: AUTOCORRELATION_MAX_LAG,
     }
+}
+
+fn series_text(values: &[f64]) -> String {
+    values
+        .iter()
+        .map(|value| format!("{value:.17e}"))
+        .collect::<Vec<_>>()
+        .join(",")
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -48,14 +57,60 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .into());
     }
 
-    println!("contract=YM-SU2-PLAQUETTE-BASELINE-V1");
-    println!("primary_doi=10.1103/PhysRevLett.109.111601");
+    println!("contract={BENCHMARK_ID}");
+    println!("primary_doi={PRIMARY_DOI}");
     println!("lattice=10,10,10,10");
     println!("beta={BETA:.17e}");
+    println!("master_seed={MASTER_SEED:016x}");
+    println!("chain0_id={}", CHAIN_IDS[0]);
+    println!("chain1_id={}", CHAIN_IDS[1]);
+    println!("chain0_derived_seed={:016x}", first.derived_seed);
+    println!("chain1_derived_seed={:016x}", second.derived_seed);
+    println!("thermalization_sweeps={THERMALIZATION_SWEEPS}");
+    println!("measurements_per_chain={MEASUREMENTS}");
+    println!("sweeps_between_measurements={SWEEPS_BETWEEN_MEASUREMENTS}");
+    println!(
+        "overrelaxation_sweeps_per_heatbath={OVERRELAXATION_SWEEPS_PER_HEATBATH}"
+    );
+    println!("autocorrelation_max_lag={AUTOCORRELATION_MAX_LAG}");
     println!("source_envelope_min={SOURCE_ENVELOPE_MIN:.17e}");
     println!("source_envelope_max={SOURCE_ENVELOPE_MAX:.17e}");
+    println!("chain0_measurements={}", series_text(&first.measurements));
+    println!("chain1_measurements={}", series_text(&second.measurements));
     println!("chain0_mean={:.17e}", summary.chain_means[0]);
     println!("chain1_mean={:.17e}", summary.chain_means[1]);
+    println!(
+        "chain0_standard_error={:.17e}",
+        summary.chain_standard_errors[0]
+    );
+    println!(
+        "chain1_standard_error={:.17e}",
+        summary.chain_standard_errors[1]
+    );
+    println!(
+        "chain0_effective_sample_size={:.17e}",
+        summary.chain_effective_sample_sizes[0]
+    );
+    println!(
+        "chain1_effective_sample_size={:.17e}",
+        summary.chain_effective_sample_sizes[1]
+    );
+    println!(
+        "chain0_tau_int={:.17e}",
+        first.diagnostics.integrated_autocorrelation_time
+    );
+    println!(
+        "chain1_tau_int={:.17e}",
+        second.diagnostics.integrated_autocorrelation_time
+    );
+    println!(
+        "chain0_heatbath_acceptance={:.17e}",
+        first.mean_heatbath_acceptance
+    );
+    println!(
+        "chain1_heatbath_acceptance={:.17e}",
+        second.mean_heatbath_acceptance
+    );
     println!("pooled_mean={:.17e}", summary.pooled_mean);
     println!(
         "pooled_standard_error={:.17e}",
