@@ -151,6 +151,20 @@ fn bounded_exponentiation_maps_traceless_hermitian_algebra_to_su3() {
 }
 
 #[test]
+fn dagger_preserves_the_checked_su3_invariant() {
+    let u =
+        Su3::from_algebra_coefficients([10.0, 20.0, -5.0, 3.0, 8.0, -9.0, 2.0, 7.0]).unwrap();
+    let dagger = u.dagger();
+    assert!(dagger.unitarity_residual() <= SU3_ACCEPTANCE_TOLERANCE);
+    assert!(dagger.determinant_residual() <= SU3_ACCEPTANCE_TOLERANCE);
+    assert_matrix_close(
+        dagger.dagger().matrix(),
+        u.matrix(),
+        SU3_ACCEPTANCE_TOLERANCE,
+    );
+}
+
+#[test]
 fn general_bounded_exponentiation_and_group_product_pass_acceptance() {
     let a = Su3::from_algebra_coefficients([10.0, 20.0, -5.0, 3.0, 8.0, -9.0, 2.0, 7.0]).unwrap();
     let b = Su3::from_algebra_coefficients([-4.0, 1.0, 6.0, 2.0, -3.0, 5.0, 8.0, -7.0]).unwrap();
