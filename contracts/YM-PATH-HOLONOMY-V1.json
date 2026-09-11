@@ -1,6 +1,6 @@
 {
   "contract_id": "YM-PATH-HOLONOMY-V1",
-  "status": "phase-1d-review-candidate",
+  "status": "phase-1d-frozen",
   "depends_on": [
     {
       "contract_id": "YM-WILSON-LOOP-V1",
