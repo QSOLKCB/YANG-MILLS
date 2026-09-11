@@ -146,7 +146,15 @@ observable = (1/(6V)) sum_x sum_(mu<nu) (1/2) ReTr P_mu_nu(x)
 
 Because the source comparison is graphical, the predeclared `[0.59,0.62]` interval is a **source-resolution envelope**, not a quoted paper statistical error bar. Agents may not relabel it as a paper uncertainty or widen it after inspecting the benchmark result.
 
-The frozen two-chain reference run reproduces that envelope and closes the finite-lattice Phase 2 graduation gate. It must retain
+Two independent cold-start chains agreeing is not sufficient to close Phase 2B. The frozen benchmark must also pass the within-chain post-thermalisation stationarity gate: split each 48-measurement chain into first/last 24-measurement halves, evaluate each half with the frozen Phase 2A autocorrelation-aware diagnostic using `max_lag=6`, and require
+
+```text
+|mean_first - mean_second| / sqrt(SE_first^2 + SE_second^2) <= 5
+```
+
+for both chains. This is a bounded stationarity check against a shared residual cold-start transient; it is not a proof that every systematic effect is absent. Do not remove or weaken this gate under the frozen Phase 2B identifier.
+
+The frozen reference run may close the finite-lattice Phase 2 graduation gate only if the published envelope, independent-chain, within-chain stationarity, ESS, acceptance, and link-unit gates all pass. It must retain
 
 ```text
 published_plaquette_baseline_reproduced = true
@@ -201,7 +209,7 @@ python3 scripts/test_all_contract_validation.py
 
 The unified contract entry points are authoritative. Adding a new contract surface without registering it in those commands is a readiness failure.
 
-Tests must fail closed on invalid lattice extents, invalid group construction, invalid/oversized paths, invalid ensemble schedules, non-finite inputs/statistics, rejection-limit exhaustion, broken contract structure, weakened benchmark provenance, or weakened claim boundaries. Public `Result` APIs may not turn admissible numerical/allocation failures into panics.
+Tests must fail closed on invalid lattice extents, invalid group construction, invalid/oversized paths, invalid ensemble schedules, non-finite inputs/statistics, rejection-limit exhaustion, broken contract structure, weakened benchmark provenance, weakened stationarity/equilibration gates, or weakened claim boundaries. Public `Result` APIs may not turn admissible numerical/allocation failures into panics.
 
 Floating-point equality is not assumed. Every numerical/statistical comparison must have an explicit tolerance or uncertainty rule and must not be advertised as bitwise cross-platform identity unless separately established.
 
