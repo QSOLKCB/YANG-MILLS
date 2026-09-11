@@ -7,9 +7,7 @@ use yang_mills_reference::{Lattice4, ReferenceError, Su2, DIM};
 #[path = "../su2_ensemble.rs"]
 mod su2_ensemble;
 
-use su2_ensemble::{
-    heatbath_sweep, overrelaxation_sweep, run_chain, EnsembleConfig, SplitMix64,
-};
+use su2_ensemble::{heatbath_sweep, overrelaxation_sweep, run_chain, EnsembleConfig, SplitMix64};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut rng = SplitMix64::new(0);
@@ -93,10 +91,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "heatbath_acceptance={:.17e}",
         report.mean_heatbath_acceptance
     );
+    println!("overrelaxation_action_residual={overrelaxation_action_residual:.17e}");
     println!(
-        "overrelaxation_action_residual={overrelaxation_action_residual:.17e}"
+        "final_link_unit_residual={:.17e}",
+        report.final_link_unit_residual
     );
-    println!("final_link_unit_residual={:.17e}", report.final_link_unit_residual);
     println!("published_plaquette_baseline_reproduced=false");
     println!("su3_ensemble_enabled=false");
     println!("confinement_claimed=false");
