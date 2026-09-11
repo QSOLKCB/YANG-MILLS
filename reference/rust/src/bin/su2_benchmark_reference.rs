@@ -4,16 +4,15 @@
 
 use yang_mills_reference::{Lattice4, ReferenceError, Su2, DIM};
 
-#[path = "../su2_ensemble.rs"]
-mod su2_ensemble;
 #[path = "../su2_benchmark.rs"]
 mod su2_benchmark;
+#[path = "../su2_ensemble.rs"]
+mod su2_ensemble;
 
 use su2_benchmark::{
-    summarize_two_chains, AUTOCORRELATION_MAX_LAG, BETA, CHAIN_IDS, EXTENTS,
-    MASTER_SEED, MAX_HEATBATH_ATTEMPTS_PER_LINK, MEASUREMENTS,
-    OVERRELAXATION_SWEEPS_PER_HEATBATH, SOURCE_ENVELOPE_MAX, SOURCE_ENVELOPE_MIN,
-    SWEEPS_BETWEEN_MEASUREMENTS, THERMALIZATION_SWEEPS,
+    summarize_two_chains, AUTOCORRELATION_MAX_LAG, BETA, CHAIN_IDS, EXTENTS, MASTER_SEED,
+    MAX_HEATBATH_ATTEMPTS_PER_LINK, MEASUREMENTS, OVERRELAXATION_SWEEPS_PER_HEATBATH,
+    SOURCE_ENVELOPE_MAX, SOURCE_ENVELOPE_MIN, SWEEPS_BETWEEN_MEASUREMENTS, THERMALIZATION_SWEEPS,
 };
 use su2_ensemble::{run_chain, EnsembleConfig};
 
@@ -58,7 +57,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("chain0_mean={:.17e}", summary.chain_means[0]);
     println!("chain1_mean={:.17e}", summary.chain_means[1]);
     println!("pooled_mean={:.17e}", summary.pooled_mean);
-    println!("pooled_standard_error={:.17e}", summary.pooled_standard_error);
+    println!(
+        "pooled_standard_error={:.17e}",
+        summary.pooled_standard_error
+    );
     println!("chain_consistency_z={:.17e}", summary.chain_consistency_z);
     println!(
         "minimum_effective_sample_size={:.17e}",
