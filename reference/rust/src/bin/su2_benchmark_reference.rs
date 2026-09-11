@@ -11,9 +11,10 @@ mod su2_ensemble;
 
 use su2_benchmark::{
     summarize_two_chains, AUTOCORRELATION_MAX_LAG, BENCHMARK_ID, BETA, CHAIN_IDS, EXTENTS,
-    MASTER_SEED, MAX_HEATBATH_ATTEMPTS_PER_LINK, MEASUREMENTS, OVERRELAXATION_SWEEPS_PER_HEATBATH,
-    PRIMARY_DOI, SOURCE_ENVELOPE_MAX, SOURCE_ENVELOPE_MIN, SWEEPS_BETWEEN_MEASUREMENTS,
-    THERMALIZATION_SWEEPS,
+    MASTER_SEED, MAX_HEATBATH_ATTEMPTS_PER_LINK, MAX_STATIONARITY_Z, MEASUREMENTS,
+    OVERRELAXATION_SWEEPS_PER_HEATBATH, PRIMARY_DOI, SOURCE_ENVELOPE_MAX, SOURCE_ENVELOPE_MIN,
+    STATIONARITY_AUTOCORRELATION_MAX_LAG, STATIONARITY_HALF_MEASUREMENTS,
+    SWEEPS_BETWEEN_MEASUREMENTS, THERMALIZATION_SWEEPS,
 };
 use su2_ensemble::{run_chain, EnsembleConfig};
 
@@ -47,12 +48,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     if !summary.phase2_graduation_gate_satisfied {
         return Err(format!(
-            "Phase 2B benchmark failed: pooled_mean={:.17e}, envelope=[{:.17e},{:.17e}], min_ess={:.17e}, chain_z={:.17e}",
+            "Phase 2B benchmark failed: pooled_mean={:.17e}, envelope=[{:.17e},{:.17e}], min_ess={:.17e}, chain_z={:.17e}, stationarity_z={:.17e}",
             summary.pooled_mean,
             SOURCE_ENVELOPE_MIN,
             SOURCE_ENVELOPE_MAX,
             summary.min_effective_sample_size,
-            summary.chain_consistency_z
+            summary.chain_consistency_z,
+            summary.max_stationarity_z
         )
         .into());
     }
@@ -71,6 +73,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("sweeps_between_measurements={SWEEPS_BETWEEN_MEASUREMENTS}");
     println!("overrelaxation_sweeps_per_heatbath={OVERRELAXATION_SWEEPS_PER_HEATBATH}");
     println!("autocorrelation_max_lag={AUTOCORRELATION_MAX_LAG}");
+    println!("stationarity_half_measurements={STATIONARITY_HALF_MEASUREMENTS}");
+    println!(
+        "stationarity_autocorrelation_max_lag={STATIONARITY_AUTOCORRELATION_MAX_LAG}"
+    );
+    println!("maximum_stationarity_z={MAX_STATIONARITY_Z:.17e}");
     println!("source_envelope_min={SOURCE_ENVELOPE_MIN:.17e}");
     println!("source_envelope_max={SOURCE_ENVELOPE_MAX:.17e}");
     println!("chain0_measurements={}", series_text(&first.measurements));
@@ -109,6 +116,31 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "chain1_heatbath_acceptance={:.17e}",
         second.mean_heatbath_acceptance
     );
+    println!(
+        "chain0_stationarity_first_half_mean={:.17e}",
+        summary.stationarity[0].first_half_mean
+    );
+    println!(
+        "chain0_stationarity_second_half_mean={:.17e}",
+        summary.stationarity[0].second_half_mean
+    );
+    println!(
+        "chain0_stationarity_z={:.17e}",
+        summary.stationarity[0].drift_z
+    );
+    println!(
+        "chain1_stationarity_first_half_mean={:.17e}",
+        summary.stationarity[1].first_half_mean
+    );
+    println!(
+        "chain1_stationarity_second_half_mean={:.17e}",
+        summary.stationarity[1].second_half_mean
+    );
+    println!(
+        "chain1_stationarity_z={:.17e}",
+        summary.stationarity[1].drift_z
+    );
+    println!("max_stationarity_z={:.17e}", summary.max_stationarity_z);
     println!("pooled_mean={:.17e}", summary.pooled_mean);
     println!(
         "pooled_standard_error={:.17e}",
