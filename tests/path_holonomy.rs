@@ -2,12 +2,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+#[path = "../reference/rust/src/path_holonomy.rs"]
+mod path_holonomy;
 #[path = "../reference/rust/src/su3.rs"]
 mod su3;
 #[path = "../reference/rust/src/su3_lattice.rs"]
 mod su3_lattice;
-#[path = "../reference/rust/src/path_holonomy.rs"]
-mod path_holonomy;
 
 use path_holonomy::{
     closed_path_holonomy, concatenate_paths, endpoint_covariance_prediction, path_holonomy,
@@ -49,7 +49,14 @@ fn path_reversal_returns_inverse_transport() {
     let (backward, returned) = path_holonomy(&lattice, end, &reversed).unwrap();
     assert_eq!(returned, start);
     assert!(backward.matrix().max_residual(forward.dagger().matrix()) <= 5.0e-12);
-    assert!(forward.mul(backward).unwrap().matrix().max_residual(Mat3::IDENTITY) <= 5.0e-12);
+    assert!(
+        forward
+            .mul(backward)
+            .unwrap()
+            .matrix()
+            .max_residual(Mat3::IDENTITY)
+            <= 5.0e-12
+    );
 }
 
 #[test]
@@ -70,7 +77,9 @@ fn concatenation_uses_frozen_left_to_right_traversal_order() {
 #[test]
 fn open_transport_obeys_endpoint_gauge_covariance() {
     let lattice = noncommuting_test_lattice();
-    let transformed = lattice.gauge_transform(deterministic_su3_site_gauge).unwrap();
+    let transformed = lattice
+        .gauge_transform(deterministic_su3_site_gauge)
+        .unwrap();
     let start = [0, 0, 0, 0];
     let steps = [
         OrientedStep::Forward(0),
@@ -98,7 +107,9 @@ fn open_transport_obeys_endpoint_gauge_covariance() {
 #[test]
 fn arbitrary_closed_wilson_loop_is_gauge_invariant_and_cyclic() {
     let lattice = noncommuting_test_lattice();
-    let transformed = lattice.gauge_transform(deterministic_su3_site_gauge).unwrap();
+    let transformed = lattice
+        .gauge_transform(deterministic_su3_site_gauge)
+        .unwrap();
     let start = [0, 0, 0, 0];
     let steps = [
         OrientedStep::Forward(0),
@@ -141,13 +152,19 @@ fn nonplanar_closed_path_has_deterministic_ordered_product() {
     ];
     let holonomy = closed_path_holonomy(&lattice, [0, 0, 0, 0], &chair).unwrap();
     assert!(holonomy.matrix().max_residual(cycle.matrix()) <= 5.0e-12);
-    assert_complex_close(wilson_loop(&lattice, [0, 0, 0, 0], &chair).unwrap(), Complex64::ZERO, 0.0);
+    assert_complex_close(
+        wilson_loop(&lattice, [0, 0, 0, 0], &chair).unwrap(),
+        Complex64::ZERO,
+        0.0,
+    );
 }
 
 #[test]
 fn polyakov_trace_is_invariant_under_periodic_local_gauge_transform() {
     let lattice = noncommuting_test_lattice();
-    let transformed = lattice.gauge_transform(deterministic_su3_site_gauge).unwrap();
+    let transformed = lattice
+        .gauge_transform(deterministic_su3_site_gauge)
+        .unwrap();
     let start = [0, 0, 0, 0];
     let before = lattice.polyakov_loop(start, 0).unwrap();
     let after = transformed.polyakov_loop(start, 0).unwrap();
@@ -193,8 +210,7 @@ fn invalid_paths_fail_closed() {
         PathHolonomyError::EmptyPath
     );
     assert_eq!(
-        closed_path_holonomy(&lattice, [0, 0, 0, 0], &[OrientedStep::Forward(0)])
-            .unwrap_err(),
+        closed_path_holonomy(&lattice, [0, 0, 0, 0], &[OrientedStep::Forward(0)]).unwrap_err(),
         PathHolonomyError::PathNotClosed
     );
     assert_eq!(
