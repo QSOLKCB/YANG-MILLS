@@ -1,7 +1,7 @@
 {
   "contract_id": "YM-SU2-PLAQUETTE-BASELINE-V1",
   "vector_set": "SU2-PLAQUETTE-BASELINE-PHASE2B-V1",
-  "status": "phase-2b-review-candidate",
+  "status": "phase-2b-frozen",
   "vectors": [
     {
       "id": "published-source-envelope",
@@ -30,6 +30,8 @@
     },
     {
       "id": "phase2-graduation-boundary",
+      "published_plaquette_baseline_reproduced": true,
+      "phase2_graduation_gate_satisfied": true,
       "benchmark_agreement_implies_confinement": false,
       "benchmark_agreement_implies_continuum_qft": false,
       "benchmark_agreement_implies_positive_mass_gap": false,
