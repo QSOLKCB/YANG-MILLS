@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+use yang_mills_reference::{Lattice4, ReferenceError, Su2, DIM};
+
 #[path = "../su2_ensemble.rs"]
 mod su2_ensemble;
 #[path = "../su2_benchmark.rs"]
@@ -58,8 +60,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("pooled_mean={:.17e}", summary.pooled_mean);
     println!("pooled_standard_error={:.17e}", summary.pooled_standard_error);
     println!("chain_consistency_z={:.17e}", summary.chain_consistency_z);
-    println!("minimum_effective_sample_size={:.17e}", summary.min_effective_sample_size);
-    println!("max_link_unit_residual={:.17e}", summary.max_link_unit_residual);
+    println!(
+        "minimum_effective_sample_size={:.17e}",
+        summary.min_effective_sample_size
+    );
+    println!(
+        "max_link_unit_residual={:.17e}",
+        summary.max_link_unit_residual
+    );
     println!("published_plaquette_baseline_reproduced=true");
     println!("phase2_graduation_gate_satisfied=true");
     println!("su3_ensemble_enabled=false");
