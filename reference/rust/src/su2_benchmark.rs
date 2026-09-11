@@ -5,16 +5,16 @@
 //! Phase 2B published SU(2) average-plaquette benchmark logic.
 //!
 //! The primary source is Langfeld, Lucini & Rago, Phys. Rev. Lett. 109,
-//! 111601 (2012), DOI 10.1103/PhysRevLett.109.111601.  Their Fig. 5 shows
+//! 111601 (2012), DOI 10.1103/PhysRevLett.109.111601. Their Fig. 5 shows
 //! the average plaquette for four-dimensional SU(2) Wilson gauge theory on
 //! a 10^4 lattice and compares density-of-states and local-hybrid Monte Carlo
-//! results.  The paper presents this comparison graphically rather than as a
+//! results. The paper presents this comparison graphically rather than as a
 //! table of point estimates, so this module freezes a deliberately conservative
 //! source-resolution envelope rather than inventing a paper uncertainty.
 
 use core::fmt;
 
-use crate::su2_ensemble::ChainReport;
+use crate::su2_ensemble::{diagnostics, ChainReport};
 
 pub const BENCHMARK_ID: &str = "YM-SU2-PLAQUETTE-BASELINE-V1";
 pub const PRIMARY_DOI: &str = "10.1103/PhysRevLett.109.111601";
@@ -32,12 +32,16 @@ pub const MAX_HEATBATH_ATTEMPTS_PER_LINK: usize = 10_000;
 pub const AUTOCORRELATION_MAX_LAG: usize = 12;
 pub const MIN_CHAIN_ESS: f64 = 6.0;
 pub const MAX_CHAIN_CONSISTENCY_Z: f64 = 5.0;
+pub const STATIONARITY_HALF_MEASUREMENTS: usize = MEASUREMENTS / 2;
+pub const STATIONARITY_AUTOCORRELATION_MAX_LAG: usize = 6;
+pub const MAX_STATIONARITY_Z: f64 = 5.0;
 pub const MAX_LINK_UNIT_RESIDUAL: f64 = 1.0e-12;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum BenchmarkError {
     WrongBenchmarkConfiguration,
     DuplicateChainIdentity,
+    StationarityDiagnosticFailed,
     NonFiniteStatistic,
 }
 
@@ -48,6 +52,9 @@ impl fmt::Display for BenchmarkError {
                 "chain report does not match the frozen Phase 2B benchmark configuration"
             }
             Self::DuplicateChainIdentity => "benchmark chains must have distinct stream identities",
+            Self::StationarityDiagnosticFailed => {
+                "post-thermalisation stationarity diagnostic could not be evaluated"
+            }
             Self::NonFiniteStatistic => "benchmark aggregation produced a non-finite statistic",
         };
         f.write_str(message)
@@ -57,10 +64,21 @@ impl fmt::Display for BenchmarkError {
 impl std::error::Error for BenchmarkError {}
 
 #[derive(Clone, Copy, Debug, PartialEq)]
+pub struct StationarityDiagnostic {
+    pub first_half_mean: f64,
+    pub second_half_mean: f64,
+    pub first_half_standard_error: f64,
+    pub second_half_standard_error: f64,
+    pub drift_z: f64,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct BenchmarkSummary {
     pub chain_means: [f64; 2],
     pub chain_standard_errors: [f64; 2],
     pub chain_effective_sample_sizes: [f64; 2],
+    pub stationarity: [StationarityDiagnostic; 2],
+    pub max_stationarity_z: f64,
     pub pooled_mean: f64,
     pub pooled_standard_error: f64,
     pub chain_consistency_z: f64,
@@ -79,10 +97,63 @@ fn report_matches_benchmark(report: &ChainReport, chain_id: u64) -> bool {
         && config.chain_id == chain_id
         && config.thermalization_sweeps == THERMALIZATION_SWEEPS
         && config.measurements == MEASUREMENTS
+        && report.measurements.len() == MEASUREMENTS
         && config.sweeps_between_measurements == SWEEPS_BETWEEN_MEASUREMENTS
         && config.overrelaxation_sweeps_per_heatbath == OVERRELAXATION_SWEEPS_PER_HEATBATH
         && config.max_heatbath_attempts_per_link == MAX_HEATBATH_ATTEMPTS_PER_LINK
         && config.autocorrelation_max_lag == AUTOCORRELATION_MAX_LAG
+}
+
+pub fn stationarity_diagnostic(
+    values: &[f64],
+) -> Result<StationarityDiagnostic, BenchmarkError> {
+    if values.len() != MEASUREMENTS
+        || STATIONARITY_HALF_MEASUREMENTS * 2 != MEASUREMENTS
+        || STATIONARITY_AUTOCORRELATION_MAX_LAG >= STATIONARITY_HALF_MEASUREMENTS
+    {
+        return Err(BenchmarkError::WrongBenchmarkConfiguration);
+    }
+
+    let split = STATIONARITY_HALF_MEASUREMENTS;
+    let first = diagnostics(
+        &values[..split],
+        STATIONARITY_AUTOCORRELATION_MAX_LAG,
+    )
+    .map_err(|_| BenchmarkError::StationarityDiagnosticFailed)?;
+    let second = diagnostics(
+        &values[split..],
+        STATIONARITY_AUTOCORRELATION_MAX_LAG,
+    )
+    .map_err(|_| BenchmarkError::StationarityDiagnosticFailed)?;
+
+    let difference = (first.mean - second.mean).abs();
+    let scale = (first.standard_error.powi(2) + second.standard_error.powi(2)).sqrt();
+    let drift_z = if scale == 0.0 {
+        if difference == 0.0 {
+            0.0
+        } else {
+            f64::INFINITY
+        }
+    } else {
+        difference / scale
+    };
+
+    if !first.mean.is_finite()
+        || !second.mean.is_finite()
+        || !first.standard_error.is_finite()
+        || !second.standard_error.is_finite()
+        || !drift_z.is_finite()
+    {
+        return Err(BenchmarkError::NonFiniteStatistic);
+    }
+
+    Ok(StationarityDiagnostic {
+        first_half_mean: first.mean,
+        second_half_mean: second.mean,
+        first_half_standard_error: first.standard_error,
+        second_half_standard_error: second.standard_error,
+        drift_z,
+    })
 }
 
 pub fn summarize_two_chains(
@@ -107,12 +178,18 @@ pub fn summarize_two_chains(
         first.diagnostics.effective_sample_size,
         second.diagnostics.effective_sample_size,
     ];
+    let stationarity = [
+        stationarity_diagnostic(&first.measurements)?,
+        stationarity_diagnostic(&second.measurements)?,
+    ];
+    let max_stationarity_z = stationarity[0].drift_z.max(stationarity[1].drift_z);
 
     if !chain_means.iter().all(|value| value.is_finite())
         || !chain_standard_errors.iter().all(|value| value.is_finite())
         || !chain_effective_sample_sizes
             .iter()
             .all(|value| value.is_finite())
+        || !max_stationarity_z.is_finite()
         || !first.final_link_unit_residual.is_finite()
         || !second.final_link_unit_residual.is_finite()
     {
@@ -153,6 +230,7 @@ pub fn summarize_two_chains(
         (SOURCE_ENVELOPE_MIN..=SOURCE_ENVELOPE_MAX).contains(&pooled_mean);
     let diagnostics_trustworthy = min_effective_sample_size >= MIN_CHAIN_ESS
         && chain_consistency_z <= MAX_CHAIN_CONSISTENCY_Z
+        && max_stationarity_z <= MAX_STATIONARITY_Z
         && max_link_unit_residual <= MAX_LINK_UNIT_RESIDUAL
         && first.mean_heatbath_acceptance.is_finite()
         && second.mean_heatbath_acceptance.is_finite()
@@ -163,6 +241,8 @@ pub fn summarize_two_chains(
         chain_means,
         chain_standard_errors,
         chain_effective_sample_sizes,
+        stationarity,
+        max_stationarity_z,
         pooled_mean,
         pooled_standard_error,
         chain_consistency_z,
