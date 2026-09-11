@@ -205,6 +205,7 @@ fn phase1d_step_orientation_matches_frozen_su2_semantics() {
 #[test]
 fn invalid_paths_fail_closed() {
     let lattice = Su3Lattice4::new_identity([3, 3, 3, 3]).unwrap();
+    let invalid = [OrientedStep::Forward(4)];
     assert_eq!(
         path_holonomy(&lattice, [0, 0, 0, 0], &[]).unwrap_err(),
         PathHolonomyError::EmptyPath
@@ -214,7 +215,15 @@ fn invalid_paths_fail_closed() {
         PathHolonomyError::PathNotClosed
     );
     assert_eq!(
-        path_holonomy(&lattice, [0, 0, 0, 0], &[OrientedStep::Forward(4)]).unwrap_err(),
+        path_holonomy(&lattice, [0, 0, 0, 0], &invalid).unwrap_err(),
+        PathHolonomyError::Lattice(Su3LatticeError::DirectionOutOfRange)
+    );
+    assert_eq!(
+        reverse_path(&invalid).unwrap_err(),
+        PathHolonomyError::Lattice(Su3LatticeError::DirectionOutOfRange)
+    );
+    assert_eq!(
+        concatenate_paths(&[OrientedStep::Forward(0)], &invalid).unwrap_err(),
         PathHolonomyError::Lattice(Su3LatticeError::DirectionOutOfRange)
     );
     assert_eq!(
