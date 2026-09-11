@@ -4,15 +4,15 @@
 
 #[path = "../reference/rust/src/su3.rs"]
 mod su3;
-#[path = "../reference/rust/src/su3_lattice.rs"]
-mod su3_lattice;
 #[path = "../reference/rust/src/su3_center.rs"]
 mod su3_center;
+#[path = "../reference/rust/src/su3_lattice.rs"]
+mod su3_lattice;
 
 use su3::{Complex64, Mat3, Su3, SU3_ACCEPTANCE_TOLERANCE};
 use su3_center::{
     apply_center_transform, center_commutator_residual, center_element, center_phase,
-    cycle_generator, cycle_noncentral_residual, C3, Su3CenterError,
+    cycle_generator, cycle_noncentral_residual, Su3CenterError, C3,
 };
 use su3_lattice::{single_traceless_su3_link_lattice, Su3Lattice4};
 
@@ -57,10 +57,8 @@ fn cycle_embedding_has_order_three_but_is_not_central() {
 fn genuine_center_is_c3_and_commutes_with_tested_su3_elements() {
     let test_values = [
         Su3::IDENTITY,
-        Su3::from_algebra_coefficients([0.3, -0.2, 0.1, 0.05, -0.07, 0.11, -0.09, 0.13])
-            .unwrap(),
-        Su3::from_algebra_coefficients([1.0, 0.5, -0.25, 0.125, 0.0, -0.2, 0.3, -0.4])
-            .unwrap(),
+        Su3::from_algebra_coefficients([0.3, -0.2, 0.1, 0.05, -0.07, 0.11, -0.09, 0.13]).unwrap(),
+        Su3::from_algebra_coefficients([1.0, 0.5, -0.25, 0.125, 0.0, -0.2, 0.3, -0.4]).unwrap(),
     ];
 
     for k in 0..3 {
@@ -88,9 +86,11 @@ fn noncentral_cycle_embedding_is_distinct_from_the_center_embedding() {
         assert!(omega.max_residual(center) >= 1.0);
     }
     assert_eq!(cycle_noncentral_residual().unwrap(), 2.0);
-    assert!(center_commutator_residual(C3::GENERATOR, su3_center::noncentral_witness().unwrap())
-        .unwrap()
-        <= 2.0e-15);
+    assert!(
+        center_commutator_residual(C3::GENERATOR, su3_center::noncentral_witness().unwrap())
+            .unwrap()
+            <= 2.0e-15
+    );
 }
 
 #[test]
