@@ -148,7 +148,7 @@ EXPECTED_SU3_LATTICE_VECTORS: dict[str, Any] = {
 
 EXPECTED_SU3_CENTER_CONTRACT: dict[str, Any] = {
     "contract_id": "YM-SU3-CENTER-V1",
-    "status": "phase-1c-review-candidate",
+    "status": "phase-1c-frozen",
     "depends_on": [
         {"contract_id": "YM-SU3-ALGEBRA-V1", "required_status": "phase-1b-algebra-frozen"},
         {"contract_id": "YM-SU3-LATTICE-V1", "required_status": "phase-1b-frozen"},
@@ -203,7 +203,7 @@ EXPECTED_SU3_CENTER_CONTRACT: dict[str, Any] = {
 EXPECTED_SU3_CENTER_VECTORS: dict[str, Any] = {
     "contract_id": "YM-SU3-CENTER-V1",
     "vector_set": "SU3-CENTER-PHASE1C-V1",
-    "status": "phase-1c-review-candidate",
+    "status": "phase-1c-frozen",
     "vectors": [
         {"id": "abstract-c3-generator-cubed", "observable": "g^3", "expected": "identity", "claim_class": "C0"},
         {"id": "omega-cubed", "observable": "Omega^3", "expected": "identity", "tolerance": 0.0, "claim_class": "C0"},
