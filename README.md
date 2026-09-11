@@ -17,7 +17,7 @@ Phase 1B was merged in PR #3 and froze `SU(3)` in two ordered gates:
 1. `YM-SU3-ALGEBRA-V1` — canonical Gell-Mann generators, `f^{abc}`/`d^{abc}`, quadratic/cubic Casimir regressions, bounded `U(theta)=exp(i theta_a T^a)`, and fail-closed unitarity/determinant acceptance;
 2. `YM-SU3-LATTICE-V1` — bounded periodic four-dimensional `SU(3)` links, plaquettes, Wilson action, and local gauge transformations, introduced only after the algebra authority was review-clean and frozen.
 
-Phase 1C is a review-candidate center-symmetry mathematics layer. It deliberately distinguishes:
+Phase 1C is implemented, CI-green, review-clean, and frozen in PR #4 pending merge. It deliberately distinguishes:
 
 ```text
 abstract C3 ~= Z3
@@ -148,7 +148,7 @@ scripts/               fail-closed contract checks
 
 ## Roadmap
 
-The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 1C separates abstract cyclic-group structure from concrete non-central and central `SU(3)` embeddings before later path/continuum dictionaries and statistical ensemble work.
+The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 1C freezes the abstract/concrete center distinction; Phase 1D next develops the path/parallel-transport/holonomy dictionary.
 
 ## Licence
 
