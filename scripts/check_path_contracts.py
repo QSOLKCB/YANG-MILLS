@@ -9,7 +9,7 @@ from check_contracts import load, validate_exact
 
 EXPECTED_PATH_CONTRACT: dict[str, Any] = {
     "contract_id": "YM-PATH-HOLONOMY-V1",
-    "status": "phase-1d-review-candidate",
+    "status": "phase-1d-frozen",
     "depends_on": [
         {"contract_id": "YM-WILSON-LOOP-V1", "required_status": "phase-1a-frozen"},
         {"contract_id": "YM-SU3-LATTICE-V1", "required_status": "phase-1b-frozen"},
@@ -78,7 +78,7 @@ EXPECTED_PATH_CONTRACT: dict[str, Any] = {
 EXPECTED_PATH_VECTORS: dict[str, Any] = {
     "contract_id": "YM-PATH-HOLONOMY-V1",
     "vector_set": "PATH-HOLONOMY-PHASE1D-V1",
-    "status": "phase-1d-review-candidate",
+    "status": "phase-1d-frozen",
     "vectors": [
         {
             "id": "su3-open-path-concatenation-left-to-right",
