@@ -57,7 +57,7 @@ fn self_dual_and_anti_self_dual_parts_match_the_frozen_vectors() {
     assert_eq!(minus.components(), [-2.5, 3.5, -0.5, 0.5, 3.5, 2.5]);
     assert_eq!(plus.hodge_star(), plus);
     assert_eq!(minus.hodge_star(), minus.scale(-1.0).unwrap());
-    assert_eq!(plus.add(minus), form);
+    assert_eq!(plus.add(minus).unwrap(), form);
     assert_eq!(plus.inner_product(minus), 0.0);
 }
 
@@ -69,6 +69,21 @@ fn non_finite_two_form_inputs_fail_closed() {
     );
     assert_eq!(
         TwoForm4::ZERO.scale(f64::INFINITY).unwrap_err(),
+        ClassicalGeometryError::NonFiniteComponent
+    );
+}
+
+#[test]
+fn two_form_addition_and_subtraction_overflow_fail_closed() {
+    let positive = TwoForm4::from_components([f64::MAX, 0.0, 0.0, 0.0, 0.0, 0.0]).unwrap();
+    let negative = TwoForm4::from_components([-f64::MAX, 0.0, 0.0, 0.0, 0.0, 0.0]).unwrap();
+
+    assert_eq!(
+        positive.add(positive).unwrap_err(),
+        ClassicalGeometryError::NonFiniteComponent
+    );
+    assert_eq!(
+        positive.sub(negative).unwrap_err(),
         ClassicalGeometryError::NonFiniteComponent
     );
 }
