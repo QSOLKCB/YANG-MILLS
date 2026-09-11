@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail-closed checks for the Phase 1B SU(3) algebra and lattice surfaces."""
+"""Fail-closed checks for the SU(3) algebra, lattice, and center surfaces."""
 
 from __future__ import annotations
 
@@ -146,6 +146,99 @@ EXPECTED_SU3_LATTICE_VECTORS: dict[str, Any] = {
     ],
 }
 
+EXPECTED_SU3_CENTER_CONTRACT: dict[str, Any] = {
+    "contract_id": "YM-SU3-CENTER-V1",
+    "status": "phase-1c-review-candidate",
+    "depends_on": [
+        {"contract_id": "YM-SU3-ALGEBRA-V1", "required_status": "phase-1b-algebra-frozen"},
+        {"contract_id": "YM-SU3-LATTICE-V1", "required_status": "phase-1b-frozen"},
+    ],
+    "abstract_group": {
+        "name": "C3",
+        "order": 3,
+        "presentation": "<g | g^3=e>",
+        "isomorphic_to": "Z3-additive",
+        "composition": "exponents-add-mod-3",
+    },
+    "cycle_embedding": {
+        "symbol": "Omega",
+        "basis_action": "Omega|k>=|k+1 mod 3>",
+        "matrix": "[[0,0,1],[1,0,0],[0,1,0]]",
+        "order": 3,
+        "unitary": True,
+        "determinant": 1,
+        "central": False,
+        "noncentral_witness": "diag(-1,-1,1)",
+        "noncentral_commutator_residual": 2.0,
+    },
+    "center_embedding": {
+        "definition": "Z(SU(3))={I,omega I,omega^2 I}",
+        "omega": "exp(2*pi*i/3)",
+        "omega_components": [-0.5, 0.8660254037844386],
+        "order": 3,
+        "unitarity_tolerance": 5e-12,
+        "determinant_one_tolerance": 5e-12,
+        "tested_commutator_tolerance": 2e-15,
+        "abstract_isomorphism": "Z(SU(3))~=C3~=Z3",
+        "same_as_cycle_embedding": False,
+    },
+    "embedding_boundary": {
+        "same_abstract_group_does_not_imply_same_subgroup_action": True,
+        "cycle_embedding_is_noncentral": True,
+        "scalar_center_embedding_is_central": True,
+    },
+    "polyakov_center_transform": {
+        "operation": "left-multiply U_mu(x) by z in Z(SU(3)) for every x with x_mu=slice",
+        "plaquette_action_rule": "center factors cancel pairwise in every plaquette",
+        "polyakov_rule": "L_mu -> z L_mu and (1/3)Tr(L_mu)->z(1/3)Tr(L_mu)",
+        "action_invariant_within_declared_tolerance": True,
+        "confinement_claimed": False,
+        "deconfinement_claimed": False,
+        "order_parameter_inference_claimed": False,
+    },
+    "cross_domain_semantic_ontology_imported": False,
+    "claim_scope": "finite-dimensional center/group facts and bounded finite-lattice center-transform observations only",
+}
+
+EXPECTED_SU3_CENTER_VECTORS: dict[str, Any] = {
+    "contract_id": "YM-SU3-CENTER-V1",
+    "vector_set": "SU3-CENTER-PHASE1C-V1",
+    "status": "phase-1c-review-candidate",
+    "vectors": [
+        {"id": "abstract-c3-generator-cubed", "observable": "g^3", "expected": "identity", "claim_class": "C0"},
+        {"id": "omega-cubed", "observable": "Omega^3", "expected": "identity", "tolerance": 0.0, "claim_class": "C0"},
+        {"id": "omega-noncentral-witness", "observable": "max_abs(Omega D-D Omega)", "witness": "D=diag(-1,-1,1)", "expected": 2.0, "tolerance": 0.0, "claim_class": "C0"},
+        {"id": "genuine-center-generator", "observable": "z=omega I", "omega_components": [-0.5, 0.8660254037844386], "unitarity_residual_max": 5e-12, "determinant_residual_max": 5e-12, "tested_commutator_residual_max": 2e-15, "claim_class": "C0"},
+        {"id": "cycle-and-center-embeddings-distinct", "observable": "max_abs(Omega-z_k I)", "for_all_k": [0, 1, 2], "expected_min": 1.0, "claim_class": "C0"},
+        {
+            "id": "identity-polyakov-center-transform",
+            "extents": [3, 3, 3, 3],
+            "configuration": "all links identity",
+            "direction": 0,
+            "slice": 0,
+            "center_exponent": 1,
+            "polyakov_before": [1.0, 0.0],
+            "polyakov_after": [-0.5, 0.8660254037844386],
+            "polyakov_tolerance": 2e-15,
+            "wilson_action_difference_max": 2e-12,
+            "claim_class": "C2",
+        },
+        {
+            "id": "nontrivial-action-center-transform",
+            "extents": [3, 3, 3, 3],
+            "configuration": "single-traceless-cycle-link",
+            "beta": 2.0,
+            "direction": 0,
+            "slice": 1,
+            "center_exponent": 2,
+            "action_before": 12.0,
+            "action_before_tolerance": 1e-12,
+            "action_difference_max": 1e-10,
+            "claim_class": "C2",
+        },
+    ],
+}
+
 
 def main() -> None:
     validate_exact(
@@ -168,7 +261,17 @@ def main() -> None:
         load("test-vectors/su3-lattice-v1.json"),
         EXPECTED_SU3_LATTICE_VECTORS,
     )
-    print("Phase 1B SU(3) algebra and lattice contract checks: passed")
+    validate_exact(
+        "contracts/YM-SU3-CENTER-V1.json",
+        load("contracts/YM-SU3-CENTER-V1.json"),
+        EXPECTED_SU3_CENTER_CONTRACT,
+    )
+    validate_exact(
+        "test-vectors/su3-center-v1.json",
+        load("test-vectors/su3-center-v1.json"),
+        EXPECTED_SU3_CENTER_VECTORS,
+    )
+    print("SU(3) algebra, lattice, and center contract checks: passed")
 
 
 if __name__ == "__main__":
