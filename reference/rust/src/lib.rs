@@ -47,12 +47,6 @@ impl Staple {
     pub const fn term_count(self) -> usize {
         self.terms
     }
-
-    pub fn half_real_trace_after_left_link(self, link: Su2) -> f64 {
-        let [a0, a1, a2, a3] = link.c;
-        let [s0, s1, s2, s3] = self.c;
-        a0 * s0 - a1 * s1 - a2 * s2 - a3 * s3
-    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -558,11 +552,21 @@ impl Lattice4 {
         beta: f64,
     ) -> Result<f64, ReferenceError> {
         validate_beta(beta)?;
-        let staple = self.staple(x, mu)?;
-        let link = self.link(x, mu)?;
-        checked_action(
-            beta * (staple.term_count() as f64 - staple.half_real_trace_after_left_link(link)),
-        )
+        Self::validate_direction(mu)?;
+        self.site_index(x)?;
+
+        let mut sum = 0.0;
+        for nu in 0..DIM {
+            if nu == mu {
+                continue;
+            }
+            let forward = self.plaquette(x, mu, nu)?;
+            let x_minus_nu = self.neighbor_minus(x, nu)?;
+            let backward = self.plaquette(x_minus_nu, mu, nu)?;
+            sum += 1.0 - forward.half_real_trace();
+            sum += 1.0 - backward.half_real_trace();
+        }
+        checked_action(beta * sum)
     }
 
     pub fn local_action_difference(
@@ -573,11 +577,11 @@ impl Lattice4 {
         beta: f64,
     ) -> Result<f64, ReferenceError> {
         validate_beta(beta)?;
-        let staple = self.staple(x, mu)?;
-        let current = self.link(x, mu)?;
-        let old_trace = staple.half_real_trace_after_left_link(current);
-        let new_trace = staple.half_real_trace_after_left_link(candidate);
-        checked_action(beta * (old_trace - new_trace))
+        let old_local = self.local_link_action(x, mu, beta)?;
+        let mut proposed = self.clone();
+        proposed.set_link(x, mu, candidate)?;
+        let new_local = proposed.local_link_action(x, mu, beta)?;
+        checked_action(new_local - old_local)
     }
 
     pub fn to_canonical_config(&self) -> Result<String, ReferenceError> {
@@ -612,44 +616,57 @@ impl Lattice4 {
     }
 
     pub fn from_canonical_config(text: &str) -> Result<Self, ReferenceError> {
-        let lines: Vec<&str> = text.lines().collect();
-        if lines.len() < 3 || lines[0] != CONFIG_FORMAT_ID {
+        let mut lines = text.lines();
+        if lines.next() != Some(CONFIG_FORMAT_ID) {
             return Err(ReferenceError::InvalidConfigurationEncoding);
         }
 
-        let extents_text = lines[1]
+        let extents_line = lines
+            .next()
+            .ok_or(ReferenceError::InvalidConfigurationEncoding)?;
+        let extents_text = extents_line
             .strip_prefix("extents=")
             .ok_or(ReferenceError::InvalidConfigurationEncoding)?;
-        let extent_parts: Vec<&str> = extents_text.split(',').collect();
-        if extent_parts.len() != DIM {
-            return Err(ReferenceError::InvalidConfigurationEncoding);
-        }
+        let mut extent_parts = extents_text.split(',');
         let mut extents = [0usize; DIM];
-        for index in 0..DIM {
-            extents[index] = extent_parts[index]
+        for extent in &mut extents {
+            *extent = extent_parts
+                .next()
+                .ok_or(ReferenceError::InvalidConfigurationEncoding)?
                 .parse::<usize>()
                 .map_err(|_| ReferenceError::InvalidConfigurationEncoding)?;
         }
+        if extent_parts.next().is_some() {
+            return Err(ReferenceError::InvalidConfigurationEncoding);
+        }
 
-        let declared_link_count = lines[2]
+        let count_line = lines
+            .next()
+            .ok_or(ReferenceError::InvalidConfigurationEncoding)?;
+        let declared_link_count = count_line
             .strip_prefix("link_count=")
             .ok_or(ReferenceError::InvalidConfigurationEncoding)?
             .parse::<usize>()
             .map_err(|_| ReferenceError::InvalidConfigurationEncoding)?;
+        if declared_link_count > MAX_REFERENCE_LINKS {
+            return Err(ReferenceError::LatticeTooLarge);
+        }
 
         let mut lattice = Self::new_identity(extents)?;
-        if declared_link_count != lattice.links.len() || lines.len() != 3 + declared_link_count {
+        if declared_link_count != lattice.links.len() {
             return Err(ReferenceError::InvalidConfigurationEncoding);
         }
 
-        for (index, line) in lines[3..].iter().enumerate() {
-            let parts: Vec<&str> = line.split(',').collect();
-            if parts.len() != 4 {
-                return Err(ReferenceError::InvalidConfigurationEncoding);
-            }
+        for index in 0..declared_link_count {
+            let line = lines
+                .next()
+                .ok_or(ReferenceError::InvalidConfigurationEncoding)?;
+            let mut parts = line.split(',');
             let mut components = [0.0; 4];
-            for component_index in 0..4 {
-                let token = parts[component_index];
+            for component in &mut components {
+                let token = parts
+                    .next()
+                    .ok_or(ReferenceError::InvalidConfigurationEncoding)?;
                 if token.len() != 16
                     || !token
                         .bytes()
@@ -659,9 +676,15 @@ impl Lattice4 {
                 }
                 let bits = u64::from_str_radix(token, 16)
                     .map_err(|_| ReferenceError::InvalidConfigurationEncoding)?;
-                components[component_index] = f64::from_bits(bits);
+                *component = f64::from_bits(bits);
+            }
+            if parts.next().is_some() {
+                return Err(ReferenceError::InvalidConfigurationEncoding);
             }
             lattice.links[index] = Su2::from_preserved_unit_components(components)?;
+        }
+        if lines.next().is_some() {
+            return Err(ReferenceError::InvalidConfigurationEncoding);
         }
 
         if lattice.to_canonical_config()?.as_str() != text {
@@ -987,6 +1010,28 @@ mod tests {
     }
 
     #[test]
+    fn near_unit_serialized_link_local_delta_matches_full_action() {
+        let identity = Lattice4::new_identity([2, 2, 2, 2]).unwrap();
+        let encoded = identity.to_canonical_config().unwrap();
+        let near_one = 1.0 - 5.0e-13;
+        let near_hex = format!("{:016x}", near_one.to_bits());
+        let mutated = encoded.replacen("3ff0000000000000", &near_hex, 1);
+        let lattice = Lattice4::from_canonical_config(&mutated).unwrap();
+
+        let local_delta = lattice
+            .local_action_difference([0, 0, 0, 0], 0, Su2::IDENTITY, 2.0)
+            .unwrap();
+        let old_action = lattice.wilson_action(2.0).unwrap();
+        let mut replaced = lattice.clone();
+        replaced
+            .set_link([0, 0, 0, 0], 0, Su2::IDENTITY)
+            .unwrap();
+        let full_delta = replaced.wilson_action(2.0).unwrap() - old_action;
+        assert_close(local_delta, full_delta, DEFAULT_TOLERANCE);
+        assert_close(local_delta, 0.0, DEFAULT_TOLERANCE);
+    }
+
+    #[test]
     fn left_update_primitive_preserves_group_invariant() {
         let mut lattice = Lattice4::new_identity([3, 3, 3, 3]).unwrap();
         let update = Su2::from_axis_angle([1.0, 1.0, 0.0], 0.5).unwrap();
@@ -1024,6 +1069,18 @@ mod tests {
         assert_eq!(
             Lattice4::from_canonical_config(&nonunit).unwrap_err(),
             ReferenceError::NonUnitSu2
+        );
+    }
+
+    #[test]
+    fn canonical_configuration_parser_bounds_declared_count_before_body() {
+        let malformed = format!(
+            "{CONFIG_FORMAT_ID}\nextents=2,2,2,2\nlink_count={}\n",
+            MAX_REFERENCE_LINKS + 1
+        );
+        assert_eq!(
+            Lattice4::from_canonical_config(&malformed).unwrap_err(),
+            ReferenceError::LatticeTooLarge
         );
     }
 
