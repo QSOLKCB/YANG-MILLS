@@ -7,8 +7,8 @@ mod su3;
 
 use su3::{
     cubic_casimir_fundamental, gell_mann, generator, quadratic_casimir_fundamental, structure_d,
-    structure_f, Complex64, Mat3, Su3, Su3Error, SU3_ACCEPTANCE_TOLERANCE,
-    SU3_EXP_MAX_COEFFICIENT, SU3_GENERATORS,
+    structure_f, Complex64, Mat3, Su3, Su3Error, SU3_ACCEPTANCE_TOLERANCE, SU3_EXP_MAX_COEFFICIENT,
+    SU3_GENERATORS,
 };
 
 const INV_SQRT_3: f64 = 0.5773502691896258;
@@ -152,19 +152,13 @@ fn bounded_exponentiation_maps_traceless_hermitian_algebra_to_su3() {
 
 #[test]
 fn general_bounded_exponentiation_and_group_product_pass_acceptance() {
-    let a =
-        Su3::from_algebra_coefficients([10.0, 20.0, -5.0, 3.0, 8.0, -9.0, 2.0, 7.0]).unwrap();
-    let b =
-        Su3::from_algebra_coefficients([-4.0, 1.0, 6.0, 2.0, -3.0, 5.0, 8.0, -7.0]).unwrap();
+    let a = Su3::from_algebra_coefficients([10.0, 20.0, -5.0, 3.0, 8.0, -9.0, 2.0, 7.0]).unwrap();
+    let b = Su3::from_algebra_coefficients([-4.0, 1.0, 6.0, 2.0, -3.0, 5.0, 8.0, -7.0]).unwrap();
     let product = a.mul(b).unwrap();
     assert!(product.unitarity_residual() <= SU3_ACCEPTANCE_TOLERANCE);
     assert!(product.determinant_residual() <= SU3_ACCEPTANCE_TOLERANCE);
     let identity = product.mul(product.dagger()).unwrap();
-    assert_matrix_close(
-        identity.matrix(),
-        Mat3::IDENTITY,
-        SU3_ACCEPTANCE_TOLERANCE,
-    );
+    assert_matrix_close(identity.matrix(), Mat3::IDENTITY, SU3_ACCEPTANCE_TOLERANCE);
 }
 
 #[test]
@@ -189,11 +183,7 @@ fn invalid_generator_and_exponentiation_inputs_fail_closed() {
     );
 
     let bad = Mat3::from_rows([
-        [
-            Complex64::new(2.0, 0.0),
-            Complex64::ZERO,
-            Complex64::ZERO,
-        ],
+        [Complex64::new(2.0, 0.0), Complex64::ZERO, Complex64::ZERO],
         [Complex64::ZERO, Complex64::ONE, Complex64::ZERO],
         [Complex64::ZERO, Complex64::ZERO, Complex64::ONE],
     ]);
