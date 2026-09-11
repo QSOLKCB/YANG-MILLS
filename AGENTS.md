@@ -13,6 +13,8 @@ Use these classes:
 5. **continuum theorem** — a mathematically proved statement about the continuum theory;
 6. **Clay solution claim** — only permissible if the full official existence-and-mass-gap problem is actually proved.
 
+Standalone finite-dimensional algebra regressions that are not themselves finite-lattice theorems should be published conservatively as implementation/contract facts unless the claim taxonomy is explicitly extended. In particular, floating-point matrix-exponential vectors are not `C1` finite-lattice exact results.
+
 Never promote a result to a stronger class because a simulation is large, a GPU agrees with a CPU, an extrapolation looks stable, or a plot is persuasive.
 
 ## Required semantic refusals
@@ -27,23 +29,31 @@ An agent must refuse to write or approve language asserting that this repository
 - a formal proof about the finite lattice;
 - cross-runtime or CPU/GPU agreement.
 
-## Phase 0 mathematical authority
+## Mathematical authority
 
-For PR #1, the authoritative executable surface is the dependency-free Rust reference implementation under `reference/rust/` plus the contracts in `contracts/`.
+Phase 0 / Phase 1A freeze the `SU(2)` finite-lattice authority under `reference/rust/` and its frozen contracts. Do not silently change the sign convention, plaquette orientation, direction ordering, boundary conditions, lattice dimension, Wilson normalisation, or frozen contract identifiers.
 
-The Phase 0 reference uses:
+The `SU(2)` convention is
 
 ```text
 U(q) = a0 I - i (a1 sigma1 + a2 sigma2 + a3 sigma3)
 ```
 
-for unit quaternion `q`, quaternion multiplication for group multiplication, quaternion conjugation for Hermitian conjugation, and
+with Wilson action
 
 ```text
 S_W = beta * sum_{x, mu<nu} (1 - 1/2 Re Tr U_mu_nu(x)).
 ```
 
-Do not silently change the sign convention, plaquette orientation, direction ordering, boundary conditions, lattice dimension, or Wilson normalisation.
+Phase 1B introduces a separate `SU(3)` algebra/group authority before any `SU(3)` lattice links. Its convention is
+
+```text
+T^a = lambda_a / 2
+Tr(lambda_a lambda_b) = 2 delta_ab
+U(theta) = exp(i sum_a theta_a T^a).
+```
+
+Do not import triadic ontology, Q/K/V-to-colour semantics, or other cross-domain interpretations into this authority. The first Phase 1B gate must keep `lattice_links_enabled=false` until the standalone algebra/group tests are review-clean.
 
 ## Donor boundary
 
@@ -87,18 +97,23 @@ When modifying an existing mathematical contract:
 
 ## Testing rules
 
-Before declaring a PR ready:
+Before declaring a PR ready, run the complete currently advertised surface:
 
 ```bash
-cargo test --all-targets
-cargo run --quiet --bin ym-su2-reference
-python3 scripts/check_contracts.py
+cargo fmt --all -- --check
+cargo test --all-targets --locked
+cargo run --quiet --locked --bin ym-su2-reference
+cargo run --quiet --locked --bin ym-su3-algebra
+python3 scripts/check_all_contracts.py
+python3 scripts/test_all_contract_validation.py
 ```
 
-Tests must fail closed on invalid lattice extents, invalid `SU(2)` construction, non-finite beta, or broken contract structure.
+The unified contract entry points are authoritative. Adding a new contract surface without registering it in those commands is a readiness failure.
+
+Tests must fail closed on invalid lattice extents, invalid group construction, non-finite inputs, broken contract structure, or weakened claim boundaries.
 
 Floating-point equality is not assumed. Every numerical comparison must have an explicit tolerance and must not be advertised as bitwise cross-platform identity unless separately established.
 
 ## Formalisation
 
-Do not add a theorem prover merely for prestige. Formalise only stable definitions and theorem surfaces. A finite-lattice proof is valuable but must not be described as the continuum Yang–Mills existence/mass-gap proof.
+Do not add a theorem prover merely for prestige. Formalise only stable definitions and theorem surfaces. A finite-lattice or finite-dimensional algebra proof is valuable but must not be described as the continuum Yang–Mills existence/mass-gap proof.
