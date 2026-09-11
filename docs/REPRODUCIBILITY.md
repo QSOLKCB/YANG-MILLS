@@ -14,6 +14,7 @@ cargo run --quiet --locked --bin ym-su3-algebra
 cargo run --quiet --locked --bin ym-su3-lattice
 cargo run --quiet --locked --bin ym-su3-center
 cargo run --quiet --locked --bin ym-path-holonomy
+cargo run --quiet --locked --bin ym-classical-geometry
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
@@ -41,18 +42,38 @@ Phase 1C likewise separates exact abstract/embedding checks from numerical cente
 - floating-point scalar-center residuals remain C0 implementation facts with explicit tolerances;
 - Polyakov-loop rotation and Wilson-action invariance after a center slice transformation are C2 finite-lattice numerical observations.
 
-No Phase 1C vector is an ensemble measurement, confinement/deconfinement result, or spontaneous-symmetry-breaking observation.
+Phase 1D separates classical path definitions from discrete numerical transport:
 
-Phase 1D adds a similar separation for path/holonomy work:
-
-- the continuum path, pullback, transport, endpoint-covariance, reversal, concatenation, reparameterization, and small-loop statements are classical mathematical definitions/rules in the contract/documentation; Phase 1D does not numerically solve the continuum transport equation;
+- continuum path, pullback, transport, endpoint-covariance, reversal, concatenation, reparameterization, and small-loop statements are classical mathematical definitions/rules;
 - exact finite-lattice vectors built from identity links or exact permutation fixtures may be C1;
-- floating-point `SU(3)` path composition, reversal, endpoint covariance, closed-loop gauge invariance, cyclic trace, and Polyakov gauge-invariance residuals are C2 with explicit tolerances;
+- floating-point `SU(3)` path composition, reversal, endpoint covariance, closed-loop gauge invariance, cyclic trace, and Polyakov gauge-invariance residuals are C2;
 - compatibility with frozen `YM-WILSON-LOOP-V1` step semantics is a C0 contract/implementation fact.
 
-The deterministic two-link `SU(3)` path fixture is not a physical ensemble. Its purpose is to exercise noncommuting ordered products and endpoint transformation laws without statistical interpretation.
+## Phase 1E classical geometry boundary
 
-The Phase 1D rectangular-path helper only prepares deterministic geometry for later static-potential analysis. It does not evaluate `<W(R,T)>`, extract `V(R)`, establish an area law, or infer confinement.
+`YM-CLASSICAL-GEOMETRY-V1` is primarily a **semantic mathematical contract**. The executable Rust component does not claim to simulate a manifold, principal bundle, covariant derivative, curvature PDE, or continuum Yang–Mills dynamics.
+
+The Rust fixture is only an oriented Euclidean `R^4` 2-form convention check. It verifies:
+
+- the frozen Hodge-star basis signs;
+- `*^2=+1` on 2-forms;
+- `alpha wedge *beta = <alpha,beta> vol` for the declared orthonormal fixture;
+- self-dual/anti-self-dual decomposition and orthogonality;
+- fail-closed rejection of non-finite fixture coefficients.
+
+These are C0 implementation/convention regressions. They are not continuum numerical observations, and they are not a proof of the general bundle theorems merely because they agree with the frozen formulas.
+
+The principal-bundle, associated-bundle, covariant-derivative, curvature, Bianchi, Hodge, Yang–Mills functional, self-duality, and lattice-continuum statements are frozen as definitions/convention rules in the contract and `docs/CLASSICAL_CONTINUUM.md`. Reproducibility here means that every advertised convention is explicit, versioned, machine-checked for semantic drift, and backed by finite-dimensional sign regressions where executable checks are meaningful.
+
+The Phase 1E contract also freezes the bridge
+
+```text
+U_gamma = P_gamma^-1
+```
+
+between Phase 1D's start-left transporter and conventional forward associated-fiber transport. This is a semantic compatibility rule, not a new physical measurement.
+
+No Phase 1E result constructs the interacting quantum theory, performs an infinite-volume/continuum limit, establishes confinement, or proves a positive mass gap.
 
 ## Future stochastic work
 
