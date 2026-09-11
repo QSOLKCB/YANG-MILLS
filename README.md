@@ -29,7 +29,7 @@ genuine Z(SU(3)) = {I, omega I, omega^2 I}.
 
 Phase 1D was merged in PR #5 and froze `YM-PATH-HOLONOMY-V1`: arbitrary bounded `SU(3)` open/closed lattice transport, Wilson/Polyakov holonomy, endpoint covariance, reversal/concatenation, and the continuum path-ordering convention matched to the already-frozen lattice product order.
 
-Phase 1E is the current review candidate. `YM-CLASSICAL-GEOMETRY-V1` freezes the classical bundle/connection dictionary: base geometry, principal/associated bundles, sections, covariant derivative, `ad P`-valued curvature, Hodge-star conventions, Bianchi identity, Yang–Mills functional/equation, self-duality, and the lattice-to-continuum dictionary. See [`docs/CLASSICAL_CONTINUUM.md`](docs/CLASSICAL_CONTINUUM.md).
+Phase 1E is implemented, CI-green, review-clean, and frozen in PR #6 pending merge. `YM-CLASSICAL-GEOMETRY-V1` freezes the classical bundle/connection dictionary: base geometry, principal/associated bundles, sections, covariant derivative, `ad P`-valued curvature, Hodge-star conventions, Bianchi identity, Yang–Mills functional/equation, self-duality, and the lattice-to-continuum dictionary. See [`docs/CLASSICAL_CONTINUUM.md`](docs/CLASSICAL_CONTINUUM.md).
 
 No current phase performs Monte Carlo ensemble generation, glueball extraction, a continuum/infinite-volume limit, construction of the interacting quantum theory, or a mass-gap proof.
 
