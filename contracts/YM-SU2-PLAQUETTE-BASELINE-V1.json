@@ -33,11 +33,16 @@
     "autocorrelation_max_lag": 12,
     "minimum_ess_per_chain": 6.0,
     "maximum_chain_consistency_z": 5.0,
+    "stationarity_half_measurements": 24,
+    "stationarity_autocorrelation_max_lag": 6,
+    "maximum_stationarity_z": 5.0,
     "maximum_link_unit_residual": 1e-12
   },
   "comparison_rule": {
     "pooled_mean_must_lie_inside_source_envelope": true,
     "independent_chain_diagnostics_required": true,
+    "within_chain_stationarity_required": true,
+    "stationarity_rule": "for each chain compare the first 24 and last 24 post-thermalization measurements using the frozen Phase 2A diagnostics with max_lag=6; require |mean_first-mean_second|/sqrt(SE_first^2+SE_second^2) <= 5",
     "source_envelope_is_paper_error_bar": false,
     "raw_measurements_retained_by_chain_reports": true
   },
