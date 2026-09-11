@@ -151,15 +151,20 @@ pub fn apply_center_transform(
     }
 
     let z = center_element(element)?;
-    let mut transformed = lattice.clone();
+    let mut transformed = Su3Lattice4::new_identity(extents)?;
     for x0 in 0..extents[0] {
         for x1 in 0..extents[1] {
             for x2 in 0..extents[2] {
                 for x3 in 0..extents[3] {
                     let x = [x0, x1, x2, x3];
-                    if x[direction] == slice {
-                        let updated = z.mul(lattice.link(x, direction)?)?;
-                        transformed.set_link(x, direction, updated)?;
+                    for mu in 0..DIM {
+                        let value = lattice.link(x, mu)?;
+                        let updated = if mu == direction && x[direction] == slice {
+                            z.mul(value)?
+                        } else {
+                            value
+                        };
+                        transformed.set_link(x, mu, updated)?;
                     }
                 }
             }
