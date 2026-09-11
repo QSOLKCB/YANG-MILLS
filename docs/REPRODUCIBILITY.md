@@ -11,6 +11,7 @@ cargo fmt --all -- --check
 cargo test --all-targets --locked
 cargo run --quiet --locked --bin ym-su2-reference
 cargo run --quiet --locked --bin ym-su3-algebra
+cargo run --quiet --locked --bin ym-su3-lattice
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
@@ -26,6 +27,13 @@ The reference uses IEEE-754 `f64` arithmetic through Rust. It does not claim bit
 Analytic vectors should preferentially use values such as `0`, `1`, exact integer combinations, or independently specified closed forms where possible, but this preference is not a substitute for an explicit numerical contract.
 
 Phase 1B's standalone `SU(3)` matrix exponential is a bounded numerical reference calculation. The exact mathematical map is `U(theta)=exp(i theta_a T^a)`, while reproduced floating-point matrix/residual outputs remain implementation facts with declared tolerances rather than finite-lattice exact results.
+
+The Phase 1B `SU(3)` lattice layer deliberately separates exact and numerical regressions:
+
+- the identity action and the single exact three-cycle-link combinatorial action are C1 finite-lattice facts;
+- local gauge-invariance residuals and transformed-link residuals are C2 numerical observations with explicit tolerances.
+
+The deterministic site-gauge helper is coordinate-bounded before exponentiation, and group-product failures during plaquette/action evaluation propagate as errors rather than panics or hidden projections.
 
 ## Future stochastic work
 
