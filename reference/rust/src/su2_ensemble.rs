@@ -49,9 +49,7 @@ const fn mix64(mut value: u64) -> u64 {
 }
 
 pub fn derive_chain_seed(master_seed: u64, chain_id: u64) -> u64 {
-    let lane = chain_id
-        .wrapping_add(1)
-        .wrapping_mul(0x9E37_79B9_7F4A_7C15);
+    let lane = chain_id.wrapping_add(1).wrapping_mul(0x9E37_79B9_7F4A_7C15);
     mix64(master_seed ^ lane)
 }
 
@@ -119,16 +117,28 @@ pub enum EnsembleError {
 impl fmt::Display for EnsembleError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let message = match self {
-            Self::BetaOutsideReferenceRange => "beta is outside the bounded Phase 2A reference range",
-            Self::ScheduleOutsideReferenceRange => "ensemble schedule exceeds the bounded Phase 2A reference range",
+            Self::BetaOutsideReferenceRange => {
+                "beta is outside the bounded Phase 2A reference range"
+            }
+            Self::ScheduleOutsideReferenceRange => {
+                "ensemble schedule exceeds the bounded Phase 2A reference range"
+            }
             Self::TooFewMeasurements => "at least two measurements are required",
             Self::ZeroMeasurementStride => "measurement stride must be positive",
-            Self::TooManyOverrelaxationSweeps => "over-relaxation sweep count exceeds the Phase 2A bound",
+            Self::TooManyOverrelaxationSweeps => {
+                "over-relaxation sweep count exceeds the Phase 2A bound"
+            }
             Self::ZeroHeatbathAttemptLimit => "heat-bath rejection attempt limit must be positive",
-            Self::AutocorrelationLagOutOfRange => "autocorrelation maximum lag must be smaller than the measurement count",
-            Self::HeatbathAttemptLimitExceeded => "SU(2) heat-bath rejection sampler exhausted its bounded attempt limit",
+            Self::AutocorrelationLagOutOfRange => {
+                "autocorrelation maximum lag must be smaller than the measurement count"
+            }
+            Self::HeatbathAttemptLimitExceeded => {
+                "SU(2) heat-bath rejection sampler exhausted its bounded attempt limit"
+            }
             Self::NonFiniteStatistic => "ensemble diagnostic produced a non-finite statistic",
-            Self::Reference(_) => "frozen SU(2) lattice reference operation failed during ensemble generation",
+            Self::Reference(_) => {
+                "frozen SU(2) lattice reference operation failed during ensemble generation"
+            }
         };
         f.write_str(message)
     }
@@ -262,11 +272,7 @@ fn heatbath_link(
     Ok(attempts)
 }
 
-fn overrelax_link(
-    lattice: &mut Lattice4,
-    x: [usize; DIM],
-    mu: usize,
-) -> Result<(), EnsembleError> {
+fn overrelax_link(lattice: &mut Lattice4, x: [usize; DIM], mu: usize) -> Result<(), EnsembleError> {
     let staple = lattice.staple(x, mu)?;
     let components = staple.components();
     let norm = staple_norm(components)?;
@@ -319,14 +325,7 @@ pub fn heatbath_sweep(
 
     let mut accounting = SweepAccounting::default();
     for_each_link(lattice, |lattice, x, mu| {
-        let attempts = heatbath_link(
-            lattice,
-            x,
-            mu,
-            beta,
-            rng,
-            max_attempts_per_link,
-        )?;
+        let attempts = heatbath_link(lattice, x, mu, beta, rng, max_attempts_per_link)?;
         accounting.proposals = accounting.proposals.saturating_add(attempts);
         accounting.updates = accounting.updates.saturating_add(1);
         Ok(())
@@ -469,8 +468,8 @@ fn markov_sweep(
         rng,
         config.max_heatbath_attempts_per_link,
     )?;
-    *heatbath_proposals = heatbath_proposals.saturating_add(proposals);
-    *heatbath_updates = heatbath_updates.saturating_add(updates);
+    *heatbath_proposals = (*heatbath_proposals).saturating_add(proposals);
+    *heatbath_updates = (*heatbath_updates).saturating_add(updates);
     for _ in 0..config.overrelaxation_sweeps_per_heatbath {
         overrelaxation_sweep(lattice)?;
         *overrelaxation_sweeps += 1;
