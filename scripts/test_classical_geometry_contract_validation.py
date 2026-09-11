@@ -72,6 +72,18 @@ def main() -> None:
     )
 
     broken = copy.deepcopy(EXPECTED_CLASSICAL_CONTRACT)
+    broken["four_dimensional_reference_fixture"]["arithmetic_overflow_rule"] = (
+        "overflow may produce non-finite components"
+    )
+    expect_reject(
+        lambda payload: validate_exact(
+            "contracts/YM-CLASSICAL-GEOMETRY-V1.json", payload, EXPECTED_CLASSICAL_CONTRACT
+        ),
+        broken,
+        "two-form arithmetic invariant weakening",
+    )
+
+    broken = copy.deepcopy(EXPECTED_CLASSICAL_CONTRACT)
     broken["flatness_and_parallel_transport"]["flat_implies_globally_trivial_holonomy"] = True
     expect_reject(
         lambda payload: validate_exact(
