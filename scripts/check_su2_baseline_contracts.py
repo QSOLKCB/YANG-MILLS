@@ -12,7 +12,7 @@ VECTOR_PATH = "test-vectors/su2-plaquette-baseline-v1.json"
 
 EXPECTED_BASELINE_CONTRACT: dict[str, Any] = {
     "contract_id": "YM-SU2-PLAQUETTE-BASELINE-V1",
-    "status": "phase-2b-review-candidate",
+    "status": "phase-2b-frozen",
     "depends_on": [
         {"contract_id": "YM-SU2-ENSEMBLE-V1", "required_status": "phase-2a-frozen"}
     ],
@@ -54,8 +54,8 @@ EXPECTED_BASELINE_CONTRACT: dict[str, Any] = {
         "raw_measurements_retained_by_chain_reports": True,
     },
     "phase2_gate": {
-        "published_plaquette_baseline_reproduced": False,
-        "phase2_graduation_gate_satisfied": False,
+        "published_plaquette_baseline_reproduced": True,
+        "phase2_graduation_gate_satisfied": True,
         "su3_ensemble_enabled": False,
     },
     "claim_boundary": {
@@ -69,7 +69,7 @@ EXPECTED_BASELINE_CONTRACT: dict[str, Any] = {
 EXPECTED_BASELINE_VECTORS: dict[str, Any] = {
     "contract_id": "YM-SU2-PLAQUETTE-BASELINE-V1",
     "vector_set": "SU2-PLAQUETTE-BASELINE-PHASE2B-V1",
-    "status": "phase-2b-review-candidate",
+    "status": "phase-2b-frozen",
     "vectors": [
         {
             "id": "published-source-envelope",
@@ -98,6 +98,8 @@ EXPECTED_BASELINE_VECTORS: dict[str, Any] = {
         },
         {
             "id": "phase2-graduation-boundary",
+            "published_plaquette_baseline_reproduced": True,
+            "phase2_graduation_gate_satisfied": True,
             "benchmark_agreement_implies_confinement": False,
             "benchmark_agreement_implies_continuum_qft": False,
             "benchmark_agreement_implies_positive_mass_gap": False,
