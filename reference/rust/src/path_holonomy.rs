@@ -29,6 +29,12 @@ impl OrientedStep {
             Self::Backward(mu) => Self::Forward(mu),
         }
     }
+
+    pub const fn direction(self) -> usize {
+        match self {
+            Self::Forward(mu) | Self::Backward(mu) => mu,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -81,6 +87,11 @@ fn validate_steps(steps: &[OrientedStep]) -> Result<(), PathHolonomyError> {
     }
     if steps.len() > MAX_PATH_STEPS {
         return Err(PathHolonomyError::PathTooLong);
+    }
+    if steps.iter().any(|step| step.direction() >= DIM) {
+        return Err(PathHolonomyError::Lattice(
+            Su3LatticeError::DirectionOutOfRange,
+        ));
     }
     Ok(())
 }
