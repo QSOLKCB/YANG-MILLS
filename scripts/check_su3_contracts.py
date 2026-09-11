@@ -53,7 +53,7 @@ EXPECTED_SU3_VECTORS: dict[str, Any] = {
             "observable": "Tr(lambda_a lambda_b)",
             "expected_rule": "2 delta_ab",
             "tolerance": 2e-15,
-            "claim_class": "C1",
+            "claim_class": "C0",
         },
         {
             "id": "f123",
@@ -61,7 +61,7 @@ EXPECTED_SU3_VECTORS: dict[str, Any] = {
             "indices_one_based": [1, 2, 3],
             "expected": 1.0,
             "tolerance": 2e-15,
-            "claim_class": "C1",
+            "claim_class": "C0",
         },
         {
             "id": "f156",
@@ -69,7 +69,7 @@ EXPECTED_SU3_VECTORS: dict[str, Any] = {
             "indices_one_based": [1, 5, 6],
             "expected": -0.5,
             "tolerance": 2e-15,
-            "claim_class": "C1",
+            "claim_class": "C0",
         },
         {
             "id": "d118",
@@ -77,7 +77,7 @@ EXPECTED_SU3_VECTORS: dict[str, Any] = {
             "indices_one_based": [1, 1, 8],
             "expected": 0.5773502691896258,
             "tolerance": 2e-15,
-            "claim_class": "C1",
+            "claim_class": "C0",
         },
         {
             "id": "d888",
@@ -85,21 +85,21 @@ EXPECTED_SU3_VECTORS: dict[str, Any] = {
             "indices_one_based": [8, 8, 8],
             "expected": -0.5773502691896258,
             "tolerance": 2e-15,
-            "claim_class": "C1",
+            "claim_class": "C0",
         },
         {
             "id": "quadratic-casimir-fundamental",
             "observable": "sum_a T^a T^a",
             "expected_multiple_of_identity": 1.3333333333333333,
             "tolerance": 3e-15,
-            "claim_class": "C1",
+            "claim_class": "C0",
         },
         {
             "id": "cubic-casimir-fundamental",
             "observable": "sum_abc d^{abc} T^a T^b T^c",
             "expected_multiple_of_identity": 1.1111111111111112,
             "tolerance": 8e-15,
-            "claim_class": "C1",
+            "claim_class": "C0",
         },
         {
             "id": "exp-theta3-0p7",
@@ -109,7 +109,7 @@ EXPECTED_SU3_VECTORS: dict[str, Any] = {
             "matrix_tolerance": 2e-14,
             "unitarity_tolerance": 5e-12,
             "determinant_one_tolerance": 5e-12,
-            "claim_class": "C1",
+            "claim_class": "C0",
         },
     ],
 }
