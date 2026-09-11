@@ -1,0 +1,23 @@
+{
+  "contract_id": "YM-CLAIM-POLICY-V1",
+  "status": "phase-0-draft",
+  "claim_classes": {
+    "C0": "software-contract",
+    "C1": "finite-lattice-exact",
+    "C2": "finite-lattice-numerical",
+    "C3": "physical-scaling-inference",
+    "C4": "continuum-mathematical-theorem",
+    "C5": "clay-solution-claim"
+  },
+  "forbidden_equivalences": {
+    "positive_finite_lattice_mass_implies_positive_continuum_mass_gap": false,
+    "stable_fit_implies_theorem": false,
+    "continuum_extrapolation_implies_continuum_qft_existence": false,
+    "cpu_gpu_agreement_implies_physical_truth": false,
+    "literature_agreement_implies_proof": false,
+    "formal_finite_lattice_theorem_implies_clay_solution": false
+  },
+  "numerical_release_disclaimer_required": true,
+  "required_numerical_release_sentence": "A numerical release must explicitly say that its numerical results are evidence/observations within a specified lattice model and are not a proof of the Yang–Mills existence and mass-gap problem.",
+  "clay_solution_requires_official_problem_proof": true
+}
