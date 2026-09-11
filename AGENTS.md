@@ -45,7 +45,7 @@ with Wilson action
 S_W = beta * sum_{x, mu<nu} (1 - 1/2 Re Tr U_mu_nu(x)).
 ```
 
-Phase 1B introduces a separate `SU(3)` algebra/group authority before any `SU(3)` lattice links. Its convention is
+Phase 1B freezes a separate `SU(3)` authority in two ordered contracts. The algebra convention is
 
 ```text
 T^a = lambda_a / 2
@@ -53,7 +53,15 @@ Tr(lambda_a lambda_b) = 2 delta_ab
 U(theta) = exp(i sum_a theta_a T^a).
 ```
 
-Do not import triadic ontology, Q/K/V-to-colour semantics, or other cross-domain interpretations into this authority. The first Phase 1B gate must keep `lattice_links_enabled=false` until the standalone algebra/group tests are review-clean.
+`YM-SU3-ALGEBRA-V1` is frozen first and retains `lattice_links_enabled=false` because that contract itself does not define lattice semantics. The dependent `YM-SU3-LATTICE-V1` may use but may not redefine the frozen algebra/group conventions, residuals, or tolerances.
+
+The minimal `SU(3)` Wilson action is
+
+```text
+S_W = beta * sum_{x, mu<nu} (1 - 1/3 Re Tr P_mu_nu(x)).
+```
+
+Do not import triadic ontology, Q/K/V-to-colour semantics, or other cross-domain interpretations into this authority. The three-cycle permutation matrix used by Phase 1B is only an exact traceless `SU(3)` regression fixture; do not describe it as the `SU(3)` center. Phase 1C owns the distinction between non-central `<Omega> ~= C3` and central `Z(SU(3)) ~= C3` embeddings.
 
 ## Donor boundary
 
@@ -104,13 +112,14 @@ cargo fmt --all -- --check
 cargo test --all-targets --locked
 cargo run --quiet --locked --bin ym-su2-reference
 cargo run --quiet --locked --bin ym-su3-algebra
+cargo run --quiet --locked --bin ym-su3-lattice
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
 
 The unified contract entry points are authoritative. Adding a new contract surface without registering it in those commands is a readiness failure.
 
-Tests must fail closed on invalid lattice extents, invalid group construction, non-finite inputs, broken contract structure, or weakened claim boundaries.
+Tests must fail closed on invalid lattice extents, invalid group construction, non-finite inputs, group-product acceptance failures, broken contract structure, or weakened claim boundaries. Public `Result` APIs may not turn an admissible numerical failure into a panic merely because an internal helper expected success.
 
 Floating-point equality is not assumed. Every numerical comparison must have an explicit tolerance and must not be advertised as bitwise cross-platform identity unless separately established.
 
