@@ -164,6 +164,43 @@ fn dagger_preserves_the_checked_su3_invariant() {
 }
 
 #[test]
+fn determinant_acceptance_is_symmetric_under_dagger_at_the_boundary() {
+    let matrix = Mat3::from_rows([
+        [
+            Complex64::new(0.5579518991402176, 0.5369378555427219),
+            Complex64::new(0.34141150954456545, -0.06915535803236855),
+            Complex64::new(-0.01536538348193488, 0.5280218178516647),
+        ],
+        [
+            Complex64::new(0.5477452171243675, 0.18316016649016478),
+            Complex64::new(-0.23942204499218495, -0.09995091864395703),
+            Complex64::new(-0.44092389452608116, -0.6361607878505382),
+        ],
+        [
+            Complex64::new(-0.2509854967677265, 0.06181608586718935),
+            Complex64::new(-0.20069336426576082, -0.8781029491919473),
+            Complex64::new(-0.2795915810973096, 0.20897603661644792),
+        ],
+    ]);
+
+    let direct = matrix.determinant().sub(Complex64::ONE).abs();
+    let dagger_direct = matrix
+        .dagger()
+        .determinant()
+        .sub(Complex64::ONE)
+        .abs();
+
+    assert!(matrix.unitarity_residual() <= SU3_ACCEPTANCE_TOLERANCE);
+    assert!(direct <= SU3_ACCEPTANCE_TOLERANCE);
+    assert!(dagger_direct > SU3_ACCEPTANCE_TOLERANCE);
+    assert_eq!(matrix.determinant_residual(), direct.max(dagger_direct));
+    assert_eq!(
+        Su3::from_checked_matrix(matrix).unwrap_err(),
+        Su3Error::DeterminantNotOne
+    );
+}
+
+#[test]
 fn general_bounded_exponentiation_and_group_product_pass_acceptance() {
     let a = Su3::from_algebra_coefficients([10.0, 20.0, -5.0, 3.0, 8.0, -9.0, 2.0, 7.0]).unwrap();
     let b = Su3::from_algebra_coefficients([-4.0, 1.0, 6.0, 2.0, -3.0, 5.0, 8.0, -7.0]).unwrap();
