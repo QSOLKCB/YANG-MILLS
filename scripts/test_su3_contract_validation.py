@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Negative regressions for Phase 1B SU(3) contract semantics."""
+"""Negative regressions for SU(3) algebra, lattice, and center contract semantics."""
 
 from __future__ import annotations
 
@@ -7,6 +7,8 @@ import copy
 
 from check_contracts import validate_exact
 from check_su3_contracts import (
+    EXPECTED_SU3_CENTER_CONTRACT,
+    EXPECTED_SU3_CENTER_VECTORS,
     EXPECTED_SU3_CONTRACT,
     EXPECTED_SU3_LATTICE_CONTRACT,
     EXPECTED_SU3_LATTICE_VECTORS,
@@ -147,7 +149,87 @@ def main() -> None:
         "gauge-invariance numerical vector overclassification",
     )
 
-    print("Negative Phase 1B SU(3) contract regression checks: passed")
+    broken = copy.deepcopy(EXPECTED_SU3_CENTER_CONTRACT)
+    broken["abstract_group"]["order"] = 4
+    expect_reject(
+        lambda payload: validate_exact(
+            "contracts/YM-SU3-CENTER-V1.json", payload, EXPECTED_SU3_CENTER_CONTRACT
+        ),
+        broken,
+        "abstract C3 order drift",
+    )
+
+    broken = copy.deepcopy(EXPECTED_SU3_CENTER_CONTRACT)
+    broken["cycle_embedding"]["central"] = True
+    expect_reject(
+        lambda payload: validate_exact(
+            "contracts/YM-SU3-CENTER-V1.json", payload, EXPECTED_SU3_CENTER_CONTRACT
+        ),
+        broken,
+        "non-central cycle embedding promoted to center",
+    )
+
+    broken = copy.deepcopy(EXPECTED_SU3_CENTER_CONTRACT)
+    broken["center_embedding"]["same_as_cycle_embedding"] = True
+    expect_reject(
+        lambda payload: validate_exact(
+            "contracts/YM-SU3-CENTER-V1.json", payload, EXPECTED_SU3_CENTER_CONTRACT
+        ),
+        broken,
+        "distinct subgroup embeddings collapsed",
+    )
+
+    broken = copy.deepcopy(EXPECTED_SU3_CENTER_CONTRACT)
+    broken["polyakov_center_transform"]["confinement_claimed"] = True
+    expect_reject(
+        lambda payload: validate_exact(
+            "contracts/YM-SU3-CENTER-V1.json", payload, EXPECTED_SU3_CENTER_CONTRACT
+        ),
+        broken,
+        "premature confinement claim",
+    )
+
+    broken = copy.deepcopy(EXPECTED_SU3_CENTER_CONTRACT)
+    broken["polyakov_center_transform"]["order_parameter_inference_claimed"] = True
+    expect_reject(
+        lambda payload: validate_exact(
+            "contracts/YM-SU3-CENTER-V1.json", payload, EXPECTED_SU3_CENTER_CONTRACT
+        ),
+        broken,
+        "premature Polyakov order-parameter inference",
+    )
+
+    broken = copy.deepcopy(EXPECTED_SU3_CENTER_VECTORS)
+    broken["vectors"][2]["expected"] = 0.0
+    expect_reject(
+        lambda payload: validate_exact(
+            "test-vectors/su3-center-v1.json", payload, EXPECTED_SU3_CENTER_VECTORS
+        ),
+        broken,
+        "Omega non-central witness erased",
+    )
+
+    broken = copy.deepcopy(EXPECTED_SU3_CENTER_VECTORS)
+    broken["vectors"][5]["claim_class"] = "C1"
+    expect_reject(
+        lambda payload: validate_exact(
+            "test-vectors/su3-center-v1.json", payload, EXPECTED_SU3_CENTER_VECTORS
+        ),
+        broken,
+        "Polyakov center-transform numerical vector overclassification",
+    )
+
+    broken = copy.deepcopy(EXPECTED_SU3_CENTER_VECTORS)
+    broken["vectors"][5]["polyakov_after"] = [1.0, 0.0]
+    expect_reject(
+        lambda payload: validate_exact(
+            "test-vectors/su3-center-v1.json", payload, EXPECTED_SU3_CENTER_VECTORS
+        ),
+        broken,
+        "Polyakov center rotation drift",
+    )
+
+    print("Negative SU(3) algebra, lattice, and center contract regression checks: passed")
 
 
 if __name__ == "__main__":

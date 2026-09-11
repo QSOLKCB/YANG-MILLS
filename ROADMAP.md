@@ -67,7 +67,7 @@ Phase 1 grows the reference surface from elementary plaquettes to gauge-invarian
 
 ### Phase 1B — `SU(3)` algebra and invariant layer
 
-**Status: implemented, independently reviewed, CI-green, and frozen in PR #3 pending merge.**
+**Status: completed, independently reviewed, CI-green, frozen, and merged in PR #3.**
 
 The `SU(3)` layer is independently derived and tested as gauge mathematics. Cross-domain QSOL-IMC work may suggest useful invariant checks, but it is not physics authority.
 
@@ -88,19 +88,25 @@ The final lattice slice is intentionally minimal: bounded periodic positive-dire
 
 ### Phase 1C — `C3`, `Z3`, and the genuine `SU(3)` center
 
+**Status: implemented, independently reviewed, CI-green, and frozen in PR #4 pending merge.**
+
 `C3` is the unique abstract group of order three and is isomorphic to the additive group `Z3`. The research task is therefore not merely to recognize the abstract group, but to distinguish different embeddings and actions inside `SU(3)`.
 
 Reference lead: [Wolfram MathWorld — Cyclic Group C3](https://mathworld.wolfram.com/CyclicGroupC3.html).
 
-- [ ] Define the abstract cyclic group `C3 = <g | g^3 = e>` and record `C3 ~= Z3` as an abstract-group isomorphism.
-- [ ] Define the three-cycle basis permutation `Omega |k> = |k+1 mod 3>` and verify `Omega^3 = I`.
-- [ ] Verify the canonical three-cycle permutation matrix has determinant `+1` and is unitary, so `<Omega>` can form a non-central `C3` subgroup of `SU(3)`.
-- [ ] Exhibit an explicit `SU(3)` element or generator that does not commute with `Omega`, proving that this embedding is not central.
-- [ ] Define the center of `SU(3)` explicitly as `Z(SU(3)) = {I, omega I, omega^2 I}`, with `omega = exp(2 pi i/3)`.
-- [ ] Verify every center element is unitary, has determinant one, and commutes with arbitrary tested `SU(3)` matrices.
-- [ ] Verify `Z(SU(3)) ~= C3 ~= Z3` while keeping it distinct from the non-central subgroup `<Omega>`.
-- [ ] Treat “same abstract group” and “same embedded subgroup/action” as different claims in tests and documentation.
-- [ ] Add center transformations to the Polyakov-loop test surface before making any confinement/deconfinement inference.
+- [x] Define the abstract cyclic group `C3 = <g | g^3 = e>` and record `C3 ~= Z3` as an abstract-group isomorphism.
+- [x] Define the three-cycle basis permutation `Omega |k> = |k+1 mod 3>` and verify `Omega^3 = I`.
+- [x] Verify the canonical three-cycle permutation matrix has determinant `+1` and is unitary, so `<Omega>` forms a non-central `C3` subgroup of `SU(3)`.
+- [x] Exhibit an explicit `SU(3)` element that does not commute with `Omega`, proving that this embedding is not central.
+- [x] Define the center of `SU(3)` explicitly as `Z(SU(3)) = {I, omega I, omega^2 I}`, with `omega = exp(2 pi i/3)`.
+- [x] Verify every center element is unitary, has determinant one, and commutes with independently generated tested `SU(3)` matrices.
+- [x] Verify `Z(SU(3)) ~= C3 ~= Z3` while keeping it distinct from the non-central subgroup `<Omega>`.
+- [x] Treat “same abstract group” and “same embedded subgroup/action” as different claims in tests and documentation.
+- [x] Add center transformations to the Polyakov-loop test surface without making any confinement/deconfinement inference.
+
+The frozen center surface uses the forward basis-cycle convention `Omega|k>=|k+1 mod 3>` and the exact group-valued witness `diag(-1,-1,1)` to prove non-centrality. The genuine center is represented separately by scalar matrices `omega^k I`. A center-slice transformation leaves the finite-lattice Wilson action invariant within declared tolerance and rotates a periodic Polyakov holonomy/trace by the chosen center element.
+
+**Phase 1C freeze gate:** `YM-SU3-CENTER-V1` and `SU3-CENTER-PHASE1C-V1` are sealed as `phase-1c-frozen` on the reviewed PR #4 surface. Incompatible changes to the abstract-group convention, cycle embedding, genuine-center embedding, or Polyakov center-transformation semantics require a new contract identifier. This phase establishes transformation laws and bounded finite-lattice observations only; it does not claim confinement, deconfinement, spontaneous center-symmetry breaking, an area law, or a thermodynamic order-parameter measurement.
 
 ### Phase 1D — paths, parallel transport, Wilson/Polyakov holonomy
 

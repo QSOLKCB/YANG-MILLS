@@ -1,0 +1,59 @@
+{
+  "contract_id": "YM-SU3-CENTER-V1",
+  "status": "phase-1c-frozen",
+  "depends_on": [
+    {
+      "contract_id": "YM-SU3-ALGEBRA-V1",
+      "required_status": "phase-1b-algebra-frozen"
+    },
+    {
+      "contract_id": "YM-SU3-LATTICE-V1",
+      "required_status": "phase-1b-frozen"
+    }
+  ],
+  "abstract_group": {
+    "name": "C3",
+    "order": 3,
+    "presentation": "<g | g^3=e>",
+    "isomorphic_to": "Z3-additive",
+    "composition": "exponents-add-mod-3"
+  },
+  "cycle_embedding": {
+    "symbol": "Omega",
+    "basis_action": "Omega|k>=|k+1 mod 3>",
+    "matrix": "[[0,0,1],[1,0,0],[0,1,0]]",
+    "order": 3,
+    "unitary": true,
+    "determinant": 1,
+    "central": false,
+    "noncentral_witness": "diag(-1,-1,1)",
+    "noncentral_commutator_residual": 2.0
+  },
+  "center_embedding": {
+    "definition": "Z(SU(3))={I,omega I,omega^2 I}",
+    "omega": "exp(2*pi*i/3)",
+    "omega_components": [-0.5, 0.8660254037844386],
+    "order": 3,
+    "unitarity_tolerance": 5e-12,
+    "determinant_one_tolerance": 5e-12,
+    "tested_commutator_tolerance": 2e-15,
+    "abstract_isomorphism": "Z(SU(3))~=C3~=Z3",
+    "same_as_cycle_embedding": false
+  },
+  "embedding_boundary": {
+    "same_abstract_group_does_not_imply_same_subgroup_action": true,
+    "cycle_embedding_is_noncentral": true,
+    "scalar_center_embedding_is_central": true
+  },
+  "polyakov_center_transform": {
+    "operation": "left-multiply U_mu(x) by z in Z(SU(3)) for every x with x_mu=slice",
+    "plaquette_action_rule": "center factors cancel pairwise in every plaquette",
+    "polyakov_rule": "L_mu -> z L_mu and (1/3)Tr(L_mu)->z(1/3)Tr(L_mu)",
+    "action_invariant_within_declared_tolerance": true,
+    "confinement_claimed": false,
+    "deconfinement_claimed": false,
+    "order_parameter_inference_claimed": false
+  },
+  "cross_domain_semantic_ontology_imported": false,
+  "claim_scope": "finite-dimensional center/group facts and bounded finite-lattice center-transform observations only"
+}

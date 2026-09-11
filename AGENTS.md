@@ -13,7 +13,7 @@ Use these classes:
 5. **continuum theorem** — a mathematically proved statement about the continuum theory;
 6. **Clay solution claim** — only permissible if the full official existence-and-mass-gap problem is actually proved.
 
-Standalone finite-dimensional algebra regressions that are not themselves finite-lattice theorems should be published conservatively as implementation/contract facts unless the claim taxonomy is explicitly extended. In particular, floating-point matrix-exponential vectors are not `C1` finite-lattice exact results.
+Standalone finite-dimensional algebra/group regressions that are not finite-lattice theorems should be published conservatively as implementation/contract facts unless the claim taxonomy is explicitly extended. Floating-point matrix-exponential or center-element residual vectors are not `C1` finite-lattice exact results.
 
 Never promote a result to a stronger class because a simulation is large, a GPU agrees with a CPU, an extrapolation looks stable, or a plot is persuasive.
 
@@ -61,7 +61,19 @@ The minimal `SU(3)` Wilson action is
 S_W = beta * sum_{x, mu<nu} (1 - 1/3 Re Tr P_mu_nu(x)).
 ```
 
-Do not import triadic ontology, Q/K/V-to-colour semantics, or other cross-domain interpretations into this authority. The three-cycle permutation matrix used by Phase 1B is only an exact traceless `SU(3)` regression fixture; do not describe it as the `SU(3)` center. Phase 1C owns the distinction between non-central `<Omega> ~= C3` and central `Z(SU(3)) ~= C3` embeddings.
+Phase 1C introduces a **new** contract rather than mutating either frozen Phase 1B identifier. Agents must keep these three meanings separate:
+
+```text
+abstract C3 ~= Z3
+non-central <Omega> subset SU(3)
+genuine Z(SU(3)) = {I, omega I, omega^2 I}.
+```
+
+The Phase 1C orientation is `Omega|k>=|k+1 mod 3>`. An exact group-valued witness `diag(-1,-1,1)` proves that this permutation embedding is not central. The scalar center embedding must commute with tested `SU(3)` matrices and must never be conflated with `<Omega>` merely because both are abstractly `C3`.
+
+A finite-lattice center transformation may rotate an `SU(3)` Polyakov loop by `z in Z(SU(3))` while leaving the Wilson action invariant. This transformation law is **not by itself** evidence of confinement, deconfinement, spontaneous symmetry breaking, or a thermodynamic order parameter. Those inferences require later ensemble/statistical contracts.
+
+Do not import triadic ontology, Q/K/V-to-colour semantics, or other cross-domain interpretations into these authorities.
 
 ## Donor boundary
 
@@ -113,6 +125,7 @@ cargo test --all-targets --locked
 cargo run --quiet --locked --bin ym-su2-reference
 cargo run --quiet --locked --bin ym-su3-algebra
 cargo run --quiet --locked --bin ym-su3-lattice
+cargo run --quiet --locked --bin ym-su3-center
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
@@ -125,4 +138,4 @@ Floating-point equality is not assumed. Every numerical comparison must have an 
 
 ## Formalisation
 
-Do not add a theorem prover merely for prestige. Formalise only stable definitions and theorem surfaces. A finite-lattice or finite-dimensional algebra proof is valuable but must not be described as the continuum Yang–Mills existence/mass-gap proof.
+Do not add a theorem prover merely for prestige. Formalise only stable definitions and theorem surfaces. A finite-lattice or finite-dimensional algebra/group proof is valuable but must not be described as the continuum Yang–Mills existence/mass-gap proof.

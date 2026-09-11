@@ -5,9 +5,9 @@
 //! Minimal Phase 1B SU(3) lattice-link layer built strictly on the frozen
 //! `YM-SU3-ALGEBRA-V1` conventions.
 //!
-//! This layer adds only bounded periodic links, plaquettes, the Wilson action,
-//! and local gauge transformations. It does not add Monte Carlo sampling,
-//! center-symmetry physics, confinement claims, or glueball observables.
+//! Phase 1C adds Polyakov holonomy/trace accessors without changing the frozen
+//! Phase 1B plaquette, Wilson-action, or gauge-transformation semantics. Center
+//! transformations themselves live in the separate Phase 1C center module.
 
 use core::fmt;
 
@@ -178,6 +178,37 @@ impl Su3Lattice4 {
             .mul(self.link(x_mu, nu)?)?
             .mul(self.link(x_nu, mu)?.dagger())?
             .mul(self.link(x, nu)?.dagger())?)
+    }
+
+    /// Ordered positive-direction holonomy wrapping one complete periodic
+    /// extent. The starting coordinate is retained as the basepoint.
+    pub fn polyakov_holonomy(
+        &self,
+        start: [usize; DIM],
+        direction: usize,
+    ) -> Result<Su3, Su3LatticeError> {
+        Self::validate_direction(direction)?;
+        self.site_index(start)?;
+        let mut x = start;
+        let mut holonomy = Su3::IDENTITY;
+        for _ in 0..self.extents[direction] {
+            holonomy = holonomy.mul(self.link(x, direction)?)?;
+            x = self.neighbor_plus(x, direction)?;
+        }
+        Ok(holonomy)
+    }
+
+    /// Normalized complex trace (1/3) Tr L of the periodic holonomy.
+    pub fn polyakov_loop(
+        &self,
+        start: [usize; DIM],
+        direction: usize,
+    ) -> Result<Complex64, Su3LatticeError> {
+        Ok(self
+            .polyakov_holonomy(start, direction)?
+            .matrix()
+            .trace()
+            .scale(1.0 / 3.0))
     }
 
     pub fn wilson_action(&self, beta: f64) -> Result<f64, Su3LatticeError> {

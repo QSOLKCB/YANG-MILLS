@@ -12,6 +12,7 @@ cargo test --all-targets --locked
 cargo run --quiet --locked --bin ym-su2-reference
 cargo run --quiet --locked --bin ym-su3-algebra
 cargo run --quiet --locked --bin ym-su3-lattice
+cargo run --quiet --locked --bin ym-su3-center
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
@@ -33,7 +34,13 @@ The Phase 1B `SU(3)` lattice layer deliberately separates exact and numerical re
 - the identity action and the single exact three-cycle-link combinatorial action are C1 finite-lattice facts;
 - local gauge-invariance residuals and transformed-link residuals are C2 numerical observations with explicit tolerances.
 
-The deterministic site-gauge helper is coordinate-bounded before exponentiation, and group-product failures during plaquette/action evaluation propagate as errors rather than panics or hidden projections.
+Phase 1C likewise separates exact abstract/embedding checks from numerical center-transform observations:
+
+- `C3` modular composition, `Omega^3=I`, and the exact non-central witness are C0 contract/group regressions;
+- floating-point scalar-center residuals remain C0 implementation facts with explicit tolerances;
+- Polyakov-loop rotation and Wilson-action invariance after a center slice transformation are C2 finite-lattice numerical observations.
+
+No Phase 1C vector is an ensemble measurement, confinement/deconfinement result, or spontaneous-symmetry-breaking observation.
 
 ## Future stochastic work
 
