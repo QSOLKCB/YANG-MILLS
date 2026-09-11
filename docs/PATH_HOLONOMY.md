@@ -32,17 +32,27 @@ be an oriented piecewise-smooth path on a smooth manifold `M`. Wherever `gamma` 
 gamma_dot(t) in T_{gamma(t)} M.
 ```
 
-After choosing a local trivialization of the gauge bundle, let
+After choosing a local trivialization of the gauge bundle over an open set `U subset M`, let
 
 ```text
 A in Omega^1(U, g)
 ```
 
-be the local Lie-algebra-valued connection one-form. Its pullback along the path is the one-dimensional Lie-algebra-valued coefficient
+be the local Lie-algebra-valued connection one-form.
+
+For the **single-chart formulas frozen in Phase 1D**, the complete image of the path must lie in that trivialization domain:
+
+```text
+gamma([0,1]) subset U.
+```
+
+Only under this condition is the coefficient below defined for every `t`:
 
 ```text
 a_gamma(t) = A_{gamma(t)}(gamma_dot(t)).
 ```
+
+If a path is not contained in one trivialization, global parallel transport must instead be constructed by covering/subdividing the path and composing local transports with the appropriate transition functions. Phase 1D does **not** freeze that multi-chart patching machinery; it is deferred to the broader principal-bundle/associated-bundle dictionary in Phase 1E rather than being silently assumed here.
 
 The local object `A` depends on the chosen trivialization; the resulting parallel transport has the corresponding endpoint gauge-covariance law.
 
@@ -157,6 +167,8 @@ The Phase 1D `SU(3)` implementation adds:
 - fallible bounded path concatenation;
 - rectangular paths for later static-potential work;
 - endpoint covariance tests under local gauge transformations.
+
+Every public helper that accepts oriented steps validates **all step directions before allocation or transport**. Thus an invalid direction such as `+4` fails closed not only in `path_holonomy`, but also in `reverse_path` and `concatenate_paths` rather than being returned as a superficially valid path object.
 
 The Phase 1D path step limit is `2^20`, matching the frozen Phase 1A bounded reference surface.
 
