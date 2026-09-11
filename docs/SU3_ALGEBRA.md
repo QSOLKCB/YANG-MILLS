@@ -2,7 +2,7 @@
 
 ## Scope
 
-Phase 1B introduces `SU(3)` first as a finite-dimensional algebra/group reference surface. This layer is deliberately isolated from lattice dynamics until its conventions and invariants have survived CI and review.
+Phase 1B introduces `SU(3)` first as a finite-dimensional algebra/group reference surface. That algebra authority was reviewed and frozen before the dependent lattice-link contract was introduced.
 
 It does **not** claim that triadic semantics, Q/K/V assignments, or other cross-domain constructions are QCD colour physics.
 
@@ -84,14 +84,18 @@ The dependency-free reference implementation uses bounded scaling-and-squaring w
 abs(theta_a) <= 64
 ```
 
-for every component. The implementation does **not** project an arbitrary output back onto `SU(3)`. Instead, it computes the exponential and then fails closed unless both
+for every component. The implementation does **not** project an arbitrary output back onto `SU(3)`. Instead, it computes the exponential and fails closed unless
 
 ```text
-max |U^dagger U - I| <= 5e-12
+max(
+  max |U^dagger U - I|,
+  max |U U^dagger - I|
+) <= 5e-12
+
 abs(det(U) - 1) <= 5e-12.
 ```
 
-This makes the residual checks meaningful rather than hiding an unstable exponential behind a projection step.
+Checking both products makes the admitted `Su3` invariant stable under Hermitian conjugation. The residual checks therefore remain meaningful rather than hiding an unstable exponential behind a projection step.
 
 A diagonal golden vector uses only `T^3`:
 
@@ -100,16 +104,20 @@ theta_3 = 0.7
 U = diag(exp(i*0.35), exp(-i*0.35), 1).
 ```
 
-## Lattice boundary
+## Frozen algebra boundary and lattice dependency
 
-`YM-SU3-ALGEBRA-V1` initially sets
+`YM-SU3-ALGEBRA-V1` is frozen with
 
 ```text
 lattice_links_enabled = false.
 ```
 
-That is intentional. `SU(3)` lattice links may be added only after this standalone algebra/group surface is CI-green and reviewed. The link layer must depend on these sealed conventions rather than redefining them.
+This field means the **algebra contract itself does not define lattice-link semantics**. It is not a repository-wide prohibition after the algebra gate has graduated.
+
+The dependent `YM-SU3-LATTICE-V1` contract was introduced only after the standalone algebra/group surface was CI-green and review-clean. The lattice layer imports the frozen algebra conventions by identifier/status and may not redefine the Gell-Mann basis, normalization, structure constants, Casimir regressions, exponentiation convention, or group-acceptance tolerances.
+
+The exact three-cycle permutation matrix is used in the lattice layer only as a traceless `SU(3)` regression fixture. No center-symmetry interpretation is attached to that fixture in Phase 1B; center embeddings are reserved for Phase 1C.
 
 ## Claim boundary
 
-This phase establishes algebra and numerical-reference facts only. It does not establish confinement, a glueball spectrum, continuum existence, or a positive Yang-Mills mass gap.
+This phase establishes algebra, group-reference, and bounded finite-lattice facts only. It does not establish confinement, a glueball spectrum, continuum existence, or a positive Yang-Mills mass gap.
