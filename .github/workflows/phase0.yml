@@ -24,11 +24,20 @@ jobs:
       - name: Rust tests
         run: cargo test --all-targets --locked
 
-      - name: Reference vectors
+      - name: SU(2) reference vectors
         run: cargo run --quiet --locked --bin ym-su2-reference
 
-      - name: Contract checks
+      - name: SU(3) algebra reference vectors
+        run: cargo run --quiet --locked --bin ym-su3-algebra
+
+      - name: Core contract checks
         run: python3 scripts/check_contracts.py
 
-      - name: Negative contract regressions
+      - name: Core negative contract regressions
         run: python3 scripts/test_contract_validation.py
+
+      - name: SU(3) contract checks
+        run: python3 scripts/check_su3_contracts.py
+
+      - name: SU(3) negative contract regressions
+        run: python3 scripts/test_su3_contract_validation.py
