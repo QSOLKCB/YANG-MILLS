@@ -88,7 +88,7 @@ The final lattice slice is intentionally minimal: bounded periodic positive-dire
 
 ### Phase 1C — `C3`, `Z3`, and the genuine `SU(3)` center
 
-**Status: implemented, independently reviewed, CI-green, and frozen in PR #4 pending merge.**
+**Status: completed, independently reviewed, CI-green, frozen, and merged in PR #4.**
 
 `C3` is the unique abstract group of order three and is isomorphic to the additive group `Z3`. The research task is therefore not merely to recognize the abstract group, but to distinguish different embeddings and actions inside `SU(3)`.
 
@@ -110,24 +110,28 @@ The frozen center surface uses the forward basis-cycle convention `Omega|k>=|k+1
 
 ### Phase 1D — paths, parallel transport, Wilson/Polyakov holonomy
 
+**Status: implemented, independently reviewed, CI-green, and frozen in PR #5 pending merge.**
+
 This checkpoint connects the differential geometry of curves to the gauge-theory observables used on the lattice. Curve geometry is useful here because a connection is sampled along an oriented path; the curvature of the path itself is not Yang–Mills curvature.
 
-- [ ] Define `YM-PATH-HOLONOMY-V1` for oriented piecewise-smooth paths and their lattice discretisations.
-- [ ] Define a path `gamma:[0,1] -> M`, its tangent `gamma_dot(t) in T_(gamma(t))M`, and the pullback of the local gauge connection along the path.
-- [ ] Define continuum parallel transport by the connection along `gamma`, with path ordering and sign/convention choices stated explicitly.
-- [ ] Record the path-ordered exponential schematically as `U_gamma = P exp(- integral_gamma A)` or the convention-equivalent form chosen by the project.
-- [ ] Verify reparameterisation invariance under orientation-preserving changes of path parameter.
-- [ ] Verify path reversal gives `U_(gamma^-1) = U_gamma^-1`.
-- [ ] Verify path concatenation gives the convention-consistent ordered product `U_(gamma2 o gamma1) = U_gamma2 U_gamma1`.
-- [ ] Distinguish open Wilson lines from closed Wilson loops: open transport transforms at both endpoints, while the normalized trace of closed holonomy is gauge invariant.
-- [ ] Treat Wilson loops as path-ordered closed-loop holonomies with normalized trace as the gauge-invariant observable.
-- [ ] Add deterministic ordered-product tests for arbitrary closed lattice paths.
-- [ ] Add Polyakov loops wrapping the periodic Euclidean-time direction.
-- [ ] Add gauge-transformation regression vectors for Wilson and Polyakov observables.
-- [ ] Relate infinitesimal closed-loop holonomy to the gauge curvature `F_A` only through a stated small-loop expansion; do not identify a finite loop directly with a pointwise curvature tensor.
-- [ ] State explicitly that Frenet curvature, torsion, osculating circles/planes, and other embedded-curve invariants are distinct from the bundle curvature `F_A` unless a separate theorem connects them in a specific construction.
-- [ ] Keep finite-lattice holonomy measurements distinct from continuum confinement theorems.
-- [ ] Prepare the later static-potential analysis surface `<W(R,T)> ~ exp(-V(R) T)` without claiming an area law before ensemble evidence exists.
+- [x] Define `YM-PATH-HOLONOMY-V1` for oriented piecewise-smooth paths and their lattice discretisations.
+- [x] Define a path `gamma:[0,1] -> M`, its tangent `gamma_dot(t) in T_(gamma(t))M`, and the pullback `a_gamma(t)=A_(gamma(t))(gamma_dot(t))` of the local gauge connection along the path.
+- [x] Freeze continuum parallel transport as `dU_gamma/dt=U_gamma a_gamma(t)`, with the local gauge convention `A^Omega=Omega A Omega^-1-dOmega Omega^-1` and endpoint law `U_gamma^Omega=Omega(start) U_gamma Omega(end)^-1`.
+- [x] Record the matching right-ordered exponential convention `U_gamma=P_R exp(integral a_gamma dt)` rather than silently importing an opposite multiplication-order convention.
+- [x] Record and justify orientation-preserving reparameterisation invariance under the frozen continuum convention.
+- [x] Verify path reversal gives `U_(gamma^-1) = U_gamma^-1` in the bounded `SU(3)` reference implementation.
+- [x] Verify path concatenation under the frozen traversal convention: if `gamma2 o gamma1` means traverse `gamma1` first and then `gamma2`, `U_(gamma2 o gamma1) = U_gamma1 U_gamma2`.
+- [x] Distinguish open Wilson lines from closed Wilson loops: open transport transforms at both endpoints, while the normalized trace of closed holonomy is gauge invariant.
+- [x] Treat Wilson loops as path-ordered closed-loop holonomies with normalized trace as the gauge-invariant observable; retain `(1/2)ReTr` for frozen `SU(2)` and use the full complex `(1/3)Tr` for the new `SU(3)` path surface.
+- [x] Add deterministic ordered-product tests for arbitrary closed lattice paths, including a non-planar closed-path regression.
+- [x] Exercise Polyakov holonomy wrapping a full periodic direction through the Phase 1C `SU(3)` lattice surface.
+- [x] Add gauge-transformation regression vectors for open endpoint covariance, closed Wilson loops, cyclic closed-loop traces, and periodic Polyakov observables.
+- [x] Relate infinitesimal closed-loop holonomy to gauge curvature only through the stated small-loop expansion `U_boundary=I+F_A(X,Y)*oriented_area+higher-order terms`; do not identify a finite loop directly with pointwise curvature.
+- [x] State explicitly that Frenet curvature, torsion, osculating circles/planes, and other embedded-curve invariants are distinct from gauge curvature `F_A` unless a separate theorem connects them in a specific construction.
+- [x] Keep finite-lattice holonomy measurements distinct from continuum confinement theorems and keep Phase 1C center transformations distinct from ordinary periodic local gauge transformations.
+- [x] Prepare bounded rectangular `R x T` path geometry for the later static-potential analysis surface `<W(R,T)> ~ exp(-V(R) T)` without evaluating an ensemble expectation or claiming an area law.
+
+**Phase 1D freeze gate:** `YM-PATH-HOLONOMY-V1` and `PATH-HOLONOMY-PHASE1D-V1` are sealed as `phase-1d-frozen` on the reviewed PR #5 surface. The frozen contract fixes the left-to-right traversal/product convention, its matching continuum transport convention, endpoint covariance, reversal/concatenation, compatibility with `YM-WILSON-LOOP-V1`, the complex `SU(3)` normalized-trace observable, periodic Polyakov gauge invariance, and the small-loop/curve-geometry firewalls. Phase 1D does **not** numerically solve continuum parallel transport, extract `V(R)`, establish an area law, or claim confinement.
 
 ### Phase 1E — classical continuum bundle/connection dictionary
 
