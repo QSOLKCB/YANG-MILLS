@@ -223,7 +223,13 @@ impl Mat3 {
     }
 
     pub fn determinant_residual(self) -> f64 {
-        self.determinant().sub(Complex64::ONE).abs()
+        let direct = self.determinant().sub(Complex64::ONE).abs();
+        let dagger = self
+            .dagger()
+            .determinant()
+            .sub(Complex64::ONE)
+            .abs();
+        direct.max(dagger)
     }
 }
 
