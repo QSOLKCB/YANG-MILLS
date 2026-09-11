@@ -1,6 +1,6 @@
 {
   "contract_id": "YM-WILSON-LOOP-V1",
-  "status": "phase-1a-review-candidate",
+  "status": "phase-1a-frozen",
   "gauge_group": "SU(2)",
   "path_step": {
     "forward": "+mu uses U_mu(x) then advances x->x+mu",
