@@ -291,9 +291,7 @@ impl Lattice4 {
         if x.iter().zip(self.extents).any(|(&v, n)| v >= n) {
             return Err(ReferenceError::CoordinateOutOfRange);
         }
-        Ok((((x[0] * self.extents[1] + x[1]) * self.extents[2] + x[2])
-            * self.extents[3])
-            + x[3])
+        Ok((((x[0] * self.extents[1] + x[1]) * self.extents[2] + x[2]) * self.extents[3]) + x[3])
     }
 
     fn link_index(&self, x: [usize; DIM], mu: usize) -> Result<usize, ReferenceError> {
@@ -653,9 +651,7 @@ impl Lattice4 {
             for component_index in 0..4 {
                 let token = parts[component_index];
                 if token.len() != 16
-                    || !token
-                        .bytes()
-                        .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+                    || !token.bytes().all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
                 {
                     return Err(ReferenceError::InvalidConfigurationEncoding);
                 }
@@ -943,9 +939,7 @@ mod tests {
         let transformed = lattice.gauge_transform(deterministic_site_gauge).unwrap();
         let rectangle = Lattice4::rectangular_path(0, 1, 2, 1).unwrap();
         let w_a = lattice.wilson_loop([0, 0, 0, 0], &rectangle).unwrap();
-        let w_b = transformed
-            .wilson_loop([0, 0, 0, 0], &rectangle)
-            .unwrap();
+        let w_b = transformed.wilson_loop([0, 0, 0, 0], &rectangle).unwrap();
         assert_close(w_a, w_b, 2.0e-11);
 
         let p_a = lattice.polyakov_loop([0, 0, 0, 0], 0).unwrap();
@@ -994,9 +988,7 @@ mod tests {
     fn left_update_primitive_preserves_group_invariant() {
         let mut lattice = Lattice4::new_identity([3, 3, 3, 3]).unwrap();
         let update = Su2::from_axis_angle([1.0, 1.0, 0.0], 0.5).unwrap();
-        let updated = lattice
-            .left_multiply_link([0, 0, 0, 0], 0, update)
-            .unwrap();
+        let updated = lattice.left_multiply_link([0, 0, 0, 0], 0, update).unwrap();
         assert!(updated.is_unit(DEFAULT_TOLERANCE));
         assert!(lattice.max_link_unit_residual() <= DEFAULT_TOLERANCE);
     }

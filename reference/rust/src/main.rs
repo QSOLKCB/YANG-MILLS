@@ -15,11 +15,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     single_link.set_link([0, 0, 0, 0], 0, traceless)?;
     let single_link_action = single_link.wilson_action(beta)?;
     let analytic_action = 6.0 * beta;
-    let single_link_rectangle =
-        single_link.rectangular_wilson_loop([0, 0, 0, 0], 0, 1, 2, 1)?;
+    let single_link_rectangle = single_link.rectangular_wilson_loop([0, 0, 0, 0], 0, 1, 2, 1)?;
     let single_link_polyakov = single_link.polyakov_loop([0, 0, 0, 0], 0)?;
-    let local_delta =
-        single_link.local_action_difference([0, 0, 0, 0], 0, Su2::IDENTITY, beta)?;
+    let local_delta = single_link.local_action_difference([0, 0, 0, 0], 0, Su2::IDENTITY, beta)?;
 
     let encoded = single_link.to_canonical_config()?;
     let decoded = Lattice4::from_canonical_config(&encoded)?;

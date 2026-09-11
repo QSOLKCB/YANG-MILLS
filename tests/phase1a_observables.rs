@@ -19,16 +19,11 @@ fn assert_close(actual: f64, expected: f64, tolerance: f64) {
 fn public_phase1a_wilson_loop_surface() {
     let lattice = Lattice4::new_identity([3, 3, 3, 3]).unwrap();
     let path = Lattice4::rectangular_path(0, 1, 2, 1).unwrap();
-    assert_eq!(
-        lattice.wilson_loop([0, 0, 0, 0], &path).unwrap(),
-        1.0
-    );
+    assert_eq!(lattice.wilson_loop([0, 0, 0, 0], &path).unwrap(), 1.0);
 
     let reverse_cancel = [PathStep::Forward(2), PathStep::Backward(2)];
     assert_close(
-        lattice
-            .wilson_loop([0, 0, 0, 0], &reverse_cancel)
-            .unwrap(),
+        lattice.wilson_loop([0, 0, 0, 0], &reverse_cancel).unwrap(),
         1.0,
         DEFAULT_TOLERANCE,
     );
@@ -41,9 +36,7 @@ fn public_phase1a_gauge_invariant_observables() {
     let path = Lattice4::rectangular_path(0, 1, 2, 1).unwrap();
     assert_close(
         lattice.wilson_loop([0, 0, 0, 0], &path).unwrap(),
-        transformed
-            .wilson_loop([0, 0, 0, 0], &path)
-            .unwrap(),
+        transformed.wilson_loop([0, 0, 0, 0], &path).unwrap(),
         2.0e-11,
     );
     assert_close(
