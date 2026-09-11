@@ -92,10 +92,13 @@ max(
   max |U U^dagger - I|
 ) <= 5e-12
 
-abs(det(U) - 1) <= 5e-12.
+max(
+  abs(det(U) - 1),
+  abs(det(U^dagger) - 1)
+) <= 5e-12.
 ```
 
-Checking both products makes the admitted `Su3` invariant stable under Hermitian conjugation. The residual checks therefore remain meaningful rather than hiding an unstable exponential behind a projection step.
+Checking both matrix products and both determinant evaluations makes the admitted `Su3` invariant stable under Hermitian conjugation despite floating-point asymmetry near the acceptance boundary. The residual checks therefore remain meaningful rather than hiding an unstable exponential behind a projection step.
 
 A diagonal golden vector uses only `T^3`:
 
