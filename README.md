@@ -28,9 +28,17 @@ Phase 1D was merged in PR #5 and froze `YM-PATH-HOLONOMY-V1`: arbitrary bounded 
 
 Phase 1E was merged in PR #6 and froze `YM-CLASSICAL-GEOMETRY-V1`: the classical principal/associated-bundle, connection, curvature, Hodge-star, Yang–Mills-functional, self-duality, and lattice-to-continuum dictionary. See [`docs/CLASSICAL_CONTINUUM.md`](docs/CLASSICAL_CONTINUUM.md).
 
-Phase 2A is implemented, CI-green, independently reviewed, and frozen in PR #7 pending merge. `YM-SU2-ENSEMBLE-V1` introduces the first stochastic authority: bounded pure-`SU(2)` heat-bath/over-relaxation Markov chains, versioned pseudorandom stream identity, explicit thermalisation and measurement cadence, independent-chain identities, average-plaquette measurements, autocorrelation diagnostics, and effective sample size. See [`docs/SU2_ENSEMBLES.md`](docs/SU2_ENSEMBLES.md).
+Phase 2A was merged in PR #7 and froze `YM-SU2-ENSEMBLE-V1`: bounded pure-`SU(2)` heat-bath/over-relaxation Markov chains, versioned pseudorandom stream identity, explicit thermalisation and measurement cadence, independent-chain identities, average-plaquette measurements, autocorrelation diagnostics, and effective sample size. See [`docs/SU2_ENSEMBLES.md`](docs/SU2_ENSEMBLES.md).
 
-Phase 2A does **not** claim the full Phase 2 graduation gate. Reproduction of a selected published plaquette benchmark remains Phase 2B, and `SU(3)` ensemble generation remains disabled until the `SU(2)` sampler is benchmark-validated.
+Phase 2B is implemented, CI-green, and frozen in PR #8 pending merge. `YM-SU2-PLAQUETTE-BASELINE-V1` reproduces a predeclared peer-reviewed `SU(2)` Wilson-action average-plaquette benchmark on a `10^4` lattice at `beta=2.3`. See [`docs/PUBLISHED_PLAQUETTE_BASELINE.md`](docs/PUBLISHED_PLAQUETTE_BASELINE.md).
+
+The predeclared published source-resolution envelope was `[0.59,0.62]`. Two independent frozen chains produced means `0.6026867251` and `0.6018972108`, with pooled mean
+
+```text
+0.6022919679
+```
+
+and chain-consistency `z ~= 0.946`. The minimum chain ESS was about `7.75`, and the maximum final `SU(2)` unit-link residual was `6.66e-16`. This closes the finite-lattice Phase 2 graduation gate for the declared `SU(2)` regime. It does **not** establish confinement, continuum quantum-field existence, or a positive continuum mass gap. `SU(3)` ensemble generation remains disabled until a separately versioned algorithm is specified and reviewed.
 
 No current phase performs glueball extraction, a continuum/infinite-volume limit, construction of the interacting quantum theory, or a mass-gap proof.
 
@@ -174,17 +182,29 @@ thermalization_sweeps + measurements*sweeps_between_measurements
 
 must not exceed the frozen reference bound.
 
-The measured Phase 2A observable is the average plaquette. The reference diagnostics record the autocorrelation sequence, a versioned positive-window integrated autocorrelation estimate, effective sample size, and ESS-adjusted diagnostic standard error.
+The measured observable is the average plaquette. The reference diagnostics record the autocorrelation sequence, a versioned positive-window integrated autocorrelation estimate, effective sample size, and ESS-adjusted diagnostic standard error.
 
-At `beta=0`, Haar measure gives exact plaquette expectation zero. Phase 2A uses that fact only as a fixed-seed sanity band. It does **not** substitute for reproduction of a published finite-beta plaquette benchmark.
+## Phase 2B published plaquette baseline
 
-The Phase 2 boundary remains explicitly frozen as
+The peer-reviewed primary source is Langfeld, Lucini & Rago, *Physical Review Letters* **109**, 111601 (2012), DOI `10.1103/PhysRevLett.109.111601`. Its Figure 5 shows the four-dimensional `SU(2)` Wilson-action average plaquette on a `10^4` lattice and compares density-of-states and local-hybrid Monte Carlo results.
+
+Because that comparison is graphical rather than a convenient table with a quoted point uncertainty, the repository froze a conservative **source-resolution envelope** before running the benchmark:
 
 ```text
-published_plaquette_baseline_reproduced = false
-phase2_graduation_gate_satisfied       = false
-su3_ensemble_enabled                   = false.
+lattice = 10^4
+beta = 2.3
+source-resolution envelope = [0.59, 0.62]
 ```
+
+That interval is explicitly **not** represented as a paper error bar. The frozen two-chain benchmark reproduced the envelope and passed its independent-chain, ESS, heat-bath, and unit-link gates. Therefore
+
+```text
+published_plaquette_baseline_reproduced = true
+phase2_graduation_gate_satisfied       = true
+su3_ensemble_enabled                   = false
+```
+
+The final CI runtime emits the two raw measurement series, derived seeds, per-chain diagnostics, and pooled comparison into the commit-tied Actions evidence log.
 
 ## Lattice-to-continuum boundary
 
@@ -204,6 +224,7 @@ cargo run --quiet --locked --bin ym-su3-center
 cargo run --quiet --locked --bin ym-path-holonomy
 cargo run --quiet --locked --bin ym-classical-geometry
 cargo run --quiet --locked --bin ym-su2-ensemble
+cargo run --quiet --locked --bin ym-su2-plaquette-baseline
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
@@ -228,7 +249,7 @@ scripts/               fail-closed contract checks
 
 ## Roadmap
 
-The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 2A freezes the `SU(2)` sampler/diagnostic surface; Phase 2B must reproduce a declared published plaquette baseline before the full Phase 2 graduation gate can close or `SU(3)` ensemble generation can begin.
+The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 2B closes the published `SU(2)` plaquette validation gate. Any future `SU(3)` ensemble generator must be a separately versioned algorithm; Phase 3 then begins the gauge-invariant glueball laboratory on sealed ensemble evidence.
 
 ## Licence
 
