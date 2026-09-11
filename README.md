@@ -28,7 +28,7 @@ Phase 1D was merged in PR #5 and froze `YM-PATH-HOLONOMY-V1`: arbitrary bounded 
 
 Phase 1E was merged in PR #6 and froze `YM-CLASSICAL-GEOMETRY-V1`: the classical principal/associated-bundle, connection, curvature, Hodge-star, Yang–Mills-functional, self-duality, and lattice-to-continuum dictionary. See [`docs/CLASSICAL_CONTINUUM.md`](docs/CLASSICAL_CONTINUUM.md).
 
-Phase 2A is implemented, CI-green, review-clean, and frozen in PR #7 pending merge. `YM-SU2-ENSEMBLE-V1` introduces the first stochastic authority: bounded pure-`SU(2)` heat-bath/over-relaxation Markov chains, versioned pseudorandom stream identity, explicit thermalisation and measurement cadence, independent-chain identities, average-plaquette measurements, autocorrelation diagnostics, and effective sample size. See [`docs/SU2_ENSEMBLES.md`](docs/SU2_ENSEMBLES.md).
+Phase 2A is implemented, CI-green, independently reviewed, and frozen in PR #7 pending merge. `YM-SU2-ENSEMBLE-V1` introduces the first stochastic authority: bounded pure-`SU(2)` heat-bath/over-relaxation Markov chains, versioned pseudorandom stream identity, explicit thermalisation and measurement cadence, independent-chain identities, average-plaquette measurements, autocorrelation diagnostics, and effective sample size. See [`docs/SU2_ENSEMBLES.md`](docs/SU2_ENSEMBLES.md).
 
 Phase 2A does **not** claim the full Phase 2 graduation gate. Reproduction of a selected published plaquette benchmark remains Phase 2B, and `SU(3)` ensemble generation remains disabled until the `SU(2)` sampler is benchmark-validated.
 
@@ -148,13 +148,13 @@ R = U Vhat
 alpha = beta k
 ```
 
-with conditional distribution
+with mathematical conditional distribution
 
 ```text
 dP(R) proportional to exp(alpha r0) d_mu_Haar(R).
 ```
 
-The implementation proposes `r0` from the exact truncated exponential, applies the Haar Jacobian by bounded rejection, samples the quaternion direction uniformly on `S^2`, and reconstructs
+For `alpha > 1e-300`, the floating reference proposes `r0` from the truncated exponential inverse CDF. For `0 <= alpha <= 1e-300`, it uses the uniform `alpha -> 0` proposal limit to avoid subnormal inverse-CDF quantization that is much larger than the physically resolvable tilt in binary64. Both branches then apply the Haar Jacobian by bounded rejection, sample the quaternion direction uniformly on `S^2`, and reconstruct
 
 ```text
 U_new = R Vhat^dagger.
@@ -166,7 +166,13 @@ The microcanonical over-relaxation step is
 U_new = Vhat^dagger U_old^dagger Vhat^dagger.
 ```
 
-A complete reference Markov sweep is one full heat-bath sweep followed by the configured number of full over-relaxation sweeps.
+A complete reference Markov sweep is one full heat-bath sweep followed by the configured number of full over-relaxation sweeps. The checked total schedule
+
+```text
+thermalization_sweeps + measurements*sweeps_between_measurements
+```
+
+must not exceed the frozen reference bound.
 
 The measured Phase 2A observable is the average plaquette. The reference diagnostics record the autocorrelation sequence, a versioned positive-window integrated autocorrelation estimate, effective sample size, and ESS-adjusted diagnostic standard error.
 
