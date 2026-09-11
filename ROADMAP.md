@@ -47,7 +47,7 @@ Phase 1 grows the reference surface from elementary plaquettes to gauge-invarian
 
 ### Phase 1A — `SU(2)` observables and local mechanics
 
-**Status: implemented, independently reviewed, CI-green, and frozen in PR #2 pending merge.**
+**Status: completed, independently reviewed, CI-green, frozen, and merged in PR #2.**
 
 - [x] Freeze `YM-SU2-LATTICE-V1` after independent review of conventions.
 - [x] Add validated deterministic configuration serialisation.
@@ -67,18 +67,24 @@ Phase 1 grows the reference surface from elementary plaquettes to gauge-invarian
 
 ### Phase 1B — `SU(3)` algebra and invariant layer
 
-The `SU(3)` layer must be independently derived and tested as gauge mathematics. Cross-domain QSOL-IMC work may suggest useful invariant checks, but it is not physics authority.
+**Status: implemented, independently reviewed, CI-green, and frozen in PR #3 pending merge.**
 
-- [ ] Add the canonical eight Gell-Mann matrices `lambda_1 ... lambda_8`.
-- [ ] Verify Hermiticity and tracelessness of every generator.
-- [ ] Verify `Tr(lambda_a lambda_b) = 2 delta_ab`.
-- [ ] Define `T^a = lambda_a / 2` and verify `[T^a,T^b] = i f^{abc} T^c`.
-- [ ] Verify the symmetric `d^{abc}` anticommutator structure where used.
-- [ ] Verify the fundamental quadratic Casimir `sum_a T^a T^a = (4/3) I`.
-- [ ] Add a separately specified cubic-Casimir regression surface before using cubic invariants computationally.
-- [ ] Add stable exponentiation from traceless Hermitian algebra elements into `SU(3)`.
-- [ ] Fail closed on unitarity and determinant-one residuals outside declared tolerances.
-- [ ] Add `SU(3)` lattice links only after the standalone algebra/group tests are sealed.
+The `SU(3)` layer is independently derived and tested as gauge mathematics. Cross-domain QSOL-IMC work may suggest useful invariant checks, but it is not physics authority.
+
+- [x] Add the canonical eight Gell-Mann matrices `lambda_1 ... lambda_8`.
+- [x] Verify Hermiticity and tracelessness of every generator.
+- [x] Verify `Tr(lambda_a lambda_b) = 2 delta_ab`.
+- [x] Define `T^a = lambda_a / 2` and verify `[T^a,T^b] = i f^{abc} T^c`.
+- [x] Verify the symmetric `d^{abc}` anticommutator structure where used.
+- [x] Verify the fundamental quadratic Casimir `sum_a T^a T^a = (4/3) I`.
+- [x] Add a separately specified cubic-Casimir regression surface before using cubic invariants computationally.
+- [x] Add stable exponentiation from traceless Hermitian algebra elements into `SU(3)`.
+- [x] Fail closed on unitarity and determinant-one residuals outside declared tolerances.
+- [x] Add `SU(3)` lattice links only after the standalone algebra/group tests are sealed.
+
+The final lattice slice is intentionally minimal: bounded periodic positive-direction links, plaquettes, the standard `SU(3)` Wilson action, and local gauge transformations. It does **not** add Monte Carlo sampling, center-symmetry physics, confinement claims, or glueball extraction.
+
+**Phase 1B freeze gate:** `YM-SU3-ALGEBRA-V1` and `SU3-ALGEBRA-PHASE1B-V1` were sealed first as `phase-1b-algebra-frozen`. The dependent `YM-SU3-LATTICE-V1` and `SU3-LATTICE-PHASE1B-V1` were introduced only after that algebra review gate, then independently tested/reviewed and sealed as `phase-1b-frozen`. The exact three-cycle permutation matrix is used only as a traceless `SU(3)` finite-lattice regression fixture; no center-symmetry interpretation is imported into Phase 1B.
 
 ### Phase 1C — `C3`, `Z3`, and the genuine `SU(3)` center
 
