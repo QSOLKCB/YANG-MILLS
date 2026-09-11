@@ -123,6 +123,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         summary.stationarity[0].second_half_mean
     );
     println!(
+        "chain0_stationarity_first_half_standard_error={:.17e}",
+        summary.stationarity[0].first_half_standard_error
+    );
+    println!(
+        "chain0_stationarity_second_half_standard_error={:.17e}",
+        summary.stationarity[0].second_half_standard_error
+    );
+    println!(
         "chain0_stationarity_z={:.17e}",
         summary.stationarity[0].drift_z
     );
@@ -133,6 +141,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!(
         "chain1_stationarity_second_half_mean={:.17e}",
         summary.stationarity[1].second_half_mean
+    );
+    println!(
+        "chain1_stationarity_first_half_standard_error={:.17e}",
+        summary.stationarity[1].first_half_standard_error
+    );
+    println!(
+        "chain1_stationarity_second_half_standard_error={:.17e}",
+        summary.stationarity[1].second_half_standard_error
     );
     println!(
         "chain1_stationarity_z={:.17e}",
