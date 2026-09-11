@@ -651,7 +651,9 @@ impl Lattice4 {
             for component_index in 0..4 {
                 let token = parts[component_index];
                 if token.len() != 16
-                    || !token.bytes().all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+                    || !token
+                        .bytes()
+                        .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
                 {
                     return Err(ReferenceError::InvalidConfigurationEncoding);
                 }
