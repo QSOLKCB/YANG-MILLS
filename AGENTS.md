@@ -13,9 +13,9 @@ Use these classes:
 5. **continuum theorem** — a mathematically proved statement about the continuum theory;
 6. **Clay solution claim** — only permissible if the full official existence-and-mass-gap problem is actually proved.
 
-A correct classical bundle/connection identity is not automatically a construction of the quantum theory. Standalone finite-dimensional algebra, Hodge-star, center, path-covariance, or gauge-invariance regressions should be published conservatively as implementation/contract facts unless the claim taxonomy is explicitly extended.
+A correct classical identity or statistically stable finite-lattice chain is not automatically a construction of the quantum theory. Stochastic ensemble measurements remain C2 finite-lattice numerical observations unless a stronger claim is independently justified.
 
-Never promote a result to a stronger class because a simulation is large, a GPU agrees with a CPU, an extrapolation looks stable, or a classical equation is standard.
+Never promote a result because a simulation is large, a GPU agrees with a CPU, an extrapolation looks stable, a chain has a large ESS, or a literature value is reproduced.
 
 ## Required semantic refusals
 
@@ -29,11 +29,12 @@ An agent must refuse to write or approve language asserting that this repository
 - a formal proof about the finite lattice;
 - a classical Yang–Mills connection or self-dual solution;
 - a complete principal-bundle/curvature dictionary;
+- a thermalised-looking Markov chain, low autocorrelation, or large effective sample size;
 - cross-runtime or CPU/GPU agreement.
 
 ## Mathematical authority
 
-Phase 0 / Phase 1A freeze the `SU(2)` finite-lattice authority. Do not silently change the sign convention, plaquette orientation, direction ordering, boundary conditions, lattice dimension, Wilson normalisation, path orientation, or frozen contract identifiers.
+Phase 0 / Phase 1A freeze the `SU(2)` finite-lattice authority. Do not silently change the sign convention, plaquette orientation, direction ordering, boundary conditions, lattice dimension, Wilson normalisation, path orientation, staple orientation, or frozen contract identifiers.
 
 The `SU(2)` convention is
 
@@ -55,23 +56,9 @@ Tr(lambda_a lambda_b) = 2 delta_ab
 U(theta) = exp(i sum_a theta_a T^a).
 ```
 
-`YM-SU3-ALGEBRA-V1` is frozen first and retains `lattice_links_enabled=false` because that contract itself does not define lattice semantics. The dependent `YM-SU3-LATTICE-V1` may use but may not redefine the frozen algebra/group conventions, residuals, or tolerances.
+The dependent `YM-SU3-LATTICE-V1` may use but may not redefine the frozen algebra/group conventions, residuals, or tolerances.
 
-The minimal `SU(3)` Wilson action is
-
-```text
-S_W = beta * sum_{x, mu<nu} (1 - 1/3 Re Tr P_mu_nu(x)).
-```
-
-Phase 1C freezes a separate center authority. Keep these meanings distinct:
-
-```text
-abstract C3 ~= Z3
-non-central <Omega> subset SU(3)
-genuine Z(SU(3)) = {I, omega I, omega^2 I}.
-```
-
-A finite-lattice center transformation is not by itself evidence of confinement, deconfinement, spontaneous symmetry breaking, or a thermodynamic order parameter.
+Phase 1C freezes a separate center authority. Keep abstract `C3 ~= Z3`, the non-central `<Omega>` embedding, and genuine `Z(SU(3))` distinct.
 
 ### Phase 1D path/transport authority
 
@@ -91,112 +78,88 @@ A^Omega = Omega A Omega^-1 - dOmega Omega^-1
 U_gamma^Omega = Omega(start) U_gamma Omega(end)^-1.
 ```
 
-If `gamma2 o gamma1` means traverse `gamma1` first and `gamma2` second, then
-
-```text
-U_{gamma2 o gamma1} = U_gamma1 U_gamma2.
-```
-
-Open transport is endpoint-covariant, not gauge invariant. Closed normalized traces are gauge invariant under ordinary periodic local gauge transformations. Phase 1C center transformations remain distinct.
-
-The small-loop relation is a limiting continuum statement. Never equate a finite loop or finite plaquette directly with pointwise gauge curvature. Likewise Frenet curvature, torsion, and osculating geometry are not gauge curvature `F_A`.
+If `gamma2 o gamma1` means traverse `gamma1` first and `gamma2` second, then `U_(gamma2 o gamma1)=U_gamma1 U_gamma2`.
 
 ### Phase 1E classical geometry authority
 
-Phase 1E freezes `YM-CLASSICAL-GEOMETRY-V1`. It is a **classical dictionary**, not a quantum construction.
+Phase 1E freezes `YM-CLASSICAL-GEOMETRY-V1`. It is a classical dictionary, not a quantum construction.
 
-The principal bundle convention is
+Principal-bundle, associated-bundle, connection, curvature, Hodge, Yang–Mills functional, self-duality, and the transport relation `U_gamma=P_gamma^-1` must remain internally consistent with the frozen contract. Gauge curvature must not be collapsed into Riemann/Frenet/Gaussian curvature. Classical self-duality plus Bianchi implies the classical Yang–Mills equation; it does not imply a quantum mass gap.
 
-```text
-pi:P->M
-right action: p -> p g
-connection form: omega_P in Omega^1(P,g)
-R_g^* omega_P = Ad_(g^-1) omega_P.
-```
+### Phase 2A stochastic authority
 
-For a local section `sigma:U->P`,
+Phase 2A freezes `YM-SU2-ENSEMBLE-V1` as the first stochastic authority. It depends on the frozen `SU(2)` lattice/staple semantics and does **not** reopen those contracts.
+
+The reference pseudorandom stream is
 
 ```text
-A = sigma^* omega_P.
+SPLITMIX64-V1
 ```
 
-If `sigma'=sigma g`, then
+with exact integer stream semantics and a versioned seed/chain derivation. A seed is provenance and stream identity, not a physical parameter. Do not replace the RNG, seed derivation, floating conversion, update order, or chain identity fields under the frozen identifier.
+
+For staple
 
 ```text
-A' = g^-1 A g + g^-1 d g.
+V = k Vhat,
 ```
 
-The already-frozen Phase 1D variable is
+the heat-bath local variable is
 
 ```text
-Omega = g^-1,
+R = U Vhat
+alpha = beta k
 ```
 
-so this must reproduce exactly
+with conditional law
 
 ```text
-A^Omega = Omega A Omega^-1 - dOmega Omega^-1.
+dP(R) proportional to exp(alpha r0) d_mu_Haar(R).
 ```
 
-Do not change one of these formulas without changing the others under a new contract version.
-
-For an associated bundle
+The frozen reference draw proposes `r0` from the exact truncated exponential on `[-1,1]`, accepts with probability `sqrt(1-r0^2)`, chooses the vector direction uniformly on `S^2`, and reconstructs
 
 ```text
-E = P x_rho V
-(p,v) ~ (p g, rho(g^-1)v),
+U_new = R Vhat^dagger.
 ```
 
-local fields transform as `psi^Omega=rho(Omega)psi` and the local covariant derivative is
+A rejection-attempt bound is a fail-closed computational guard. Exhausting it must return an error; agents may not silently fall back to a biased proposal.
+
+The frozen over-relaxation reflection is
 
 ```text
-D_A = d + rho_*(A).
+U_new = Vhat^dagger U_old^dagger Vhat^dagger
 ```
 
-The global curvature type is
+for nonzero staple norm. It is microcanonical decorrelation, not an ergodic sampler by itself.
+
+Reference update order is lexicographic sites `x0,x1,x2,x3`, then directions `mu=0,1,2,3`. A complete Markov sweep is one heat-bath sweep followed by the configured number of over-relaxation sweeps.
+
+Every reported chain must preserve:
+
+- action/lattice parameters;
+- master seed, chain ID, and derived seed;
+- thermalisation sweeps;
+- measurement count and sweep cadence;
+- over-relaxation cadence;
+- heat-bath attempt bound;
+- raw measurement series;
+- autocorrelation estimator identity and requested lag;
+- effective sample size.
+
+The Phase 2A autocorrelation/ESS estimator is versioned. Do not substitute a library default or a different window silently.
+
+The `beta=0` plaquette expectation of zero is a sampler sanity surface only. Phase 2A deliberately freezes:
 
 ```text
-F_A in Omega^2(M, ad P),
+published_plaquette_baseline_reproduced = false
+phase2_graduation_gate_satisfied       = false
+su3_ensemble_enabled                   = false.
 ```
 
-with local matrix convention
+Do not claim full Phase 2 graduation, a published finite-beta baseline reproduction, or enable `SU(3)` ensembles under `YM-SU2-ENSEMBLE-V1`. Those require a later reviewed gate matching the published action, normalization, volume, parameter regime, observable, and uncertainty treatment.
 
-```text
-F_A = dA + A wedge A
-```
-
-and Bianchi identity
-
-```text
-D_A F_A = 0.
-```
-
-Do not collapse `F_A` into an ordinary scalar 2-form or into Riemann/Frenet/Gaussian curvature.
-
-The mathematical Lie algebra `su(3)` is traceless anti-Hermitian. Phase 1B's `T^a=lambda_a/2` are Hermitian generators, so the corresponding anti-Hermitian basis is `i T^a`. This bridge is frozen.
-
-For the oriented Riemannian four-dimensional convention,
-
-```text
-*^2 = +1 on 2-forms
-D_A^* F_A = - * D_A * F_A
-YM(A) = (1/2) integral_M |F_A|^2 dvol
-Euler-Lagrange: D_A^* F_A = 0.
-```
-
-A Yang–Mills connection is a critical point, not automatically a global minimizer. Self-duality/anti-self-duality plus Bianchi implies the **classical** Yang–Mills equation; it does not imply a quantum mass gap.
-
-The Levi-Civita connection is the unique torsion-free metric-compatible connection on `TM`; it is not the gauge connection. Its Riemann curvature is not `F_A`.
-
-Phase 1E freezes the transport dictionary
-
-```text
-U_gamma = P_gamma^-1,
-```
-
-where `P_gamma` is forward associated-fiber transport and `U_gamma` is the Phase 1D start-left transporter. Multi-chart transport must use path subdivision and transition-function coordinate changes; no local potential may be silently extended outside its trivialization.
-
-The finite-dimensional Rust Hodge fixture checks only sign/algebra conventions in oriented Euclidean `R^4`. It is not a continuum PDE/manifold solver.
+A low autocorrelation estimate, large ESS, or literature agreement does not imply confinement, continuum QFT existence, or a mass gap.
 
 Do not import triadic ontology, Q/K/V-to-colour semantics, or other cross-domain interpretations into these authorities.
 
@@ -208,24 +171,11 @@ GLUBALL `v1.0.0` is an engineering donor only. The recorded tag target is:
 80941183d14531093117e122da0fc32c13d2464b
 ```
 
-Allowed donor ideas include provenance sealing, contract/version discipline, deterministic test vectors, reference-vs-accelerator separation, residual acceptance, and bounded stress/testing patterns.
-
-Not imported as Yang–Mills physics:
-
-- `GLUBALL-KNOT-V1`;
-- `(2,3)` torus-knot geometry;
-- topology claims;
-- phi-Weyl sampling;
-- ternary/triality channels;
-- sonification;
-- RSH geometry;
-- any implication that GLUBALL geometry represents gluons, glueballs, gauge fields, or the mass gap.
-
-Any future proposal connecting those concepts to Yang–Mills must be introduced as a new hypothesis with independent motivation and tests.
+Allowed donor ideas include provenance sealing, contract/version discipline, deterministic test vectors, reference-vs-accelerator separation, residual acceptance, and bounded stress/testing patterns. GLUBALL geometry/topology is not Yang–Mills physics.
 
 ## Change rules
 
-When modifying an existing mathematical contract:
+When modifying an existing mathematical/statistical contract:
 
 - state whether the change is editorial, implementation-only, or semantic;
 - add/update regression vectors for semantic changes;
@@ -246,16 +196,17 @@ cargo run --quiet --locked --bin ym-su3-lattice
 cargo run --quiet --locked --bin ym-su3-center
 cargo run --quiet --locked --bin ym-path-holonomy
 cargo run --quiet --locked --bin ym-classical-geometry
+cargo run --quiet --locked --bin ym-su2-ensemble
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
 
 The unified contract entry points are authoritative. Adding a new contract surface without registering it in those commands is a readiness failure.
 
-Tests must fail closed on invalid lattice extents, invalid group construction, invalid/oversized paths, non-finite inputs, group-product acceptance failures, broken contract structure, or weakened claim boundaries. Public `Result` APIs may not turn an admissible numerical or allocation failure into a panic merely because an internal helper expected success.
+Tests must fail closed on invalid lattice extents, invalid group construction, invalid/oversized paths, invalid ensemble schedules, non-finite inputs/statistics, rejection-limit exhaustion, broken contract structure, or weakened claim boundaries. Public `Result` APIs may not turn admissible numerical/allocation failures into panics.
 
-Floating-point equality is not assumed. Every numerical comparison must have an explicit tolerance and must not be advertised as bitwise cross-platform identity unless separately established.
+Floating-point equality is not assumed. Every numerical/statistical comparison must have an explicit tolerance or uncertainty rule and must not be advertised as bitwise cross-platform identity unless separately established.
 
 ## Formalisation
 
-Do not add a theorem prover merely for prestige. Formalise only stable definitions and theorem surfaces. A finite-lattice, finite-dimensional group/Hodge, or classical bundle/connection proof is valuable but must not be described as the continuum quantum Yang–Mills existence/mass-gap proof.
+Do not add a theorem prover merely for prestige. Formalise only stable definitions and theorem surfaces. A finite-lattice, finite-dimensional group/Hodge, classical bundle/connection, or sampler-correctness theorem is valuable but must not be described as the continuum quantum Yang–Mills existence/mass-gap proof.
