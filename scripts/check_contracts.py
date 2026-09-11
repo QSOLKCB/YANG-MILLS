@@ -279,8 +279,22 @@ def require(condition: bool, message: str) -> None:
         raise SystemExit(f"contract check failed: {message}")
 
 
+def exact_typed_equal(payload: Any, expected: Any) -> bool:
+    if type(payload) is not type(expected):
+        return False
+    if isinstance(expected, dict):
+        return payload.keys() == expected.keys() and all(
+            exact_typed_equal(payload[key], expected[key]) for key in expected
+        )
+    if isinstance(expected, list):
+        return len(payload) == len(expected) and all(
+            exact_typed_equal(actual, wanted) for actual, wanted in zip(payload, expected)
+        )
+    return payload == expected
+
+
 def validate_exact(relative: str, payload: Any, expected: Any) -> None:
-    require(payload == expected, f"{relative}: contract/vector semantics drift")
+    require(exact_typed_equal(payload, expected), f"{relative}: contract/vector semantics drift")
 
 
 def main() -> None:
