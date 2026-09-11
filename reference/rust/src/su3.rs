@@ -217,7 +217,9 @@ impl Mat3 {
     }
 
     pub fn unitarity_residual(self) -> f64 {
-        self.dagger().mul(self).max_residual(Self::IDENTITY)
+        let left = self.dagger().mul(self).max_residual(Self::IDENTITY);
+        let right = self.mul(self.dagger()).max_residual(Self::IDENTITY);
+        left.max(right)
     }
 
     pub fn determinant_residual(self) -> f64 {
