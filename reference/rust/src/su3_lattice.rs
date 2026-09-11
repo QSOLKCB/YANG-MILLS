@@ -15,6 +15,7 @@ use crate::su3::{Complex64, Mat3, Su3, Su3Error, SU3_ACCEPTANCE_TOLERANCE};
 
 pub const DIM: usize = 4;
 pub const MAX_SU3_REFERENCE_LINKS: usize = 1 << 18;
+const DETERMINISTIC_GAUGE_CODE_MODULUS: usize = 1024;
 
 #[derive(Clone, Debug)]
 pub struct Su3Lattice4 {
@@ -293,11 +294,18 @@ pub fn traceless_cycle_link() -> Result<Su3, Su3LatticeError> {
 }
 
 pub fn deterministic_su3_site_gauge(x: [usize; DIM]) -> Su3 {
-    let code = x[0] + 3 * x[1] + 7 * x[2] + 11 * x[3];
+    let reduced = [
+        x[0] % DETERMINISTIC_GAUGE_CODE_MODULUS,
+        x[1] % DETERMINISTIC_GAUGE_CODE_MODULUS,
+        x[2] % DETERMINISTIC_GAUGE_CODE_MODULUS,
+        x[3] % DETERMINISTIC_GAUGE_CODE_MODULUS,
+    ];
+    let code = (reduced[0] + 3 * reduced[1] + 7 * reduced[2] + 11 * reduced[3])
+        % DETERMINISTIC_GAUGE_CODE_MODULUS;
     let mut coefficients = [0.0; 8];
     coefficients[2] = 0.031 * (code as f64 + 1.0);
     Su3::from_algebra_coefficients(coefficients)
-        .expect("bounded deterministic SU(3) diagonal gauge coefficient")
+        .expect("modulo-bounded deterministic SU(3) gauge coefficient")
 }
 
 pub fn single_traceless_su3_link_lattice() -> Result<Su3Lattice4, Su3LatticeError> {
