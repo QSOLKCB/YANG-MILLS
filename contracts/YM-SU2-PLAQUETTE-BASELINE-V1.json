@@ -1,6 +1,6 @@
 {
   "contract_id": "YM-SU2-PLAQUETTE-BASELINE-V1",
-  "status": "phase-2b-review-candidate",
+  "status": "phase-2b-frozen",
   "depends_on": [
     {"contract_id": "YM-SU2-ENSEMBLE-V1", "required_status": "phase-2a-frozen"}
   ],
@@ -42,8 +42,8 @@
     "raw_measurements_retained_by_chain_reports": true
   },
   "phase2_gate": {
-    "published_plaquette_baseline_reproduced": false,
-    "phase2_graduation_gate_satisfied": false,
+    "published_plaquette_baseline_reproduced": true,
+    "phase2_graduation_gate_satisfied": true,
     "su3_ensemble_enabled": false
   },
   "claim_boundary": {
