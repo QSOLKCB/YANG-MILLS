@@ -1,10 +1,10 @@
 [package]
 name = "yang-mills-reference"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 license = "MPL-2.0"
 repository = "https://github.com/QSOLKCB/YANG-MILLS"
-description = "Deterministic SU(2) Wilson-lattice reference core and invariant observables for YANG-MILLS Phase 1A"
+description = "Deterministic SU(2) lattice observables and standalone SU(3) algebra reference surfaces for YANG-MILLS"
 default-run = "ym-su2-reference"
 
 [lib]
@@ -13,6 +13,10 @@ path = "reference/rust/src/lib.rs"
 [[bin]]
 name = "ym-su2-reference"
 path = "reference/rust/src/main.rs"
+
+[[bin]]
+name = "ym-su3-algebra"
+path = "reference/rust/src/bin/su3_reference.rs"
 
 [profile.release]
 lto = "thin"
