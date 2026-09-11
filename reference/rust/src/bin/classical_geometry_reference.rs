@@ -12,10 +12,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let beta = TwoForm4::from_components([6.0, -5.0, 4.0, -3.0, 2.0, -1.0])?;
 
     let star_square_residual = alpha.hodge_star().hodge_star().max_residual(alpha);
-    let hodge_inner_wedge_residual = (alpha
-        .wedge_volume_coefficient(beta.hodge_star())
-        - alpha.inner_product(beta))
-    .abs();
+    let hodge_inner_wedge_residual =
+        (alpha.wedge_volume_coefficient(beta.hodge_star()) - alpha.inner_product(beta)).abs();
 
     let self_dual = alpha.self_dual_part()?;
     let anti_self_dual = alpha.anti_self_dual_part()?;
