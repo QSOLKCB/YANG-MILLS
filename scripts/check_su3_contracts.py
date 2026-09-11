@@ -34,6 +34,7 @@ EXPECTED_SU3_CONTRACT: dict[str, Any] = {
         "coefficient_domain": "all theta_a finite and abs(theta_a)<=64",
         "method": "scaling-and-squaring-taylor-64",
         "scale_target_one_norm": 0.5,
+        "unitarity_residual": "max(max_abs(U^dagger U-I),max_abs(U U^dagger-I))",
         "unitarity_acceptance_tolerance": 5e-12,
         "determinant_one_acceptance_tolerance": 5e-12,
         "projection_to_su3_used": False,
