@@ -43,6 +43,18 @@ def main() -> None:
     )
 
     broken = copy.deepcopy(EXPECTED_PATH_CONTRACT)
+    broken["continuum_path"]["local_trivialization_domain"] = (
+        "U subset M with no requirement that the path image lies in U"
+    )
+    expect_reject(
+        lambda payload: validate_exact(
+            "contracts/YM-PATH-HOLONOMY-V1.json", payload, EXPECTED_PATH_CONTRACT
+        ),
+        broken,
+        "undefined single-chart connection along path",
+    )
+
+    broken = copy.deepcopy(EXPECTED_PATH_CONTRACT)
     broken["lattice_discretization"]["product_order"] = (
         "segments-multiplied-in-reverse-traversal-order"
     )
@@ -52,6 +64,18 @@ def main() -> None:
         ),
         broken,
         "lattice product-order drift",
+    )
+
+    broken = copy.deepcopy(EXPECTED_PATH_CONTRACT)
+    broken["lattice_discretization"]["invalid_direction_rule"] = (
+        "validate only when the path is transported"
+    )
+    expect_reject(
+        lambda payload: validate_exact(
+            "contracts/YM-PATH-HOLONOMY-V1.json", payload, EXPECTED_PATH_CONTRACT
+        ),
+        broken,
+        "direction validation deferred past public path helpers",
     )
 
     broken = copy.deepcopy(EXPECTED_PATH_CONTRACT)
