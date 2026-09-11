@@ -1,0 +1,66 @@
+{
+  "contract_id": "YM-CLASSICAL-GEOMETRY-V1",
+  "vector_set": "CLASSICAL-GEOMETRY-PHASE1E-V1",
+  "status": "phase-1e-review-candidate",
+  "vectors": [
+    {
+      "id": "hodge-star-basis-signs",
+      "fixture": "oriented Euclidean R^4 orthonormal coframe",
+      "basis_order": ["01", "02", "03", "12", "13", "23"],
+      "expected_map": ["23", "-13", "12", "03", "-02", "01"],
+      "claim_class": "C0"
+    },
+    {
+      "id": "hodge-star-square-two-form",
+      "input": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+      "observable": "max_abs(**F-F)",
+      "expected": 0.0,
+      "tolerance": 0.0,
+      "claim_class": "C0"
+    },
+    {
+      "id": "hodge-inner-product-wedge-identity",
+      "alpha": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+      "beta": [6.0, -5.0, 4.0, -3.0, 2.0, -1.0],
+      "observable": "coefficient(alpha wedge *beta)-inner_product(alpha,beta)",
+      "expected": 0.0,
+      "tolerance": 0.0,
+      "claim_class": "C0"
+    },
+    {
+      "id": "self-dual-decomposition",
+      "input": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+      "self_dual_expected": [3.5, -1.5, 3.5, 3.5, 1.5, 3.5],
+      "anti_self_dual_expected": [-2.5, 3.5, -0.5, 0.5, 3.5, 2.5],
+      "star_self_dual_residual_max": 0.0,
+      "star_anti_self_dual_residual_max": 0.0,
+      "reconstruction_residual_max": 0.0,
+      "claim_class": "C0"
+    },
+    {
+      "id": "self-anti-orthogonality",
+      "input": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+      "observable": "inner_product(F_plus,F_minus)",
+      "expected": 0.0,
+      "tolerance": 0.0,
+      "claim_class": "C0"
+    },
+    {
+      "id": "phase1d-forward-transport-dictionary",
+      "source_contract": "YM-PATH-HOLONOMY-V1",
+      "phase1d_start_left": "U_gamma",
+      "forward_associated_transport": "P_gamma",
+      "relation": "U_gamma=P_gamma^-1",
+      "expected": "exact-semantic-match",
+      "claim_class": "C0"
+    },
+    {
+      "id": "su3-hermitian-to-antihermitian-lie-algebra-bridge",
+      "source_contract": "YM-SU3-ALGEBRA-V1",
+      "hermitian_generator": "T^a=lambda_a/2",
+      "su3_lie_algebra_basis": "i T^a",
+      "expected": "traceless-anti-Hermitian-basis",
+      "claim_class": "C0"
+    }
+  ]
+}
