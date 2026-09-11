@@ -19,6 +19,7 @@ pub const MAX_REFERENCE_BETA: f64 = 8.0;
 pub const MAX_REFERENCE_SWEEPS: usize = 1 << 20;
 pub const MAX_REFERENCE_MEASUREMENTS: usize = 1 << 20;
 pub const MAX_OVERRELAXATION_SWEEPS: usize = 16;
+pub const ALPHA_ZERO_LIMIT: f64 = 1.0e-300;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct SplitMix64 {
@@ -72,13 +73,18 @@ impl EnsembleConfig {
         if !self.beta.is_finite() || self.beta < 0.0 || self.beta > MAX_REFERENCE_BETA {
             return Err(EnsembleError::BetaOutsideReferenceRange);
         }
-        if self.thermalization_sweeps > MAX_REFERENCE_SWEEPS
-            || self.measurements > MAX_REFERENCE_MEASUREMENTS
-            || self
-                .measurements
-                .checked_mul(self.sweeps_between_measurements)
-                .is_none_or(|sweeps| sweeps > MAX_REFERENCE_SWEEPS)
-        {
+        if self.measurements > MAX_REFERENCE_MEASUREMENTS {
+            return Err(EnsembleError::ScheduleOutsideReferenceRange);
+        }
+        let measurement_sweeps = self
+            .measurements
+            .checked_mul(self.sweeps_between_measurements)
+            .ok_or(EnsembleError::ScheduleOutsideReferenceRange)?;
+        let total_sweeps = self
+            .thermalization_sweeps
+            .checked_add(measurement_sweeps)
+            .ok_or(EnsembleError::ScheduleOutsideReferenceRange)?;
+        if total_sweeps > MAX_REFERENCE_SWEEPS {
             return Err(EnsembleError::ScheduleOutsideReferenceRange);
         }
         if self.measurements < 2 {
@@ -206,9 +212,11 @@ fn uniform_sphere_direction(rng: &mut SplitMix64) -> [f64; 3] {
 ///
 /// dP(R) proportional to exp(alpha * r0) d_mu_Haar(R), alpha >= 0.
 ///
-/// The scalar component proposal is the exact truncated exponential on
-/// [-1,1].  The Haar Jacobian factor sqrt(1-r0^2) is then imposed by rejection,
-/// and the vector direction is uniform on S^2.
+/// The scalar proposal is the truncated exponential away from zero.  Below
+/// `ALPHA_ZERO_LIMIT` the floating-point reference uses its uniform zero-limit
+/// to avoid subnormal inverse-CDF quantization. The Haar Jacobian factor
+/// sqrt(1-r0^2) is then imposed by rejection, and the vector direction is
+/// uniform on S^2.
 fn sample_local_heatbath(
     alpha: f64,
     rng: &mut SplitMix64,
@@ -220,7 +228,7 @@ fn sample_local_heatbath(
 
     for attempt in 1..=max_attempts {
         let proposal_uniform = rng.unit_f64();
-        let r0 = if alpha == 0.0 {
+        let r0 = if alpha <= ALPHA_ZERO_LIMIT {
             2.0 * proposal_uniform - 1.0
         } else {
             let truncated_mass = -(-2.0 * alpha).exp_m1();
@@ -522,13 +530,17 @@ pub fn run_chain(config: EnsembleConfig) -> Result<ChainReport, EnsembleError> {
         return Err(EnsembleError::NonFiniteStatistic);
     }
 
+    let total_heatbath_sweeps = config
+        .thermalization_sweeps
+        .checked_add(config.measurements * config.sweeps_between_measurements)
+        .ok_or(EnsembleError::ScheduleOutsideReferenceRange)?;
+
     Ok(ChainReport {
         sampler_id: SAMPLER_ID,
         rng_id: RNG_ID,
         config,
         derived_seed,
-        total_heatbath_sweeps: config.thermalization_sweeps
-            + config.measurements * config.sweeps_between_measurements,
+        total_heatbath_sweeps,
         total_overrelaxation_sweeps: overrelaxation_sweeps,
         heatbath_proposals,
         heatbath_updates,
