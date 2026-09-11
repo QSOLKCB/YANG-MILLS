@@ -30,8 +30,28 @@ def main() -> None:
     expect_reject(validate_ensemble_contract, broken, "seed promoted to physical parameter")
 
     broken = copy.deepcopy(contract)
+    broken["chain_identity"] = {}
+    expect_reject(validate_ensemble_contract, broken, "chain identity structure erased")
+
+    broken = copy.deepcopy(contract)
+    broken["schedule"]["observable"] = "unrelated observable"
+    expect_reject(validate_ensemble_contract, broken, "schedule observable drift")
+
+    broken = copy.deepcopy(contract)
+    broken["reproducibility"]["raw_measurement_series_retained_in_reference_report"] = False
+    expect_reject(validate_ensemble_contract, broken, "raw measurement retention weakened")
+
+    broken = copy.deepcopy(contract)
+    broken["reference_bounds"]["total_complete_markov_sweeps_must_be_at_most_max_schedule_sweeps"] = False
+    expect_reject(validate_ensemble_contract, broken, "total schedule bound weakened")
+
+    broken = copy.deepcopy(contract)
     broken["su2_heatbath"]["conditional_density"] = "uniform Haar only"
     expect_reject(validate_ensemble_contract, broken, "heat-bath conditional density drift")
+
+    broken = copy.deepcopy(contract)
+    broken["su2_heatbath"]["alpha_zero_limit"] = 1e-100
+    expect_reject(validate_ensemble_contract, broken, "tiny-alpha numerical threshold drift")
 
     broken = copy.deepcopy(contract)
     broken["su2_heatbath"]["haar_jacobian_acceptance"] = "always accept"
