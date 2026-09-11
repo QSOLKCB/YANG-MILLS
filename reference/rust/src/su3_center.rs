@@ -80,16 +80,8 @@ pub fn cycle_generator() -> Result<Su3, Su3Error> {
 /// non-central without relying on a merely infinitesimal Lie-algebra witness.
 pub fn noncentral_witness() -> Result<Su3, Su3Error> {
     Su3::from_checked_matrix(Mat3::from_rows([
-        [
-            Complex64::new(-1.0, 0.0),
-            Complex64::ZERO,
-            Complex64::ZERO,
-        ],
-        [
-            Complex64::ZERO,
-            Complex64::new(-1.0, 0.0),
-            Complex64::ZERO,
-        ],
+        [Complex64::new(-1.0, 0.0), Complex64::ZERO, Complex64::ZERO],
+        [Complex64::ZERO, Complex64::new(-1.0, 0.0), Complex64::ZERO],
         [Complex64::ZERO, Complex64::ZERO, Complex64::ONE],
     ]))
 }
@@ -97,9 +89,7 @@ pub fn noncentral_witness() -> Result<Su3, Su3Error> {
 pub fn cycle_noncentral_residual() -> Result<f64, Su3Error> {
     let omega = cycle_generator()?.matrix();
     let witness = noncentral_witness()?.matrix();
-    Ok(omega
-        .mul(witness)
-        .max_residual(witness.mul(omega)))
+    Ok(omega.mul(witness).max_residual(witness.mul(omega)))
 }
 
 pub fn center_commutator_residual(element: C3, value: Su3) -> Result<f64, Su3Error> {
