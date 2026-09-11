@@ -106,15 +106,17 @@ No confinement/deconfinement claim follows merely from defining or evaluating th
 
 ## Staples and local action mechanics
 
-For a link `U_mu(x)`, there are two adjacent plaquettes in each of the other three coordinate directions, giving six staple terms in four dimensions. The implementation constructs their quaternion-component sum as a non-group-valued `Staple` object.
+For a link `U_mu(x)`, there are two adjacent plaquettes in each of the other three coordinate directions, giving six staple terms in four dimensions. The implementation exposes their quaternion-component sum as a non-group-valued `Staple` diagnostic object.
 
-If `S_mu(x)` denotes that six-term staple sum, the local six-plaquette action is evaluated through the scalar part of `U_mu(x) S_mu(x)`. For a candidate replacement `U'_mu(x)`, `local_action_difference` returns
+The authoritative local six-plaquette action is evaluated from the same normalized plaquette products used by the complete Wilson action. For a candidate replacement `U'_mu(x)`, `local_action_difference` returns
 
 ```text
 Delta S = S_local(U') - S_local(U).
 ```
 
-This is checked against the difference of two complete Wilson-action evaluations. These deterministic primitives are intended for later heat-bath/over-relaxation algorithms; Phase 1A does not implement stochastic sampling.
+The implementation constructs the candidate configuration, recomputes those six normalized plaquette terms, and checks the result against the difference of complete Wilson-action evaluations. This intentionally avoids a raw staple-dot-product shortcut whose floating-point behavior can disagree with the normalized plaquette authority for serialized near-unit links.
+
+These deterministic primitives are intended for later heat-bath/over-relaxation algorithms; Phase 1A does not implement stochastic sampling.
 
 ## Local gauge transformations
 
@@ -132,12 +134,15 @@ The reference implementation caches one `Omega(x)` value per site before transfo
 
 `YM-SU2-CONFIG-V1` serializes links in canonical site-major order, then direction order `0,1,2,3`. Each quaternion component is represented by its exact IEEE-754 binary64 bit pattern as 16 lowercase hexadecimal digits.
 
-Parsing is fail-closed:
+Parsing is incremental and fail-closed: the parser reads and validates the header, extents, and declared link count before consuming the link body, rejects a declared count beyond the bounded reference limit, and never collects all input lines into an unbounded intermediate vector.
+
+The remaining canonical requirements are:
 
 - the header and extents must be canonical;
 - declared and computed link counts must agree;
 - each component token must be exactly 16 lowercase hexadecimal digits;
 - each decoded quaternion must be finite and unit within the declared serialization tolerance;
+- no extra component fields or link lines are permitted;
 - re-serialization must reproduce the input text exactly.
 
 This encoding establishes deterministic identity/provenance for finite configurations; it does not make floating-point outputs physically exact.
