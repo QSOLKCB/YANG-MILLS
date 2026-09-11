@@ -17,10 +17,10 @@ Phase 1A extends that core with finite-lattice observables and local mechanics:
 - arbitrary oriented lattice paths with forward and reverse-link transport;
 - Wilson loops and rectangular `R x T` loops;
 - Polyakov loops as gauge-invariant observables, without a confinement claim;
-- staples, local link action, and local action differences;
+- six-term staple diagnostics plus authoritative normalized-plaquette local action and action differences;
 - deterministic left-link update primitives for later ensemble algorithms;
 - analytic/gauge-invariance/cyclic-trace regression tests;
-- candidate contracts `YM-SU2-LATTICE-V1` and `YM-WILSON-LOOP-V1`.
+- frozen contracts `YM-SU2-LATTICE-V1` and `YM-WILSON-LOOP-V1`.
 
 Phase 1A still does **not** perform Monte Carlo ensemble generation, glueball extraction, continuum extrapolation, or any proof-facing continuum construction.
 
@@ -87,7 +87,7 @@ Polyakov loops wrap one complete periodic lattice extent. Their presence in the 
 
 ## Deterministic configuration encoding
 
-`YM-SU2-CONFIG-V1` serializes a lattice in a canonical site-major/link-direction order. Each quaternion component is stored as its exact IEEE-754 binary64 bit pattern using 16 lowercase hexadecimal digits. Round-trip parsing must reproduce the canonical text exactly and must preserve the unit-quaternion invariant.
+`YM-SU2-CONFIG-V1` serializes a lattice in a canonical site-major/link-direction order. Each quaternion component is stored as its exact IEEE-754 binary64 bit pattern using 16 lowercase hexadecimal digits. Round-trip parsing must reproduce the canonical text exactly and must preserve the unit-quaternion invariant. Parsing is incremental and enforces the bounded reference link count before processing the configuration body.
 
 This is an implementation/provenance surface, not a physical observable.
 
@@ -125,7 +125,7 @@ See [`docs/DONOR_BOUNDARY.md`](docs/DONOR_BOUNDARY.md).
 
 ## Roadmap
 
-The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 1A establishes the finite `SU(2)` observable/mechanics surface. Later Phase 1 work adds `SU(3)` algebra, center symmetry, path/continuum dictionaries, then subsequent phases add ensemble generation, glueball observables, published-baseline reproduction, HPC acceleration, continuum scaling, constructive analysis, and formalization of stable theorem surfaces.
+The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 1A establishes the frozen finite `SU(2)` observable/mechanics surface. Later Phase 1 work adds `SU(3)` algebra, center symmetry, path/continuum dictionaries, then subsequent phases add ensemble generation, glueball observables, published-baseline reproduction, HPC acceleration, continuum scaling, constructive analysis, and formalization of stable theorem surfaces.
 
 ## Licence
 
