@@ -56,7 +56,9 @@ fn single_traceless_cycle_link_has_analytic_action() {
 fn local_gauge_transform_preserves_wilson_action() {
     let beta = 1.7;
     let lattice = single_traceless_su3_link_lattice().unwrap();
-    let transformed = lattice.gauge_transform(deterministic_su3_site_gauge).unwrap();
+    let transformed = lattice
+        .gauge_transform(deterministic_su3_site_gauge)
+        .unwrap();
     let residual =
         (lattice.wilson_action(beta).unwrap() - transformed.wilson_action(beta).unwrap()).abs();
     assert!(residual <= 1.0e-10, "gauge-action residual={residual:.17e}");
