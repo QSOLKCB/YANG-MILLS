@@ -67,6 +67,30 @@ def main() -> None:
     )
 
     broken = copy.deepcopy(contract)
+    broken["comparison_rule"]["within_chain_stationarity_required"] = False
+    expect_reject(
+        lambda payload: validate_exact(CONTRACT_PATH, payload, EXPECTED_BASELINE_CONTRACT),
+        broken,
+        "within-chain stationarity gate removed",
+    )
+
+    broken = copy.deepcopy(contract)
+    broken["reference_run"]["maximum_stationarity_z"] = 50.0
+    expect_reject(
+        lambda payload: validate_exact(CONTRACT_PATH, payload, EXPECTED_BASELINE_CONTRACT),
+        broken,
+        "stationarity drift threshold weakened",
+    )
+
+    broken = copy.deepcopy(contract)
+    broken["reference_run"]["stationarity_autocorrelation_max_lag"] = 0
+    expect_reject(
+        lambda payload: validate_exact(CONTRACT_PATH, payload, EXPECTED_BASELINE_CONTRACT),
+        broken,
+        "stationarity autocorrelation rule drift",
+    )
+
+    broken = copy.deepcopy(contract)
     broken["phase2_gate"]["published_plaquette_baseline_reproduced"] = False
     expect_reject(
         lambda payload: validate_exact(CONTRACT_PATH, payload, EXPECTED_BASELINE_CONTRACT),
@@ -107,7 +131,15 @@ def main() -> None:
     )
 
     broken = copy.deepcopy(vectors)
-    broken["vectors"][2]["phase2_graduation_gate_satisfied"] = False
+    broken["vectors"][2]["maximum_half_drift_z"] = 50.0
+    expect_reject(
+        lambda payload: validate_exact(VECTOR_PATH, payload, EXPECTED_BASELINE_VECTORS),
+        broken,
+        "stationarity vector weakened",
+    )
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][3]["phase2_graduation_gate_satisfied"] = False
     expect_reject(
         lambda payload: validate_exact(VECTOR_PATH, payload, EXPECTED_BASELINE_VECTORS),
         broken,
