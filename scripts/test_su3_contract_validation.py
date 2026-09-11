@@ -40,6 +40,14 @@ def main() -> None:
     )
 
     broken = copy.deepcopy(EXPECTED_SU3_CONTRACT)
+    broken["exponentiation"]["determinant_residual"] = "abs(det(U)-1)"
+    expect_reject(
+        lambda payload: validate_exact("contracts/YM-SU3-ALGEBRA-V1.json", payload, EXPECTED_SU3_CONTRACT),
+        broken,
+        "one-sided determinant residual",
+    )
+
+    broken = copy.deepcopy(EXPECTED_SU3_CONTRACT)
     broken["lattice_links_enabled"] = 0
     expect_reject(
         lambda payload: validate_exact("contracts/YM-SU3-ALGEBRA-V1.json", payload, EXPECTED_SU3_CONTRACT),
