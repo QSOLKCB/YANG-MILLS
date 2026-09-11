@@ -282,8 +282,7 @@ mod tests {
             config,
             derived_seed: derive_chain_seed(MASTER_SEED, chain_id),
             total_heatbath_sweeps,
-            total_overrelaxation_sweeps: total_heatbath_sweeps
-                * OVERRELAXATION_SWEEPS_PER_HEATBATH,
+            total_overrelaxation_sweeps: total_heatbath_sweeps * OVERRELAXATION_SWEEPS_PER_HEATBATH,
             heatbath_proposals: 100,
             heatbath_updates: 40,
             mean_heatbath_acceptance: 0.4,
