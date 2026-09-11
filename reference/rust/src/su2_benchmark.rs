@@ -14,7 +14,7 @@
 
 use core::fmt;
 
-use crate::su2_ensemble::{diagnostics, ChainReport};
+use crate::su2_ensemble::{derive_chain_seed, diagnostics, ChainReport, RNG_ID, SAMPLER_ID};
 
 pub const BENCHMARK_ID: &str = "YM-SU2-PLAQUETTE-BASELINE-V1";
 pub const PRIMARY_DOI: &str = "10.1103/PhysRevLett.109.111601";
@@ -91,7 +91,10 @@ pub struct BenchmarkSummary {
 
 fn report_matches_benchmark(report: &ChainReport, chain_id: u64) -> bool {
     let config = report.config;
-    config.extents == EXTENTS
+    report.sampler_id == SAMPLER_ID
+        && report.rng_id == RNG_ID
+        && report.derived_seed == derive_chain_seed(MASTER_SEED, chain_id)
+        && config.extents == EXTENTS
         && config.beta == BETA
         && config.master_seed == MASTER_SEED
         && config.chain_id == chain_id
@@ -264,7 +267,7 @@ pub fn summarize_two_chains(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::su2_ensemble::{derive_chain_seed, EnsembleConfig, RNG_ID, SAMPLER_ID};
+    use crate::su2_ensemble::EnsembleConfig;
 
     fn benchmark_config(chain_id: u64) -> EnsembleConfig {
         EnsembleConfig {
@@ -302,6 +305,47 @@ mod tests {
             diagnostics: chain_diagnostics,
             final_link_unit_residual: 0.0,
         }
+    }
+
+    fn stationary_measurements() -> Vec<f64> {
+        (0..MEASUREMENTS)
+            .map(|index| if index % 2 == 0 { 0.601 } else { 0.603 })
+            .collect()
+    }
+
+    #[test]
+    fn executable_source_envelope_matches_frozen_contract() {
+        assert_eq!(SOURCE_ENVELOPE_MIN, 0.59);
+        assert_eq!(SOURCE_ENVELOPE_MAX, 0.62);
+    }
+
+    #[test]
+    fn frozen_chain_report_identity_is_required() {
+        let measurements = stationary_measurements();
+        let first = synthetic_report(CHAIN_IDS[0], measurements.clone());
+        let second = synthetic_report(CHAIN_IDS[1], measurements);
+        assert!(summarize_two_chains(&first, &second).is_ok());
+
+        let mut wrong_sampler = first.clone();
+        wrong_sampler.sampler_id = "YM-SU2-ENSEMBLE-OTHER";
+        assert_eq!(
+            summarize_two_chains(&wrong_sampler, &second),
+            Err(BenchmarkError::WrongBenchmarkConfiguration)
+        );
+
+        let mut wrong_rng = first.clone();
+        wrong_rng.rng_id = "SPLITMIX64-OTHER";
+        assert_eq!(
+            summarize_two_chains(&wrong_rng, &second),
+            Err(BenchmarkError::WrongBenchmarkConfiguration)
+        );
+
+        let mut wrong_seed = first;
+        wrong_seed.derived_seed ^= 1;
+        assert_eq!(
+            summarize_two_chains(&wrong_seed, &second),
+            Err(BenchmarkError::WrongBenchmarkConfiguration)
+        );
     }
 
     #[test]
