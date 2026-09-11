@@ -4,7 +4,7 @@
 
 Phase 2B tests the frozen Phase 2A `SU(2)` sampler against a peer-reviewed external finite-lattice observable. It is a validation of the finite-lattice Markov-chain implementation in one declared regime. It is not a confinement result, a continuum construction, or a mass-gap theorem.
 
-`YM-SU2-PLAQUETTE-BASELINE-V1` and `SU2-PLAQUETTE-BASELINE-PHASE2B-V1` are frozen as `phase-2b-frozen` only when the external comparison, independent-chain diagnostics, and explicit post-thermalisation stationarity checks all pass the complete reference/contract surface.
+`YM-SU2-PLAQUETTE-BASELINE-V1` and `SU2-PLAQUETTE-BASELINE-PHASE2B-V1` are frozen as `phase-2b-frozen` after the external comparison, independent-chain diagnostics, and explicit post-thermalisation stationarity checks all passed the complete reference/contract surface.
 
 ## Primary source
 
@@ -92,7 +92,7 @@ stationarity_z = |mean_first - mean_second|
 
 Each chain must satisfy `stationarity_z <= 5`. This is a bounded within-chain stationarity diagnostic, not a proof of perfect equilibration or the absence of every systematic effect.
 
-The Phase 2 graduation candidate passes only if:
+The Phase 2 graduation gate passes only if:
 
 1. the pooled mean lies inside the predeclared published source-resolution envelope `[0.59,0.62]`;
 2. both chains meet the ESS floor;
@@ -101,9 +101,11 @@ The Phase 2 graduation candidate passes only if:
 5. final `SU(2)` link-unit residuals remain within tolerance;
 6. heat-bath acceptance statistics remain finite and positive.
 
-## First predeclared external result
+## Final hardened result
 
-The first run using the frozen external benchmark settings, before the later stationarity hardening, produced:
+The external benchmark target, source envelope, volume, coupling, observable, seeds, and chain schedule were not changed after inspection. Review later identified that two cold-start chains could share a residual transient, so the additional stationarity gate above was added without moving those external or run targets.
+
+The exact hardened run produced:
 
 ```text
 chain 0 mean             = 0.6026867250625984
@@ -113,19 +115,27 @@ pooled diagnostic SE     = 0.0004173286094490
 chain-consistency z      = 0.9459144054
 minimum chain ESS        = 7.7458561747
 maximum link-unit resid. = 6.6613381478e-16
+
+chain 0 first-half mean  = 0.6037349175777675
+chain 0 second-half mean = 0.6016385325474291
+chain 0 stationarity z   = 2.3962050056
+
+chain 1 first-half mean  = 0.6021866298531725
+chain 1 second-half mean = 0.6016077916981041
+chain 1 stationarity z   = 1.1383971897
+
+maximum stationarity z   = 2.3962050056
 ```
 
-That result lies inside the predeclared `[0.59,0.62]` source-resolution envelope. After review identified the common-cold-start blind spot, the repository added the stationarity gate **without changing the source envelope, volume, coupling, seeds, chain schedule, or external target**. The final Phase 2 graduation claim is conditional on the exact hardened head passing that additional gate.
+The pooled mean lies inside the predeclared `[0.59,0.62]` source-resolution envelope, the independent chains satisfy their ESS/consistency gates, and both post-thermalisation drift statistics lie below the frozen maximum of 5.
 
-The frozen Phase 2B authority is intended to record
+The frozen Phase 2B authority therefore records
 
 ```text
 published_plaquette_baseline_reproduced = true
 phase2_graduation_gate_satisfied       = true
 su3_ensemble_enabled                   = false
 ```
-
-only when the hardened benchmark runtime passes every external, independent-chain, stationarity, and invariant gate.
 
 ## Evidence archive
 
