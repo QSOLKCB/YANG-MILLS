@@ -1,0 +1,42 @@
+{
+  "contract_id": "YM-SU3-LATTICE-V1",
+  "vector_set": "SU3-LATTICE-PHASE1B-V1",
+  "status": "phase-1b-lattice-review-candidate",
+  "vectors": [
+    {
+      "id": "identity-3x3x3x3-beta2",
+      "extents": [3, 3, 3, 3],
+      "beta": 2.0,
+      "configuration": "all links identity",
+      "observable": "wilson_action",
+      "expected": 0.0,
+      "tolerance": 0.0,
+      "claim_class": "C1"
+    },
+    {
+      "id": "single-traceless-cycle-link-3x3x3x3-beta2",
+      "extents": [3, 3, 3, 3],
+      "beta": 2.0,
+      "configuration": "all identity except U_0([0,0,0,0])=three-cycle permutation matrix",
+      "fixture_trace": 0.0,
+      "fixture_determinant": 1.0,
+      "affected_plaquettes": 6,
+      "observable": "wilson_action",
+      "expected": 12.0,
+      "tolerance": 1e-12,
+      "claim_class": "C1"
+    },
+    {
+      "id": "single-traceless-cycle-link-gauge-invariance",
+      "extents": [3, 3, 3, 3],
+      "beta": 1.7,
+      "configuration": "single-traceless-cycle-link",
+      "gauge_field": "deterministic-theta3-site-field",
+      "observable": "absolute_wilson_action_difference_after_local_gauge_transform",
+      "expected_max": 1e-10,
+      "link_unitarity_residual_max": 5e-12,
+      "link_determinant_residual_max": 5e-12,
+      "claim_class": "C2"
+    }
+  ]
+}
