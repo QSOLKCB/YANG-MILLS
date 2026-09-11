@@ -1,0 +1,70 @@
+{
+  "contract_id": "YM-SU3-CENTER-V1",
+  "vector_set": "SU3-CENTER-PHASE1C-V1",
+  "status": "phase-1c-review-candidate",
+  "vectors": [
+    {
+      "id": "abstract-c3-generator-cubed",
+      "observable": "g^3",
+      "expected": "identity",
+      "claim_class": "C0"
+    },
+    {
+      "id": "omega-cubed",
+      "observable": "Omega^3",
+      "expected": "identity",
+      "tolerance": 0.0,
+      "claim_class": "C0"
+    },
+    {
+      "id": "omega-noncentral-witness",
+      "observable": "max_abs(Omega D-D Omega)",
+      "witness": "D=diag(-1,-1,1)",
+      "expected": 2.0,
+      "tolerance": 0.0,
+      "claim_class": "C0"
+    },
+    {
+      "id": "genuine-center-generator",
+      "observable": "z=omega I",
+      "omega_components": [-0.5, 0.8660254037844386],
+      "unitarity_residual_max": 5e-12,
+      "determinant_residual_max": 5e-12,
+      "tested_commutator_residual_max": 2e-15,
+      "claim_class": "C0"
+    },
+    {
+      "id": "cycle-and-center-embeddings-distinct",
+      "observable": "max_abs(Omega-z_k I)",
+      "for_all_k": [0, 1, 2],
+      "expected_min": 1.0,
+      "claim_class": "C0"
+    },
+    {
+      "id": "identity-polyakov-center-transform",
+      "extents": [3, 3, 3, 3],
+      "configuration": "all links identity",
+      "direction": 0,
+      "slice": 0,
+      "center_exponent": 1,
+      "polyakov_before": [1.0, 0.0],
+      "polyakov_after": [-0.5, 0.8660254037844386],
+      "polyakov_tolerance": 2e-15,
+      "wilson_action_difference_max": 2e-12,
+      "claim_class": "C2"
+    },
+    {
+      "id": "nontrivial-action-center-transform",
+      "extents": [3, 3, 3, 3],
+      "configuration": "single-traceless-cycle-link",
+      "beta": 2.0,
+      "direction": 0,
+      "slice": 1,
+      "center_exponent": 2,
+      "action_before": 12.0,
+      "action_before_tolerance": 1e-12,
+      "action_difference_max": 1e-10,
+      "claim_class": "C2"
+    }
+  ]
+}
