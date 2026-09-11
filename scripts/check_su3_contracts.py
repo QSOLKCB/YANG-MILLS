@@ -9,7 +9,7 @@ from check_contracts import load, validate_exact
 
 EXPECTED_SU3_CONTRACT: dict[str, Any] = {
     "contract_id": "YM-SU3-ALGEBRA-V1",
-    "status": "phase-1b-review-candidate",
+    "status": "phase-1b-algebra-frozen",
     "scope": "standalone SU(3) algebra and group reference mathematics",
     "representation": {
         "fundamental_dimension": 3,
@@ -47,71 +47,16 @@ EXPECTED_SU3_CONTRACT: dict[str, Any] = {
 EXPECTED_SU3_VECTORS: dict[str, Any] = {
     "contract_id": "YM-SU3-ALGEBRA-V1",
     "vector_set": "SU3-ALGEBRA-PHASE1B-V1",
-    "status": "phase-1b-review-candidate",
+    "status": "phase-1b-algebra-frozen",
     "vectors": [
-        {
-            "id": "gell-mann-trace-normalization",
-            "observable": "Tr(lambda_a lambda_b)",
-            "expected_rule": "2 delta_ab",
-            "tolerance": 2e-15,
-            "claim_class": "C0",
-        },
-        {
-            "id": "f123",
-            "observable": "f",
-            "indices_one_based": [1, 2, 3],
-            "expected": 1.0,
-            "tolerance": 2e-15,
-            "claim_class": "C0",
-        },
-        {
-            "id": "f156",
-            "observable": "f",
-            "indices_one_based": [1, 5, 6],
-            "expected": -0.5,
-            "tolerance": 2e-15,
-            "claim_class": "C0",
-        },
-        {
-            "id": "d118",
-            "observable": "d",
-            "indices_one_based": [1, 1, 8],
-            "expected": 0.5773502691896258,
-            "tolerance": 2e-15,
-            "claim_class": "C0",
-        },
-        {
-            "id": "d888",
-            "observable": "d",
-            "indices_one_based": [8, 8, 8],
-            "expected": -0.5773502691896258,
-            "tolerance": 2e-15,
-            "claim_class": "C0",
-        },
-        {
-            "id": "quadratic-casimir-fundamental",
-            "observable": "sum_a T^a T^a",
-            "expected_multiple_of_identity": 1.3333333333333333,
-            "tolerance": 3e-15,
-            "claim_class": "C0",
-        },
-        {
-            "id": "cubic-casimir-fundamental",
-            "observable": "sum_abc d^{abc} T^a T^b T^c",
-            "expected_multiple_of_identity": 1.1111111111111112,
-            "tolerance": 8e-15,
-            "claim_class": "C0",
-        },
-        {
-            "id": "exp-theta3-0p7",
-            "observable": "U=exp(i theta T^3)",
-            "theta": 0.7,
-            "expected_diagonal": "diag(exp(i*0.35),exp(-i*0.35),1)",
-            "matrix_tolerance": 2e-14,
-            "unitarity_tolerance": 5e-12,
-            "determinant_one_tolerance": 5e-12,
-            "claim_class": "C0",
-        },
+        {"id": "gell-mann-trace-normalization", "observable": "Tr(lambda_a lambda_b)", "expected_rule": "2 delta_ab", "tolerance": 2e-15, "claim_class": "C0"},
+        {"id": "f123", "observable": "f", "indices_one_based": [1, 2, 3], "expected": 1.0, "tolerance": 2e-15, "claim_class": "C0"},
+        {"id": "f156", "observable": "f", "indices_one_based": [1, 5, 6], "expected": -0.5, "tolerance": 2e-15, "claim_class": "C0"},
+        {"id": "d118", "observable": "d", "indices_one_based": [1, 1, 8], "expected": 0.5773502691896258, "tolerance": 2e-15, "claim_class": "C0"},
+        {"id": "d888", "observable": "d", "indices_one_based": [8, 8, 8], "expected": -0.5773502691896258, "tolerance": 2e-15, "claim_class": "C0"},
+        {"id": "quadratic-casimir-fundamental", "observable": "sum_a T^a T^a", "expected_multiple_of_identity": 1.3333333333333333, "tolerance": 3e-15, "claim_class": "C0"},
+        {"id": "cubic-casimir-fundamental", "observable": "sum_abc d^{abc} T^a T^b T^c", "expected_multiple_of_identity": 1.1111111111111112, "tolerance": 8e-15, "claim_class": "C0"},
+        {"id": "exp-theta3-0p7", "observable": "U=exp(i theta T^3)", "theta": 0.7, "expected_diagonal": "diag(exp(i*0.35),exp(-i*0.35),1)", "matrix_tolerance": 2e-14, "unitarity_tolerance": 5e-12, "determinant_one_tolerance": 5e-12, "claim_class": "C0"},
     ],
 }
 
@@ -127,7 +72,7 @@ def main() -> None:
         load("test-vectors/su3-algebra-v1.json"),
         EXPECTED_SU3_VECTORS,
     )
-    print("Phase 1B SU(3) contract checks: passed")
+    print("Phase 1B SU(3) algebra contract checks: passed")
 
 
 if __name__ == "__main__":
