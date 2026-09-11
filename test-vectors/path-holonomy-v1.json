@@ -1,7 +1,7 @@
 {
   "contract_id": "YM-PATH-HOLONOMY-V1",
   "vector_set": "PATH-HOLONOMY-PHASE1D-V1",
-  "status": "phase-1d-review-candidate",
+  "status": "phase-1d-frozen",
   "vectors": [
     {
       "id": "su3-open-path-concatenation-left-to-right",
