@@ -29,7 +29,7 @@ genuine Z(SU(3)) = {I, omega I, omega^2 I}.
 
 It also added `SU(3)` Polyakov holonomy/trace accessors and a finite-lattice center transformation that leaves the Wilson action invariant while rotating a Polyakov loop by the chosen center element. This is a transformation law only; no confinement/deconfinement inference is made.
 
-Phase 1D is the current review-candidate. It introduces `YM-PATH-HOLONOMY-V1`, which ties the frozen lattice path ordering to an explicit classical continuum parallel-transport convention and extends `SU(3)` with arbitrary open/closed oriented path transport, reversal, concatenation, Wilson loops, periodic Polyakov gauge-invariance checks, and a small-loop curvature dictionary. See [`docs/PATH_HOLONOMY.md`](docs/PATH_HOLONOMY.md).
+Phase 1D is implemented, CI-green, review-clean, and frozen in PR #5 pending merge. `YM-PATH-HOLONOMY-V1` ties the frozen lattice path ordering to an explicit classical continuum parallel-transport convention and extends `SU(3)` with arbitrary open/closed oriented path transport, reversal, concatenation, Wilson loops, periodic Polyakov gauge-invariance checks, and a small-loop curvature dictionary. See [`docs/PATH_HOLONOMY.md`](docs/PATH_HOLONOMY.md).
 
 No current phase performs Monte Carlo ensemble generation, glueball extraction, continuum extrapolation, numerical continuum parallel transport, or any proof-facing continuum construction.
 
@@ -102,7 +102,7 @@ These two concrete subgroups are abstractly isomorphic to `C3 ~= Z3`, but they a
 
 ## Paths, parallel transport, and holonomy
 
-The frozen Phase 1A lattice convention multiplies path segments **left to right in traversal order**. Phase 1D chooses the continuum convention that matches it:
+The frozen Phase 1A lattice convention multiplies path segments **left to right in traversal order**. Phase 1D freezes the continuum convention that matches it:
 
 ```text
 dU_gamma/dt = U_gamma a_gamma(t),
@@ -139,7 +139,7 @@ W_3(C) = (1/3) Tr U_C.
 
 A periodic Polyakov loop is likewise invariant under ordinary periodic local gauge transformations. That rule remains distinct from the Phase 1C center transformation, which rotates the Polyakov loop by a center phase.
 
-For infinitesimal loops, Phase 1D records only the standard small-loop bridge
+For infinitesimal loops, Phase 1D records only the small-loop bridge
 
 ```text
 U_boundary = I + F_A(X,Y) * oriented_area + higher-order terms,
@@ -148,7 +148,7 @@ F_A = dA + A wedge A.
 
 A finite loop or finite plaquette is not identified with a pointwise continuum curvature tensor.
 
-Frenet curvature, torsion, and osculating geometry of a path are also explicitly distinct from gauge curvature `F_A` unless a separate theorem establishes a connection.
+Frenet curvature, torsion, and osculating geometry of a path are explicitly distinct from gauge curvature `F_A` unless a separate theorem establishes a connection.
 
 ## Deterministic configuration encoding
 
@@ -190,7 +190,7 @@ scripts/               fail-closed contract checks
 
 ## Roadmap
 
-The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 1D currently develops the path/parallel-transport/holonomy bridge; Phase 1E then freezes the broader classical bundle/connection dictionary before statistical ensemble work begins.
+The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 1D freezes the path/parallel-transport/holonomy bridge; Phase 1E next freezes the broader classical bundle/connection dictionary before statistical ensemble work begins.
 
 ## Licence
 
