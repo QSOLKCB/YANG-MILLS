@@ -4,7 +4,7 @@ version = "0.2.0"
 edition = "2021"
 license = "MPL-2.0"
 repository = "https://github.com/QSOLKCB/YANG-MILLS"
-description = "Deterministic SU(2) lattice observables and standalone SU(3) algebra reference surfaces for YANG-MILLS"
+description = "Deterministic SU(2) lattice observables and Phase 1B SU(3) algebra/lattice reference surfaces for YANG-MILLS"
 default-run = "ym-su2-reference"
 
 [lib]
@@ -17,6 +17,10 @@ path = "reference/rust/src/main.rs"
 [[bin]]
 name = "ym-su3-algebra"
 path = "reference/rust/src/bin/su3_reference.rs"
+
+[[bin]]
+name = "ym-su3-lattice"
+path = "reference/rust/src/bin/su3_lattice_reference.rs"
 
 [profile.release]
 lto = "thin"
