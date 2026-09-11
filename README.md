@@ -15,7 +15,7 @@ Phase 1A was merged in PR #2 and froze the finite-lattice `SU(2)` observable/mec
 Phase 1B was merged in PR #3 and froze `SU(3)` in two ordered gates:
 
 1. `YM-SU3-ALGEBRA-V1` — canonical Gell-Mann generators, `f^{abc}`/`d^{abc}`, quadratic/cubic Casimir regressions, bounded `U(theta)=exp(i theta_a T^a)`, and fail-closed unitarity/determinant acceptance;
-2. `YM-SU3-LATTICE-V1` — bounded periodic four-dimensional `SU(3)` links, plaquettes, Wilson action, and local gauge transformations, introduced only after the algebra authority was review-clean and frozen.
+2. `YM-SU3-LATTICE-V1` — bounded periodic four-dimensional `SU(3)` links, plaquettes, Wilson action, and local gauge transformations.
 
 Phase 1C was merged in PR #4 and froze the distinction
 
@@ -27,11 +27,11 @@ non-central <Omega> subset SU(3)
 genuine Z(SU(3)) = {I, omega I, omega^2 I}.
 ```
 
-It also added `SU(3)` Polyakov holonomy/trace accessors and a finite-lattice center transformation that leaves the Wilson action invariant while rotating a Polyakov loop by the chosen center element. This is a transformation law only; no confinement/deconfinement inference is made.
+Phase 1D was merged in PR #5 and froze `YM-PATH-HOLONOMY-V1`: arbitrary bounded `SU(3)` open/closed lattice transport, Wilson/Polyakov holonomy, endpoint covariance, reversal/concatenation, and the continuum path-ordering convention matched to the already-frozen lattice product order.
 
-Phase 1D is implemented, CI-green, review-clean, and frozen in PR #5 pending merge. `YM-PATH-HOLONOMY-V1` ties the frozen lattice path ordering to an explicit classical continuum parallel-transport convention and extends `SU(3)` with arbitrary open/closed oriented path transport, reversal, concatenation, Wilson loops, periodic Polyakov gauge-invariance checks, and a small-loop curvature dictionary. See [`docs/PATH_HOLONOMY.md`](docs/PATH_HOLONOMY.md).
+Phase 1E is implemented, CI-green, review-clean, and frozen in PR #6 pending merge. `YM-CLASSICAL-GEOMETRY-V1` freezes the classical bundle/connection dictionary: base geometry, principal/associated bundles, sections, covariant derivative, `ad P`-valued curvature, Hodge-star conventions, Bianchi identity, Yang–Mills functional/equation, self-duality, and the lattice-to-continuum dictionary. See [`docs/CLASSICAL_CONTINUUM.md`](docs/CLASSICAL_CONTINUUM.md).
 
-No current phase performs Monte Carlo ensemble generation, glueball extraction, continuum extrapolation, numerical continuum parallel transport, or any proof-facing continuum construction.
+No current phase performs Monte Carlo ensemble generation, glueball extraction, a continuum/infinite-volume limit, construction of the interacting quantum theory, or a mass-gap proof.
 
 ## The target
 
@@ -42,117 +42,161 @@ The repository therefore maintains a strict implication boundary:
 ```text
 finite lattice calculation
         !=
-continuum Yang-Mills construction
+classical continuum dictionary
+        !=
+continuum quantum Yang-Mills construction
         !=
 proof of a positive continuum mass gap
 ```
 
-A finite-lattice spectral estimate may be scientifically useful evidence. It is not interchangeable with the theorem Clay asks for.
+## Frozen lattice/group conventions
 
-## `SU(2)` reference surface
-
-The code uses the standard unit-quaternion representation of `SU(2)`:
+The `SU(2)` reference uses
 
 ```text
 U(q) = a0 I - i (a1 sigma1 + a2 sigma2 + a3 sigma3)
 ```
 
-with Wilson action
+and
 
 ```text
 S_W = beta * sum_p (1 - 1/2 Re Tr U_p).
 ```
 
-## `SU(3)` reference surface
-
-The frozen fundamental-representation convention is
+The frozen `SU(3)` fundamental-representation convention is
 
 ```text
 T^a = lambda_a / 2
 Tr(lambda_a lambda_b) = 2 delta_ab
-U(theta) = exp(i sum_a theta_a T^a).
+U(theta) = exp(i sum_a theta_a T^a),
 ```
 
-The checked `Su3` type uses dagger-symmetric unitarity and determinant residuals. No projection-to-`SU(3)` step hides acceptance failures.
-
-The minimal Phase 1B lattice action is
+with minimal lattice action
 
 ```text
 S_W = beta * sum_p (1 - 1/3 Re Tr U_p).
 ```
 
-## `C3`, `Z3`, and the `SU(3)` center
-
-Phase 1C freezes the orientation
+The mathematical Lie algebra `su(3)` consists of traceless anti-Hermitian matrices. Phase 1E therefore freezes the bridge
 
 ```text
-Omega |k> = |k+1 mod 3>
+Phase 1B Hermitian basis : T^a
+anti-Hermitian su(3) basis: i T^a.
 ```
 
-for a non-central order-three permutation subgroup. An exact `SU(3)` witness `diag(-1,-1,1)` does not commute with `Omega`.
+## Paths and forward transport
 
-The genuine center is separately represented as
+Phase 1D freezes the start-left transporter
 
 ```text
-Z(SU(3)) = {I, omega I, omega^2 I}
-omega = exp(2 pi i / 3).
+dU_gamma/dt = U_gamma a_gamma(t)
+U_gamma^Omega = Omega(start) U_gamma Omega(end)^-1.
 ```
 
-These two concrete subgroups are abstractly isomorphic to `C3 ~= Z3`, but they are not the same embedding or action.
-
-## Paths, parallel transport, and holonomy
-
-The frozen Phase 1A lattice convention multiplies path segments **left to right in traversal order**. Phase 1D freezes the continuum convention that matches it:
+Phase 1E introduces the conventional forward associated-fiber transport `P_gamma` and freezes
 
 ```text
-dU_gamma/dt = U_gamma a_gamma(t),
-U_gamma(0) = I,
-a_gamma(t) = A_{gamma(t)}(gamma_dot(t)).
+U_gamma = P_gamma^-1.
 ```
 
-Under
+Thus
 
 ```text
-A^Omega = Omega A Omega^-1 - dOmega Omega^-1,
+P_gamma^Omega
+  = rho(Omega(end))
+    P_gamma
+    rho(Omega(start))^-1.
 ```
 
-the open transporter obeys
+This makes the principal-bundle, associated-bundle, and lattice path conventions one consistent system rather than competing sign conventions.
+
+## Classical continuum geometry
+
+Phase 1E uses a principal bundle
 
 ```text
-U_gamma^Omega
-  = Omega(start) U_gamma Omega(end)^-1.
+pi:P->M
 ```
 
-If `gamma2 o gamma1` means traverse `gamma1` first, then `gamma2`, the frozen product convention gives
+with free **right** `G` action. A principal connection one-form `omega_P` yields a local gauge potential
 
 ```text
-U_{gamma2 o gamma1} = U_gamma1 U_gamma2.
+A = sigma^* omega_P
 ```
 
-Reversal gives `U_{gamma^-1}=U_gamma^-1`. For a closed loop the endpoint factors reduce to conjugation, so the normalized trace is gauge invariant.
-
-The Phase 1D `SU(3)` lattice observable keeps the full complex normalized trace
+for a local section `sigma:U->P`. If `sigma'=sigma g`, then
 
 ```text
-W_3(C) = (1/3) Tr U_C.
+A' = g^-1 A g + g^-1 d g.
 ```
 
-A periodic Polyakov loop is likewise invariant under ordinary periodic local gauge transformations. That rule remains distinct from the Phase 1C center transformation, which rotates the Polyakov loop by a center phase.
-
-For infinitesimal loops, Phase 1D records only the small-loop bridge
+With the frozen Phase 1D variable `Omega=g^-1`, this becomes
 
 ```text
-U_boundary = I + F_A(X,Y) * oriented_area + higher-order terms,
-F_A = dA + A wedge A.
+A^Omega = Omega A Omega^-1 - dOmega Omega^-1.
 ```
 
-A finite loop or finite plaquette is not identified with a pointwise continuum curvature tensor.
+The global curvature type is
 
-Frenet curvature, torsion, and osculating geometry of a path are explicitly distinct from gauge curvature `F_A` unless a separate theorem establishes a connection.
+```text
+F_A in Omega^2(M, ad P),
+```
 
-## Deterministic configuration encoding
+with local matrix formula
 
-`YM-SU2-CONFIG-V1` serializes a lattice in canonical site-major/link-direction order using exact IEEE-754 binary64 bit patterns. This is an implementation/provenance surface, not a physical observable.
+```text
+F_A = dA + A wedge A
+```
+
+and Bianchi identity
+
+```text
+D_A F_A = 0.
+```
+
+Gauge curvature is kept distinct from Riemann curvature, Gaussian/surface curvature, and Frenet/path curvature.
+
+For an oriented Riemannian four-manifold, Phase 1E freezes
+
+```text
+*^2 = +1 on 2-forms
+D_A^* F_A = - * D_A * F_A
+YM(A) = (1/2) integral_M |F_A|^2 dvol
+Euler-Lagrange: D_A^* F_A = 0.
+```
+
+A Yang–Mills connection is a **critical point** of this functional; it is not automatically a global minimizer.
+
+Self-duality/anti-self-duality are
+
+```text
+F_A = +/- *F_A.
+```
+
+Together with the Bianchi identity they imply the classical Yang–Mills equation. They do not imply a quantum mass gap.
+
+## Executable Hodge convention fixture
+
+The Phase 1E Rust reference is intentionally only a finite-dimensional sign/convention check in oriented Euclidean `R^4`. In the ordered 2-form basis
+
+```text
+01, 02, 03, 12, 13, 23
+```
+
+it freezes
+
+```text
+*01=23  *02=-13  *03=12
+*12=03  *13=-02  *23=01.
+```
+
+It verifies `*^2=+1`, the wedge/Hodge inner-product identity, and self-dual/anti-self-dual decomposition. It is **not** a continuum manifold or PDE solver.
+
+## Lattice-to-continuum boundary
+
+A lattice link approximates the frozen start-left transport along an edge. A plaquette is a finite small-loop holonomy whose smooth small-spacing expansion contains `F_mu_nu`. A finite plaquette is not equal to pointwise continuum curvature, and the finite-spacing Wilson action is not exactly the continuum functional.
+
+Likewise, no finite-lattice observable becomes a continuum quantum theorem merely because the classical dictionary is now explicit.
 
 ## Run the reference checks
 
@@ -166,6 +210,7 @@ cargo run --quiet --locked --bin ym-su3-algebra
 cargo run --quiet --locked --bin ym-su3-lattice
 cargo run --quiet --locked --bin ym-su3-center
 cargo run --quiet --locked --bin ym-path-holonomy
+cargo run --quiet --locked --bin ym-classical-geometry
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
@@ -190,7 +235,7 @@ scripts/               fail-closed contract checks
 
 ## Roadmap
 
-The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 1D freezes the path/parallel-transport/holonomy bridge; Phase 1E next freezes the broader classical bundle/connection dictionary before statistical ensemble work begins.
+The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 1E closes the classical continuum dictionary before Phase 2 introduces statistical ensemble generation.
 
 ## Licence
 
