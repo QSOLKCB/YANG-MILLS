@@ -10,7 +10,7 @@ YANG-MILLS studies lattice gauge dynamics, gauge-invariant observables, glueball
 
 Phase 0 was merged in PR #1. It established the project constitution, claim boundary, GLUBALL engineering-donor boundary, machine-readable contracts, and a minimal four-dimensional periodic `SU(2)` Wilson-lattice reference core.
 
-Phase 1A extends that core with finite-lattice observables and local mechanics:
+Phase 1A was merged in PR #2 and froze the finite-lattice `SU(2)` observable/mechanics surface:
 
 - bounded periodic `SU(2)` reference lattices;
 - exact deterministic `YM-SU2-CONFIG-V1` configuration serialization;
@@ -22,7 +22,9 @@ Phase 1A extends that core with finite-lattice observables and local mechanics:
 - analytic/gauge-invariance/cyclic-trace regression tests;
 - frozen contracts `YM-SU2-LATTICE-V1` and `YM-WILSON-LOOP-V1`.
 
-Phase 1A still does **not** perform Monte Carlo ensemble generation, glueball extraction, continuum extrapolation, or any proof-facing continuum construction.
+Phase 1B begins from an isolated standalone `SU(3)` algebra/group authority before any `SU(3)` lattice links are enabled. Its review-candidate surface includes canonical Gell-Mann generators, `f^{abc}`/`d^{abc}`, quadratic and cubic Casimir regressions, and bounded `U(theta)=exp(i theta_a T^a)` construction with explicit unitarity and determinant-one acceptance. See [`docs/SU3_ALGEBRA.md`](docs/SU3_ALGEBRA.md).
+
+No current phase performs Monte Carlo ensemble generation, glueball extraction, continuum extrapolation, or any proof-facing continuum construction.
 
 ## The target
 
@@ -99,18 +101,19 @@ Requires the pinned Rust toolchain in [`rust-toolchain.toml`](rust-toolchain.tom
 cargo fmt --all -- --check
 cargo test --all-targets --locked
 cargo run --quiet --locked --bin ym-su2-reference
-python3 scripts/check_contracts.py
-python3 scripts/test_contract_validation.py
+cargo run --quiet --locked --bin ym-su3-algebra
+python3 scripts/check_all_contracts.py
+python3 scripts/test_all_contract_validation.py
 ```
 
-The reference executable checks the Phase 0 action vectors plus Phase 1A rectangle, Polyakov-loop, local-action-difference, and canonical-serialization invariants.
+The unified contract entry points are authoritative for every currently advertised contract surface. A local readiness check must not run only the legacy core contract checker once a newer phase has registered additional contracts.
 
 ## Repository map
 
 ```text
 contracts/             machine-readable contract surfaces
 docs/                  constitution, donor boundary, model, evidence rules
-reference/rust/        canonical finite-lattice reference implementation
+reference/rust/        canonical finite-lattice and algebra reference implementations
 test-vectors/          human- and machine-readable regression vectors
 tests/                 integration tests
 scripts/               fail-closed contract checks
@@ -125,7 +128,7 @@ See [`docs/DONOR_BOUNDARY.md`](docs/DONOR_BOUNDARY.md).
 
 ## Roadmap
 
-The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 1A establishes the frozen finite `SU(2)` observable/mechanics surface. Later Phase 1 work adds `SU(3)` algebra, center symmetry, path/continuum dictionaries, then subsequent phases add ensemble generation, glueball observables, published-baseline reproduction, HPC acceleration, continuum scaling, constructive analysis, and formalization of stable theorem surfaces.
+The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 1A establishes the frozen finite `SU(2)` observable/mechanics surface. Phase 1B builds the independently tested `SU(3)` algebra/group authority before `SU(3)` lattice links; later Phase 1 work adds center symmetry and path/continuum dictionaries, followed by ensemble generation, glueball observables, published-baseline reproduction, HPC acceleration, continuum scaling, constructive analysis, and formalization of stable theorem surfaces.
 
 ## Licence
 
