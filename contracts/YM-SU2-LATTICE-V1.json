@@ -1,6 +1,6 @@
 {
   "contract_id": "YM-SU2-LATTICE-V1",
-  "status": "phase-1a-review-candidate",
+  "status": "phase-1a-frozen",
   "gauge_group": "SU(2)",
   "dimension": 4,
   "boundary_conditions": "periodic",
