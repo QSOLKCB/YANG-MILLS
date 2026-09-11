@@ -48,7 +48,9 @@ impl fmt::Display for PathHolonomyError {
         let message = match self {
             Self::EmptyPath => "path must contain at least one oriented step",
             Self::PathTooLong => "path exceeds the bounded Phase 1D step limit",
-            Self::PathNotClosed => "closed holonomy requires the final periodic coordinate to equal the start",
+            Self::PathNotClosed => {
+                "closed holonomy requires the final periodic coordinate to equal the start"
+            }
             Self::DirectionsMustDiffer => "rectangular path directions must differ",
             Self::ZeroRectangleExtent => "rectangular path extents must be positive",
             Self::AllocationFailed => "path allocation failed",
@@ -83,12 +85,12 @@ fn validate_steps(steps: &[OrientedStep]) -> Result<(), PathHolonomyError> {
     Ok(())
 }
 
-fn validate_coordinate(
-    lattice: &Su3Lattice4,
-    x: [usize; DIM],
-) -> Result<(), PathHolonomyError> {
+fn validate_coordinate(lattice: &Su3Lattice4, x: [usize; DIM]) -> Result<(), PathHolonomyError> {
     let extents = lattice.extents();
-    if x.iter().zip(extents).any(|(&value, extent)| value >= extent) {
+    if x.iter()
+        .zip(extents)
+        .any(|(&value, extent)| value >= extent)
+    {
         return Err(PathHolonomyError::Lattice(
             Su3LatticeError::CoordinateOutOfRange,
         ));
