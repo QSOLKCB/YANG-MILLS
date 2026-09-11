@@ -63,20 +63,26 @@ impl TwoForm4 {
         }
     }
 
-    pub fn add(self, rhs: Self) -> Self {
+    pub fn add(self, rhs: Self) -> Result<Self, ClassicalGeometryError> {
         let mut out = [0.0; 6];
         for (index, value) in out.iter_mut().enumerate() {
             *value = self.components[index] + rhs.components[index];
+            if !value.is_finite() {
+                return Err(ClassicalGeometryError::NonFiniteComponent);
+            }
         }
-        Self { components: out }
+        Ok(Self { components: out })
     }
 
-    pub fn sub(self, rhs: Self) -> Self {
+    pub fn sub(self, rhs: Self) -> Result<Self, ClassicalGeometryError> {
         let mut out = [0.0; 6];
         for (index, value) in out.iter_mut().enumerate() {
             *value = self.components[index] - rhs.components[index];
+            if !value.is_finite() {
+                return Err(ClassicalGeometryError::NonFiniteComponent);
+            }
         }
-        Self { components: out }
+        Ok(Self { components: out })
     }
 
     pub fn scale(self, factor: f64) -> Result<Self, ClassicalGeometryError> {
@@ -109,11 +115,11 @@ impl TwoForm4 {
     }
 
     pub fn self_dual_part(self) -> Result<Self, ClassicalGeometryError> {
-        self.add(self.hodge_star()).scale(0.5)
+        self.add(self.hodge_star())?.scale(0.5)
     }
 
     pub fn anti_self_dual_part(self) -> Result<Self, ClassicalGeometryError> {
-        self.sub(self.hodge_star()).scale(0.5)
+        self.sub(self.hodge_star())?.scale(0.5)
     }
 
     pub fn max_residual(self, rhs: Self) -> f64 {
