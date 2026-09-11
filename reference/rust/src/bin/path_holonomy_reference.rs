@@ -2,12 +2,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+#[path = "../path_holonomy.rs"]
+mod path_holonomy;
 #[path = "../su3.rs"]
 mod su3;
 #[path = "../su3_lattice.rs"]
 mod su3_lattice;
-#[path = "../path_holonomy.rs"]
-mod path_holonomy;
 
 use path_holonomy::{
     concatenate_paths, endpoint_covariance_prediction, path_holonomy, reverse_path, wilson_loop,
