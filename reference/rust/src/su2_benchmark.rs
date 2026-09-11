@@ -104,9 +104,7 @@ fn report_matches_benchmark(report: &ChainReport, chain_id: u64) -> bool {
         && config.autocorrelation_max_lag == AUTOCORRELATION_MAX_LAG
 }
 
-pub fn stationarity_diagnostic(
-    values: &[f64],
-) -> Result<StationarityDiagnostic, BenchmarkError> {
+pub fn stationarity_diagnostic(values: &[f64]) -> Result<StationarityDiagnostic, BenchmarkError> {
     if values.len() != MEASUREMENTS
         || STATIONARITY_HALF_MEASUREMENTS * 2 != MEASUREMENTS
         || STATIONARITY_AUTOCORRELATION_MAX_LAG >= STATIONARITY_HALF_MEASUREMENTS
@@ -115,16 +113,10 @@ pub fn stationarity_diagnostic(
     }
 
     let split = STATIONARITY_HALF_MEASUREMENTS;
-    let first = diagnostics(
-        &values[..split],
-        STATIONARITY_AUTOCORRELATION_MAX_LAG,
-    )
-    .map_err(|_| BenchmarkError::StationarityDiagnosticFailed)?;
-    let second = diagnostics(
-        &values[split..],
-        STATIONARITY_AUTOCORRELATION_MAX_LAG,
-    )
-    .map_err(|_| BenchmarkError::StationarityDiagnosticFailed)?;
+    let first = diagnostics(&values[..split], STATIONARITY_AUTOCORRELATION_MAX_LAG)
+        .map_err(|_| BenchmarkError::StationarityDiagnosticFailed)?;
+    let second = diagnostics(&values[split..], STATIONARITY_AUTOCORRELATION_MAX_LAG)
+        .map_err(|_| BenchmarkError::StationarityDiagnosticFailed)?;
 
     let difference = (first.mean - second.mean).abs();
     let scale = (first.standard_error.powi(2) + second.standard_error.powi(2)).sqrt();
