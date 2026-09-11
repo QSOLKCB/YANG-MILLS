@@ -67,6 +67,22 @@ def main() -> None:
     )
 
     broken = copy.deepcopy(contract)
+    broken["phase2_gate"]["published_plaquette_baseline_reproduced"] = False
+    expect_reject(
+        lambda payload: validate_exact(CONTRACT_PATH, payload, EXPECTED_BASELINE_CONTRACT),
+        broken,
+        "frozen published baseline result erased",
+    )
+
+    broken = copy.deepcopy(contract)
+    broken["phase2_gate"]["phase2_graduation_gate_satisfied"] = False
+    expect_reject(
+        lambda payload: validate_exact(CONTRACT_PATH, payload, EXPECTED_BASELINE_CONTRACT),
+        broken,
+        "frozen Phase 2 graduation erased",
+    )
+
+    broken = copy.deepcopy(contract)
     broken["phase2_gate"]["su3_ensemble_enabled"] = True
     expect_reject(
         lambda payload: validate_exact(CONTRACT_PATH, payload, EXPECTED_BASELINE_CONTRACT),
@@ -88,6 +104,14 @@ def main() -> None:
         lambda payload: validate_exact(VECTOR_PATH, payload, EXPECTED_BASELINE_VECTORS),
         broken,
         "published envelope vector weakened",
+    )
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][2]["phase2_graduation_gate_satisfied"] = False
+    expect_reject(
+        lambda payload: validate_exact(VECTOR_PATH, payload, EXPECTED_BASELINE_VECTORS),
+        broken,
+        "graduation vector erased",
     )
 
     print("Negative Phase 2B published baseline contract regression checks: passed")
