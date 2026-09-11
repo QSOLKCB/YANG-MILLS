@@ -1,7 +1,7 @@
 {
   "contract_id": "YM-WILSON-LOOP-V1",
   "vector_set": "SU2-OBSERVABLES-PHASE1A-V1",
-  "status": "phase-1a-review-candidate",
+  "status": "phase-1a-frozen",
   "vectors": [
     {
       "id": "identity-rectangle-2x1",
