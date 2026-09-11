@@ -307,9 +307,7 @@ impl fmt::Display for Su3Error {
             Self::ExponentialScalingOverflow => {
                 "SU(3) matrix-exponential scaling bound was exceeded"
             }
-            Self::NonUnitaryMatrix => {
-                "matrix is outside the SU(3) unitarity acceptance tolerance"
-            }
+            Self::NonUnitaryMatrix => "matrix is outside the SU(3) unitarity acceptance tolerance",
             Self::DeterminantNotOne => {
                 "matrix determinant is outside the SU(3) determinant-one acceptance tolerance"
             }
