@@ -67,6 +67,13 @@ fn local_gauge_transform_preserves_wilson_action() {
 }
 
 #[test]
+fn deterministic_gauge_helper_is_bounded_for_maximal_coordinates() {
+    let gauge = deterministic_su3_site_gauge([usize::MAX; 4]);
+    assert!(gauge.unitarity_residual() <= reference_acceptance_tolerance());
+    assert!(gauge.determinant_residual() <= reference_acceptance_tolerance());
+}
+
+#[test]
 fn gauge_transform_samples_each_site_field_exactly_once() {
     let lattice = Su3Lattice4::new_identity([2, 2, 2, 2]).unwrap();
     let calls = Cell::new(0usize);
