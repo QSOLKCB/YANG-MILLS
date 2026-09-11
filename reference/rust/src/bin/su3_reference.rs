@@ -6,8 +6,8 @@
 mod su3;
 
 use su3::{
-    cubic_casimir_fundamental, quadratic_casimir_fundamental, structure_d, structure_f, Mat3,
-    Su3, SU3_ACCEPTANCE_TOLERANCE, SU3_GENERATORS,
+    cubic_casimir_fundamental, quadratic_casimir_fundamental, structure_d, structure_f, Mat3, Su3,
+    SU3_ACCEPTANCE_TOLERANCE, SU3_GENERATORS,
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -40,8 +40,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("d118={d118:.17e}");
     println!("quadratic_casimir_residual={quadratic_residual:.17e}");
     println!("cubic_casimir_residual={cubic_residual:.17e}");
-    println!("theta3_0p7_unitarity_residual={:.17e}", u.unitarity_residual());
-    println!("theta3_0p7_determinant_residual={:.17e}", u.determinant_residual());
+    println!(
+        "theta3_0p7_unitarity_residual={:.17e}",
+        u.unitarity_residual()
+    );
+    println!(
+        "theta3_0p7_determinant_residual={:.17e}",
+        u.determinant_residual()
+    );
     println!("status=passed");
     Ok(())
 }
