@@ -21,7 +21,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let anti_self_dual_residual = anti_self_dual
         .hodge_star()
         .max_residual(anti_self_dual.scale(-1.0)?);
-    let decomposition_residual = self_dual.add(anti_self_dual).max_residual(alpha);
+    let decomposition_residual = self_dual.add(anti_self_dual)?.max_residual(alpha);
     let orthogonality_residual = self_dual.inner_product(anti_self_dual).abs();
 
     if star_square_residual != 0.0
