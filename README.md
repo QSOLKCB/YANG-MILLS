@@ -30,7 +30,7 @@ Phase 1E was merged in PR #6 and froze `YM-CLASSICAL-GEOMETRY-V1`: the classical
 
 Phase 2A was merged in PR #7 and froze `YM-SU2-ENSEMBLE-V1`: bounded pure-`SU(2)` heat-bath/over-relaxation Markov chains, versioned pseudorandom stream identity, explicit thermalisation and measurement cadence, independent-chain identities, average-plaquette measurements, autocorrelation diagnostics, and effective sample size. See [`docs/SU2_ENSEMBLES.md`](docs/SU2_ENSEMBLES.md).
 
-Phase 2B is implemented, CI-green, and frozen in PR #8 pending merge. `YM-SU2-PLAQUETTE-BASELINE-V1` reproduces a predeclared peer-reviewed `SU(2)` Wilson-action average-plaquette benchmark on a `10^4` lattice at `beta=2.3`. See [`docs/PUBLISHED_PLAQUETTE_BASELINE.md`](docs/PUBLISHED_PLAQUETTE_BASELINE.md).
+Phase 2B is implemented, independently reviewed, CI-green, and frozen in PR #8 pending merge. `YM-SU2-PLAQUETTE-BASELINE-V1` reproduces a predeclared peer-reviewed `SU(2)` Wilson-action average-plaquette benchmark on a `10^4` lattice at `beta=2.3` and additionally requires a within-chain post-thermalisation stationarity gate. See [`docs/PUBLISHED_PLAQUETTE_BASELINE.md`](docs/PUBLISHED_PLAQUETTE_BASELINE.md).
 
 The predeclared published source-resolution envelope was `[0.59,0.62]`. Two independent frozen chains produced means `0.6026867251` and `0.6018972108`, with pooled mean
 
@@ -38,7 +38,7 @@ The predeclared published source-resolution envelope was `[0.59,0.62]`. Two inde
 0.6022919679
 ```
 
-and chain-consistency `z ~= 0.946`. The minimum chain ESS was about `7.75`, and the maximum final `SU(2)` unit-link residual was `6.66e-16`. This closes the finite-lattice Phase 2 graduation gate for the declared `SU(2)` regime. It does **not** establish confinement, continuum quantum-field existence, or a positive continuum mass gap. `SU(3)` ensemble generation remains disabled until a separately versioned algorithm is specified and reviewed.
+and chain-consistency `z ~= 0.946`. The minimum chain ESS was about `7.75`, and the maximum final `SU(2)` unit-link residual was `6.66e-16`. Review hardening split each post-thermalisation chain into first/last 24-measurement halves and required autocorrelation-aware drift `z <= 5`; the two chains produced stationarity `z ~= 2.396` and `z ~= 1.138`, respectively. This closes the finite-lattice Phase 2 graduation gate for the declared `SU(2)` regime. It does **not** establish confinement, continuum quantum-field existence, or a positive continuum mass gap. `SU(3)` ensemble generation remains disabled until a separately versioned algorithm is specified and reviewed.
 
 No current phase performs glueball extraction, a continuum/infinite-volume limit, construction of the interacting quantum theory, or a mass-gap proof.
 
@@ -196,7 +196,13 @@ beta = 2.3
 source-resolution envelope = [0.59, 0.62]
 ```
 
-That interval is explicitly **not** represented as a paper error bar. The frozen two-chain benchmark reproduced the envelope and passed its independent-chain, ESS, heat-bath, and unit-link gates. Therefore
+That interval is explicitly **not** represented as a paper error bar. The frozen benchmark must pass the external envelope, independent-chain/ESS gates, and a within-chain post-thermalisation stationarity gate. For each chain, the 48 recorded measurements are split into first/last 24-measurement halves; each half uses the frozen autocorrelation-aware diagnostic with `max_lag=6`, and the drift statistic must satisfy
+
+```text
+|mean_first - mean_second| / sqrt(SE_first^2 + SE_second^2) <= 5.
+```
+
+On the hardened frozen run the stationarity values were approximately `2.396` and `1.138`, so the maximum was below the frozen threshold. Therefore
 
 ```text
 published_plaquette_baseline_reproduced = true
@@ -204,7 +210,7 @@ phase2_graduation_gate_satisfied       = true
 su3_ensemble_enabled                   = false
 ```
 
-The final CI runtime emits the two raw measurement series, derived seeds, per-chain diagnostics, and pooled comparison into the commit-tied Actions evidence log.
+The final CI runtime emits the two raw measurement series, derived seeds, per-chain diagnostics, stationarity evidence, and pooled comparison into the commit-tied Actions evidence log.
 
 ## Lattice-to-continuum boundary
 
