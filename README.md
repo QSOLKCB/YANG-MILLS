@@ -17,7 +17,7 @@ Phase 1B was merged in PR #3 and froze `SU(3)` in two ordered gates:
 1. `YM-SU3-ALGEBRA-V1` — canonical Gell-Mann generators, `f^{abc}`/`d^{abc}`, quadratic/cubic Casimir regressions, bounded `U(theta)=exp(i theta_a T^a)`, and fail-closed unitarity/determinant acceptance;
 2. `YM-SU3-LATTICE-V1` — bounded periodic four-dimensional `SU(3)` links, plaquettes, Wilson action, and local gauge transformations, introduced only after the algebra authority was review-clean and frozen.
 
-Phase 1C is implemented, CI-green, review-clean, and frozen in PR #4 pending merge. It deliberately distinguishes:
+Phase 1C was merged in PR #4 and froze the distinction
 
 ```text
 abstract C3 ~= Z3
@@ -27,11 +27,11 @@ non-central <Omega> subset SU(3)
 genuine Z(SU(3)) = {I, omega I, omega^2 I}.
 ```
 
-It also adds `SU(3)` Polyakov holonomy/trace accessors and a finite-lattice center transformation that leaves the Wilson action invariant while rotating a Polyakov loop by the chosen center element. This is a transformation law only; no confinement/deconfinement inference is made.
+It also added `SU(3)` Polyakov holonomy/trace accessors and a finite-lattice center transformation that leaves the Wilson action invariant while rotating a Polyakov loop by the chosen center element. This is a transformation law only; no confinement/deconfinement inference is made.
 
-See [`docs/SU3_ALGEBRA.md`](docs/SU3_ALGEBRA.md), [`docs/SU3_LATTICE.md`](docs/SU3_LATTICE.md), and [`docs/SU3_CENTER.md`](docs/SU3_CENTER.md).
+Phase 1D is the current review-candidate. It introduces `YM-PATH-HOLONOMY-V1`, which ties the frozen lattice path ordering to an explicit classical continuum parallel-transport convention and extends `SU(3)` with arbitrary open/closed oriented path transport, reversal, concatenation, Wilson loops, periodic Polyakov gauge-invariance checks, and a small-loop curvature dictionary. See [`docs/PATH_HOLONOMY.md`](docs/PATH_HOLONOMY.md).
 
-No current phase performs Monte Carlo ensemble generation, glueball extraction, continuum extrapolation, or any proof-facing continuum construction.
+No current phase performs Monte Carlo ensemble generation, glueball extraction, continuum extrapolation, numerical continuum parallel transport, or any proof-facing continuum construction.
 
 ## The target
 
@@ -100,14 +100,55 @@ omega = exp(2 pi i / 3).
 
 These two concrete subgroups are abstractly isomorphic to `C3 ~= Z3`, but they are not the same embedding or action.
 
-For a periodic direction `mu`, multiplying all `U_mu(x)` on one `x_mu = slice` by a genuine center element `z` leaves every plaquette unchanged while
+## Paths, parallel transport, and holonomy
+
+The frozen Phase 1A lattice convention multiplies path segments **left to right in traversal order**. Phase 1D chooses the continuum convention that matches it:
 
 ```text
-L_mu -> z L_mu
-(1/3) Tr L_mu -> z (1/3) Tr L_mu.
+dU_gamma/dt = U_gamma a_gamma(t),
+U_gamma(0) = I,
+a_gamma(t) = A_{gamma(t)}(gamma_dot(t)).
 ```
 
-No area law, confinement, deconfinement, or thermodynamic order-parameter conclusion follows merely from this finite-lattice transformation rule.
+Under
+
+```text
+A^Omega = Omega A Omega^-1 - dOmega Omega^-1,
+```
+
+the open transporter obeys
+
+```text
+U_gamma^Omega
+  = Omega(start) U_gamma Omega(end)^-1.
+```
+
+If `gamma2 o gamma1` means traverse `gamma1` first, then `gamma2`, the frozen product convention gives
+
+```text
+U_{gamma2 o gamma1} = U_gamma1 U_gamma2.
+```
+
+Reversal gives `U_{gamma^-1}=U_gamma^-1`. For a closed loop the endpoint factors reduce to conjugation, so the normalized trace is gauge invariant.
+
+The Phase 1D `SU(3)` lattice observable keeps the full complex normalized trace
+
+```text
+W_3(C) = (1/3) Tr U_C.
+```
+
+A periodic Polyakov loop is likewise invariant under ordinary periodic local gauge transformations. That rule remains distinct from the Phase 1C center transformation, which rotates the Polyakov loop by a center phase.
+
+For infinitesimal loops, Phase 1D records only the standard small-loop bridge
+
+```text
+U_boundary = I + F_A(X,Y) * oriented_area + higher-order terms,
+F_A = dA + A wedge A.
+```
+
+A finite loop or finite plaquette is not identified with a pointwise continuum curvature tensor.
+
+Frenet curvature, torsion, and osculating geometry of a path are also explicitly distinct from gauge curvature `F_A` unless a separate theorem establishes a connection.
 
 ## Deterministic configuration encoding
 
@@ -124,6 +165,7 @@ cargo run --quiet --locked --bin ym-su2-reference
 cargo run --quiet --locked --bin ym-su3-algebra
 cargo run --quiet --locked --bin ym-su3-lattice
 cargo run --quiet --locked --bin ym-su3-center
+cargo run --quiet --locked --bin ym-path-holonomy
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
@@ -148,7 +190,7 @@ scripts/               fail-closed contract checks
 
 ## Roadmap
 
-The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 1C freezes the abstract/concrete center distinction; Phase 1D next develops the path/parallel-transport/holonomy dictionary.
+The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 1D currently develops the path/parallel-transport/holonomy bridge; Phase 1E then freezes the broader classical bundle/connection dictionary before statistical ensemble work begins.
 
 ## Licence
 
