@@ -104,6 +104,12 @@ fn report_matches_benchmark(report: &ChainReport, chain_id: u64) -> bool {
         && config.autocorrelation_max_lag == AUTOCORRELATION_MAX_LAG
 }
 
+fn is_constant_series(values: &[f64]) -> bool {
+    values
+        .first()
+        .is_some_and(|first| values[1..].iter().all(|value| value == first))
+}
+
 pub fn stationarity_diagnostic(values: &[f64]) -> Result<StationarityDiagnostic, BenchmarkError> {
     if values.len() != MEASUREMENTS
         || STATIONARITY_HALF_MEASUREMENTS * 2 != MEASUREMENTS
@@ -113,15 +119,21 @@ pub fn stationarity_diagnostic(values: &[f64]) -> Result<StationarityDiagnostic,
     }
 
     let split = STATIONARITY_HALF_MEASUREMENTS;
-    let first = diagnostics(&values[..split], STATIONARITY_AUTOCORRELATION_MAX_LAG)
+    let first_values = &values[..split];
+    let second_values = &values[split..];
+
+    // Reject a stuck observable directly from the raw samples. Checking only
+    // the variance is insufficient because summing a repeated non-binary f64
+    // can shift the computed mean by roundoff and create a tiny fake variance.
+    if is_constant_series(first_values) || is_constant_series(second_values) {
+        return Err(BenchmarkError::StationarityDiagnosticFailed);
+    }
+
+    let first = diagnostics(first_values, STATIONARITY_AUTOCORRELATION_MAX_LAG)
         .map_err(|_| BenchmarkError::StationarityDiagnosticFailed)?;
-    let second = diagnostics(&values[split..], STATIONARITY_AUTOCORRELATION_MAX_LAG)
+    let second = diagnostics(second_values, STATIONARITY_AUTOCORRELATION_MAX_LAG)
         .map_err(|_| BenchmarkError::StationarityDiagnosticFailed)?;
 
-    // A constant half-series is not evidence of equilibrium for this stochastic
-    // benchmark. Phase 2A diagnostics intentionally define a zero-variance
-    // series, but Phase 2B stationarity fails closed rather than interpreting
-    // two stuck halves as perfect agreement.
     if first.variance == 0.0 || second.variance == 0.0 {
         return Err(BenchmarkError::StationarityDiagnosticFailed);
     }
