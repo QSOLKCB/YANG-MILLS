@@ -49,6 +49,7 @@
     "max_schedule_sweeps": 1048576,
     "max_measurements": 1048576,
     "max_overrelaxation_sweeps_per_heatbath": 16,
+    "total_complete_markov_sweeps_must_be_at_most_max_schedule_sweeps": true,
     "heatbath_attempt_limit_must_be_positive": true,
     "autocorrelation_max_lag_must_be_less_than_measurements": true
   },
@@ -62,7 +63,9 @@
     "factorization": "V=k Vhat with k=sqrt(sum_i V_i^2) and Vhat in SU(2) when k>0",
     "local_variable": "R=U Vhat",
     "conditional_density": "dP(R) proportional to exp(alpha r0) d_mu_Haar(R), alpha=beta*k",
-    "scalar_proposal": "r0 is proposed from the exact truncated exponential density proportional to exp(alpha r0) on [-1,1]",
+    "scalar_proposal": "r0 is proposed from the truncated exponential density proportional to exp(alpha r0) on [-1,1], with the uniform alpha->0 floating-point limit used for alpha<=1e-300",
+    "alpha_zero_limit": 1e-300,
+    "alpha_zero_limit_reason": "avoid subnormal inverse-CDF quantization where the physical tilt is far below binary64 resolution",
     "haar_jacobian_acceptance": "accept scalar proposal with probability sqrt(1-r0^2)",
     "vector_direction": "conditional on accepted r0, vector direction is uniform on S^2",
     "link_reconstruction": "U_new=R Vhat^dagger; when k=0 use U_new=R",
@@ -78,6 +81,7 @@
     "initial_configuration": "cold identity lattice",
     "thermalization": "discard thermalization_sweeps complete Markov sweeps before measurements",
     "measurement_cadence": "perform sweeps_between_measurements complete Markov sweeps before each recorded measurement",
+    "total_sweep_count": "thermalization_sweeps + measurements*sweeps_between_measurements, checked for overflow and bounded by max_schedule_sweeps",
     "observable": "average plaquette=(1/(6V))*sum_x,sum_mu<nu (1/2)ReTr P_mu_nu(x)"
   },
   "autocorrelation_diagnostics": {
