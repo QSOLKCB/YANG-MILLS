@@ -1023,9 +1023,7 @@ mod tests {
             .unwrap();
         let old_action = lattice.wilson_action(2.0).unwrap();
         let mut replaced = lattice.clone();
-        replaced
-            .set_link([0, 0, 0, 0], 0, Su2::IDENTITY)
-            .unwrap();
+        replaced.set_link([0, 0, 0, 0], 0, Su2::IDENTITY).unwrap();
         let full_delta = replaced.wilson_action(2.0).unwrap() - old_action;
         assert_close(local_delta, full_delta, DEFAULT_TOLERANCE);
         assert_close(local_delta, 0.0, DEFAULT_TOLERANCE);
