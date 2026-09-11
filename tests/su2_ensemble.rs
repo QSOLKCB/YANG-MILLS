@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+use std::collections::BTreeSet;
+
 use yang_mills_reference::{Lattice4, ReferenceError, Su2, DIM};
 
 #[path = "../reference/rust/src/su2_ensemble.rs"]
@@ -9,7 +11,7 @@ mod su2_ensemble;
 
 use su2_ensemble::{
     average_plaquette, derive_chain_seed, diagnostics, heatbath_sweep, overrelaxation_sweep,
-    run_chain, EnsembleConfig, EnsembleError, SplitMix64,
+    run_chain, EnsembleConfig, EnsembleError, SplitMix64, MAX_REFERENCE_SWEEPS,
 };
 
 fn beta_zero_config(chain_id: u64) -> EnsembleConfig {
@@ -89,6 +91,29 @@ fn heatbath_sweep_preserves_su2_link_invariant() {
 }
 
 #[test]
+fn tiny_positive_beta_uses_well_resolved_zero_limit_proposals() {
+    let mut lattice = Lattice4::new_identity([2, 2, 2, 2]).unwrap();
+    let mut rng = SplitMix64::new(0x1234_5678_9abc_def0);
+    heatbath_sweep(&mut lattice, f64::from_bits(1), &mut rng, 100_000).unwrap();
+
+    let mut scalar_bits = BTreeSet::new();
+    for x0 in 0..2 {
+        for x1 in 0..2 {
+            for x2 in 0..2 {
+                for x3 in 0..2 {
+                    let x = [x0, x1, x2, x3];
+                    for mu in 0..DIM {
+                        scalar_bits.insert(lattice.link(x, mu).unwrap().components()[0].to_bits());
+                    }
+                }
+            }
+        }
+    }
+    assert!(scalar_bits.len() > 16);
+    assert!(lattice.max_link_unit_residual() <= 1.0e-12);
+}
+
+#[test]
 fn overrelaxation_is_microcanonical_within_tolerance() {
     let beta = 2.0;
     let mut lattice = Lattice4::new_identity([2, 2, 2, 2]).unwrap();
@@ -146,5 +171,15 @@ fn invalid_sampler_inputs_fail_closed() {
     assert_eq!(
         config.validate().unwrap_err(),
         EnsembleError::AutocorrelationLagOutOfRange
+    );
+
+    let mut config = beta_zero_config(0);
+    config.thermalization_sweeps = MAX_REFERENCE_SWEEPS;
+    config.measurements = 2;
+    config.sweeps_between_measurements = MAX_REFERENCE_SWEEPS / 2;
+    config.autocorrelation_max_lag = 1;
+    assert_eq!(
+        config.validate().unwrap_err(),
+        EnsembleError::ScheduleOutsideReferenceRange
     );
 }
