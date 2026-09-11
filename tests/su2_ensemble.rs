@@ -122,7 +122,10 @@ fn invalid_sampler_inputs_fail_closed() {
 
     let mut config = beta_zero_config(0);
     config.measurements = 1;
-    assert_eq!(config.validate().unwrap_err(), EnsembleError::TooFewMeasurements);
+    assert_eq!(
+        config.validate().unwrap_err(),
+        EnsembleError::TooFewMeasurements
+    );
 
     let mut config = beta_zero_config(0);
     config.sweeps_between_measurements = 0;
