@@ -124,16 +124,13 @@ impl Su3Lattice4 {
     }
 
     fn site_index(&self, x: [usize; DIM]) -> Result<usize, Su3LatticeError> {
-        if x
-            .iter()
+        if x.iter()
             .zip(self.extents)
             .any(|(&value, extent)| value >= extent)
         {
             return Err(Su3LatticeError::CoordinateOutOfRange);
         }
-        Ok((((x[0] * self.extents[1] + x[1]) * self.extents[2] + x[2])
-            * self.extents[3])
-            + x[3])
+        Ok((((x[0] * self.extents[1] + x[1]) * self.extents[2] + x[2]) * self.extents[3]) + x[3])
     }
 
     fn link_index(&self, x: [usize; DIM], mu: usize) -> Result<usize, Su3LatticeError> {
@@ -167,12 +164,7 @@ impl Su3Lattice4 {
         Ok(())
     }
 
-    pub fn plaquette(
-        &self,
-        x: [usize; DIM],
-        mu: usize,
-        nu: usize,
-    ) -> Result<Su3, Su3LatticeError> {
+    pub fn plaquette(&self, x: [usize; DIM], mu: usize, nu: usize) -> Result<Su3, Su3LatticeError> {
         Self::validate_direction(mu)?;
         Self::validate_direction(nu)?;
         if mu == nu {
@@ -227,9 +219,7 @@ impl Su3Lattice4 {
             .map_err(|_| Su3LatticeError::AllocationFailed)?;
         site_gauges.resize(self.site_count(), Su3::IDENTITY);
         self.for_each_site(|x| {
-            let index = self
-                .site_index(x)
-                .expect("enumerated SU(3) site is valid");
+            let index = self.site_index(x).expect("enumerated SU(3) site is valid");
             site_gauges[index] = omega(x);
         });
 
@@ -239,9 +229,7 @@ impl Su3Lattice4 {
             if failure.is_some() {
                 return;
             }
-            let gx = site_gauges[self
-                .site_index(x)
-                .expect("enumerated SU(3) site is valid")];
+            let gx = site_gauges[self.site_index(x).expect("enumerated SU(3) site is valid")];
             for mu in 0..DIM {
                 let result = (|| {
                     let xp = self.neighbor_plus(x, mu)?;
