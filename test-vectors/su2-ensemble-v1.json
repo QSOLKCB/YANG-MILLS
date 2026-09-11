@@ -1,7 +1,7 @@
 {
   "contract_id": "YM-SU2-ENSEMBLE-V1",
   "vector_set": "SU2-ENSEMBLE-PHASE2A-V1",
-  "status": "phase-2a-review-candidate",
+  "status": "phase-2a-frozen",
   "vectors": [
     {
       "id": "splitmix64-seed-zero-first-five",
