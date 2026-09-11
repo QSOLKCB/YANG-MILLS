@@ -1,4 +1,4 @@
-name: Phase 0 reference checks
+name: YANG-MILLS reference checks
 
 on:
   push:

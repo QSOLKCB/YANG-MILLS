@@ -4,7 +4,7 @@ The roadmap is ordered to keep implementation validation, numerical evidence, ph
 
 ## Phase 0 — constitution + minimal `SU(2)` reference core
 
-**Status: implemented by PR #1 candidate.**
+**Status: completed and merged in PR #1.**
 
 ### Constitution
 
@@ -47,19 +47,23 @@ Phase 1 grows the reference surface from elementary plaquettes to gauge-invarian
 
 ### Phase 1A — `SU(2)` observables and local mechanics
 
-- [ ] Freeze `YM-SU2-LATTICE-V1` after independent review of conventions.
-- [ ] Add validated deterministic configuration serialisation.
-- [ ] Define `YM-WILSON-LOOP-V1` for arbitrary closed oriented lattice paths.
-- [ ] Add Wilson loops beyond elementary plaquettes.
-- [ ] Add rectangular `R x T` Wilson-loop golden vectors.
-- [ ] Check path closure, reverse-link dagger handling, cyclic trace invariance, and local gauge invariance.
-- [ ] Check the identity configuration gives `W(C) = 1` for every valid closed loop.
-- [ ] Add Polyakov loops as observables without prematurely assigning a confinement claim.
-- [ ] Add staple construction and local action-difference checks.
-- [ ] Add `SU(2)` update-kernel primitives needed by later ensemble algorithms.
-- [ ] Add bounded lattice-size and overflow validation.
-- [ ] Add independent golden vectors derived from analytic configurations.
-- [ ] Make the lattice-to-continuum bridge explicit: plaquette holonomy is the discrete object whose small-spacing expansion contains `F_mu_nu`; do not treat a finite-spacing plaquette as the continuum field-strength tensor itself.
+**Status: implemented, independently reviewed, CI-green, and frozen in PR #2 pending merge.**
+
+- [x] Freeze `YM-SU2-LATTICE-V1` after independent review of conventions.
+- [x] Add validated deterministic configuration serialisation.
+- [x] Define `YM-WILSON-LOOP-V1` for arbitrary closed oriented lattice paths.
+- [x] Add Wilson loops beyond elementary plaquettes.
+- [x] Add rectangular `R x T` Wilson-loop golden vectors.
+- [x] Check path closure, reverse-link dagger handling, cyclic trace invariance, and local gauge invariance.
+- [x] Check the identity configuration gives `W(C) = 1` for every valid closed loop.
+- [x] Add Polyakov loops as observables without prematurely assigning a confinement claim.
+- [x] Add staple construction and local action-difference checks.
+- [x] Add `SU(2)` update-kernel primitives needed by later ensemble algorithms.
+- [x] Add bounded lattice-size and overflow validation.
+- [x] Add independent golden vectors derived from analytic configurations.
+- [x] Make the lattice-to-continuum bridge explicit: plaquette holonomy is the discrete object whose small-spacing expansion contains `F_mu_nu`; do not treat a finite-spacing plaquette as the continuum field-strength tensor itself.
+
+**Phase 1A freeze gate:** `YM-SU2-LATTICE-V1`, `YM-WILSON-LOOP-V1`, `YM-SU2-CONFIG-V1`, and `SU2-OBSERVABLES-PHASE1A-V1` are sealed on the reviewed PR #2 surface. Incompatible semantic changes require new contract identifiers rather than silent mutation.
 
 ### Phase 1B — `SU(3)` algebra and invariant layer
 

@@ -1,0 +1,25 @@
+{
+  "contract_id": "YM-WILSON-LOOP-V1",
+  "status": "phase-1a-frozen",
+  "gauge_group": "SU(2)",
+  "path_step": {
+    "forward": "+mu uses U_mu(x) then advances x->x+mu",
+    "backward": "-mu first advances x->x-mu then uses U_mu(x-mu)^dagger"
+  },
+  "path_product_order": "segments-multiplied-in-traversal-order-from-left-to-right",
+  "closed_path_rule": "final periodic lattice coordinate equals start coordinate",
+  "observable": "W(C)=(1/2)*ReTr(product_C U)",
+  "identity_rule": "W(C)=1 for every valid closed path on the identity configuration",
+  "reverse_rule": "immediate +mu,-mu transport multiplies to identity",
+  "gauge_rule": "closed-loop normalized trace is invariant under local gauge transformations",
+  "cyclic_rule": "normalized trace is invariant under cyclic choice of closed-loop basepoint",
+  "rectangle_rule": "+mu^R,+nu^T,-mu^R,-nu^T",
+  "polyakov_rule": "positive-direction holonomy wrapping one full periodic extent",
+  "reference_limits": {
+    "max_path_steps": 1048576,
+    "zero_rectangle_extent": "reject",
+    "open_path_as_wilson_loop": "reject"
+  },
+  "confinement_claimed": false,
+  "continuum_curvature_identity_claimed_at_finite_spacing": false
+}
