@@ -95,7 +95,7 @@ EXPECTED_CONTRACTS: dict[str, dict[str, Any]] = {
     },
     "contracts/YM-SU2-LATTICE-V1.json": {
         "contract_id": "YM-SU2-LATTICE-V1",
-        "status": "phase-1a-review-candidate",
+        "status": "phase-1a-frozen",
         "gauge_group": "SU(2)",
         "dimension": 4,
         "boundary_conditions": "periodic",
@@ -129,7 +129,7 @@ EXPECTED_CONTRACTS: dict[str, dict[str, Any]] = {
     },
     "contracts/YM-WILSON-LOOP-V1.json": {
         "contract_id": "YM-WILSON-LOOP-V1",
-        "status": "phase-1a-review-candidate",
+        "status": "phase-1a-frozen",
         "gauge_group": "SU(2)",
         "path_step": {
             "forward": "+mu uses U_mu(x) then advances x->x+mu",
@@ -184,7 +184,7 @@ EXPECTED_PHASE0_VECTORS = {
 EXPECTED_PHASE1A_VECTORS = {
     "contract_id": "YM-WILSON-LOOP-V1",
     "vector_set": "SU2-OBSERVABLES-PHASE1A-V1",
-    "status": "phase-1a-review-candidate",
+    "status": "phase-1a-frozen",
     "vectors": [
         {
             "id": "identity-rectangle-2x1",
