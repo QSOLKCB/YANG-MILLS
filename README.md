@@ -2,7 +2,7 @@
 
 **A deterministic, provenance-sealed computational and theorem-facing laboratory for pure Yang–Mills theory.**
 
-YANG-MILLS studies lattice gauge dynamics, gauge-invariant observables, glueball spectra, continuum extrapolation, and the mathematical boundary surrounding the Yang–Mills existence and mass-gap problem.
+YANG-MILLS studies lattice gauge dynamics, gauge-invariant observables, statistical ensembles, glueball spectra, continuum extrapolation, and the mathematical boundary surrounding the Yang–Mills existence and mass-gap problem.
 
 > Numerical evidence is not a proof of the Millennium Problem.
 
@@ -12,10 +12,7 @@ Phase 0 was merged in PR #1. It established the project constitution, claim boun
 
 Phase 1A was merged in PR #2 and froze the finite-lattice `SU(2)` observable/mechanics surface, including deterministic configuration identity, oriented paths, Wilson loops, Polyakov loops, staples, and local update mechanics.
 
-Phase 1B was merged in PR #3 and froze `SU(3)` in two ordered gates:
-
-1. `YM-SU3-ALGEBRA-V1` — canonical Gell-Mann generators, `f^{abc}`/`d^{abc}`, quadratic/cubic Casimir regressions, bounded `U(theta)=exp(i theta_a T^a)`, and fail-closed unitarity/determinant acceptance;
-2. `YM-SU3-LATTICE-V1` — bounded periodic four-dimensional `SU(3)` links, plaquettes, Wilson action, and local gauge transformations.
+Phase 1B was merged in PR #3 and froze `SU(3)` algebra and the minimal periodic `SU(3)` Wilson lattice.
 
 Phase 1C was merged in PR #4 and froze the distinction
 
@@ -27,11 +24,15 @@ non-central <Omega> subset SU(3)
 genuine Z(SU(3)) = {I, omega I, omega^2 I}.
 ```
 
-Phase 1D was merged in PR #5 and froze `YM-PATH-HOLONOMY-V1`: arbitrary bounded `SU(3)` open/closed lattice transport, Wilson/Polyakov holonomy, endpoint covariance, reversal/concatenation, and the continuum path-ordering convention matched to the already-frozen lattice product order.
+Phase 1D was merged in PR #5 and froze `YM-PATH-HOLONOMY-V1`: arbitrary bounded `SU(3)` open/closed lattice transport, Wilson/Polyakov holonomy, endpoint covariance, reversal/concatenation, and the matching continuum path-ordering convention.
 
-Phase 1E is implemented, CI-green, review-clean, and frozen in PR #6 pending merge. `YM-CLASSICAL-GEOMETRY-V1` freezes the classical bundle/connection dictionary: base geometry, principal/associated bundles, sections, covariant derivative, `ad P`-valued curvature, Hodge-star conventions, Bianchi identity, Yang–Mills functional/equation, self-duality, and the lattice-to-continuum dictionary. See [`docs/CLASSICAL_CONTINUUM.md`](docs/CLASSICAL_CONTINUUM.md).
+Phase 1E was merged in PR #6 and froze `YM-CLASSICAL-GEOMETRY-V1`: the classical principal/associated-bundle, connection, curvature, Hodge-star, Yang–Mills-functional, self-duality, and lattice-to-continuum dictionary. See [`docs/CLASSICAL_CONTINUUM.md`](docs/CLASSICAL_CONTINUUM.md).
 
-No current phase performs Monte Carlo ensemble generation, glueball extraction, a continuum/infinite-volume limit, construction of the interacting quantum theory, or a mass-gap proof.
+Phase 2A is implemented, CI-green, review-clean, and frozen in PR #7 pending merge. `YM-SU2-ENSEMBLE-V1` introduces the first stochastic authority: bounded pure-`SU(2)` heat-bath/over-relaxation Markov chains, versioned pseudorandom stream identity, explicit thermalisation and measurement cadence, independent-chain identities, average-plaquette measurements, autocorrelation diagnostics, and effective sample size. See [`docs/SU2_ENSEMBLES.md`](docs/SU2_ENSEMBLES.md).
+
+Phase 2A does **not** claim the full Phase 2 graduation gate. Reproduction of a selected published plaquette benchmark remains Phase 2B, and `SU(3)` ensemble generation remains disabled until the `SU(2)` sampler is benchmark-validated.
+
+No current phase performs glueball extraction, a continuum/infinite-volume limit, construction of the interacting quantum theory, or a mass-gap proof.
 
 ## The target
 
@@ -40,7 +41,7 @@ The Clay Mathematics Institute problem asks, in substance, for a non-trivial qua
 The repository therefore maintains a strict implication boundary:
 
 ```text
-finite lattice calculation
+finite lattice calculation / ensemble
         !=
 classical continuum dictionary
         !=
@@ -77,14 +78,14 @@ with minimal lattice action
 S_W = beta * sum_p (1 - 1/3 Re Tr U_p).
 ```
 
-The mathematical Lie algebra `su(3)` consists of traceless anti-Hermitian matrices. Phase 1E therefore freezes the bridge
+The mathematical Lie algebra `su(3)` consists of traceless anti-Hermitian matrices. Phase 1E freezes the bridge
 
 ```text
 Phase 1B Hermitian basis : T^a
 anti-Hermitian su(3) basis: i T^a.
 ```
 
-## Paths and forward transport
+## Paths and classical continuum geometry
 
 Phase 1D freezes the start-left transporter
 
@@ -93,44 +94,25 @@ dU_gamma/dt = U_gamma a_gamma(t)
 U_gamma^Omega = Omega(start) U_gamma Omega(end)^-1.
 ```
 
-Phase 1E introduces the conventional forward associated-fiber transport `P_gamma` and freezes
+Phase 1E freezes conventional forward associated-fiber transport `P_gamma` by
 
 ```text
 U_gamma = P_gamma^-1.
 ```
 
-Thus
+For a principal bundle `pi:P->M` with free right `G` action, a local section gives
 
 ```text
-P_gamma^Omega
-  = rho(Omega(end))
-    P_gamma
-    rho(Omega(start))^-1.
+A = sigma^* omega_P,
 ```
 
-This makes the principal-bundle, associated-bundle, and lattice path conventions one consistent system rather than competing sign conventions.
-
-## Classical continuum geometry
-
-Phase 1E uses a principal bundle
-
-```text
-pi:P->M
-```
-
-with free **right** `G` action. A principal connection one-form `omega_P` yields a local gauge potential
-
-```text
-A = sigma^* omega_P
-```
-
-for a local section `sigma:U->P`. If `sigma'=sigma g`, then
+and `sigma'=sigma g` gives
 
 ```text
 A' = g^-1 A g + g^-1 d g.
 ```
 
-With the frozen Phase 1D variable `Omega=g^-1`, this becomes
+With `Omega=g^-1`, this is the already-frozen Phase 1D law
 
 ```text
 A^Omega = Omega A Omega^-1 - dOmega Omega^-1.
@@ -142,19 +124,7 @@ The global curvature type is
 F_A in Omega^2(M, ad P),
 ```
 
-with local matrix formula
-
-```text
-F_A = dA + A wedge A
-```
-
-and Bianchi identity
-
-```text
-D_A F_A = 0.
-```
-
-Gauge curvature is kept distinct from Riemann curvature, Gaussian/surface curvature, and Frenet/path curvature.
+with local formula `F_A=dA+A wedge A` and Bianchi identity `D_A F_A=0`.
 
 For an oriented Riemannian four-manifold, Phase 1E freezes
 
@@ -165,38 +135,54 @@ YM(A) = (1/2) integral_M |F_A|^2 dvol
 Euler-Lagrange: D_A^* F_A = 0.
 ```
 
-A Yang–Mills connection is a **critical point** of this functional; it is not automatically a global minimizer.
+A Yang–Mills connection is a critical point, not automatically a global minimizer. Classical self-duality does not imply a quantum mass gap.
 
-Self-duality/anti-self-duality are
+## Phase 2A SU(2) ensembles
 
-```text
-F_A = +/- *F_A.
-```
+Phase 2A freezes `SPLITMIX64-V1` as a **reference reproducibility stream**, not as a physical parameter or cryptographic RNG. Chain identity includes the master seed, chain ID, derived seed, lattice/action parameters, thermalisation schedule, measurement cadence, over-relaxation cadence, rejection bound, and autocorrelation settings.
 
-Together with the Bianchi identity they imply the classical Yang–Mills equation. They do not imply a quantum mass gap.
-
-## Executable Hodge convention fixture
-
-The Phase 1E Rust reference is intentionally only a finite-dimensional sign/convention check in oriented Euclidean `R^4`. In the ordered 2-form basis
+For one link with staple `V=k Vhat`, the frozen local heat-bath variable is
 
 ```text
-01, 02, 03, 12, 13, 23
+R = U Vhat
+alpha = beta k
 ```
 
-it freezes
+with conditional distribution
 
 ```text
-*01=23  *02=-13  *03=12
-*12=03  *13=-02  *23=01.
+dP(R) proportional to exp(alpha r0) d_mu_Haar(R).
 ```
 
-It verifies `*^2=+1`, the wedge/Hodge inner-product identity, and self-dual/anti-self-dual decomposition. It is **not** a continuum manifold or PDE solver.
+The implementation proposes `r0` from the exact truncated exponential, applies the Haar Jacobian by bounded rejection, samples the quaternion direction uniformly on `S^2`, and reconstructs
+
+```text
+U_new = R Vhat^dagger.
+```
+
+The microcanonical over-relaxation step is
+
+```text
+U_new = Vhat^dagger U_old^dagger Vhat^dagger.
+```
+
+A complete reference Markov sweep is one full heat-bath sweep followed by the configured number of full over-relaxation sweeps.
+
+The measured Phase 2A observable is the average plaquette. The reference diagnostics record the autocorrelation sequence, a versioned positive-window integrated autocorrelation estimate, effective sample size, and ESS-adjusted diagnostic standard error.
+
+At `beta=0`, Haar measure gives exact plaquette expectation zero. Phase 2A uses that fact only as a fixed-seed sanity band. It does **not** substitute for reproduction of a published finite-beta plaquette benchmark.
+
+The Phase 2 boundary remains explicitly frozen as
+
+```text
+published_plaquette_baseline_reproduced = false
+phase2_graduation_gate_satisfied       = false
+su3_ensemble_enabled                   = false.
+```
 
 ## Lattice-to-continuum boundary
 
-A lattice link approximates the frozen start-left transport along an edge. A plaquette is a finite small-loop holonomy whose smooth small-spacing expansion contains `F_mu_nu`. A finite plaquette is not equal to pointwise continuum curvature, and the finite-spacing Wilson action is not exactly the continuum functional.
-
-Likewise, no finite-lattice observable becomes a continuum quantum theorem merely because the classical dictionary is now explicit.
+A lattice link approximates the frozen start-left transport along an edge. A plaquette is a finite small-loop holonomy whose smooth small-spacing expansion contains `F_mu_nu`. A finite plaquette is not equal to pointwise continuum curvature, and a finite-lattice ensemble is not a continuum theorem.
 
 ## Run the reference checks
 
@@ -211,6 +197,7 @@ cargo run --quiet --locked --bin ym-su3-lattice
 cargo run --quiet --locked --bin ym-su3-center
 cargo run --quiet --locked --bin ym-path-holonomy
 cargo run --quiet --locked --bin ym-classical-geometry
+cargo run --quiet --locked --bin ym-su2-ensemble
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
@@ -221,8 +208,8 @@ The unified contract entry points are authoritative for every currently advertis
 
 ```text
 contracts/             machine-readable contract surfaces
-docs/                  constitution, mathematical dictionaries, evidence rules
-reference/rust/        deterministic reference implementations
+docs/                  constitution, mathematical/statistical dictionaries, evidence rules
+reference/rust/        deterministic and stochastic reference implementations
 test-vectors/          human- and machine-readable regression vectors
 tests/                 integration tests
 scripts/               fail-closed contract checks
@@ -235,7 +222,7 @@ scripts/               fail-closed contract checks
 
 ## Roadmap
 
-The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 1E closes the classical continuum dictionary before Phase 2 introduces statistical ensemble generation.
+The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 2A freezes the `SU(2)` sampler/diagnostic surface; Phase 2B must reproduce a declared published plaquette baseline before the full Phase 2 graduation gate can close or `SU(3)` ensemble generation can begin.
 
 ## Licence
 
