@@ -1,6 +1,6 @@
 {
   "contract_id": "YM-SU3-CENTER-V1",
-  "status": "phase-1c-review-candidate",
+  "status": "phase-1c-frozen",
   "depends_on": [
     {
       "contract_id": "YM-SU3-ALGEBRA-V1",
