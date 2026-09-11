@@ -125,8 +125,7 @@ impl Su3Lattice4 {
     }
 
     fn site_index(&self, x: [usize; DIM]) -> Result<usize, Su3LatticeError> {
-        if x
-            .iter()
+        if x.iter()
             .zip(self.extents)
             .any(|(&value, extent)| value >= extent)
         {
