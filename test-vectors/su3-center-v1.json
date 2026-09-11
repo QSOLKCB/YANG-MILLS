@@ -1,7 +1,7 @@
 {
   "contract_id": "YM-SU3-CENTER-V1",
   "vector_set": "SU3-CENTER-PHASE1C-V1",
-  "status": "phase-1c-review-candidate",
+  "status": "phase-1c-frozen",
   "vectors": [
     {
       "id": "abstract-c3-generator-cubed",
