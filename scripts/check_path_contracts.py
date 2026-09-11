@@ -20,7 +20,9 @@ EXPECTED_PATH_CONTRACT: dict[str, Any] = {
         "class": "oriented-piecewise-smooth",
         "map": "gamma:[0,1]->M",
         "tangent": "gamma_dot(t) in T_{gamma(t)}M",
-        "local_connection": "A in Omega^1(U,g) in a chosen local trivialization",
+        "local_trivialization_domain": "U subset M with gamma([0,1]) subset U for the single-chart Phase 1D formula",
+        "local_connection": "A in Omega^1(U,g) in the chosen local trivialization",
+        "multi_chart_transport": "not frozen in Phase 1D; defer transition-function/patching semantics to Phase 1E",
         "pullback_coefficient": "a_gamma(t)=A_{gamma(t)}(gamma_dot(t))",
     },
     "continuum_transport_convention": {
@@ -40,6 +42,7 @@ EXPECTED_PATH_CONTRACT: dict[str, Any] = {
         "product_order": "segments-multiplied-in-traversal-order-from-left-to-right",
         "open_path": "returns group-valued transport plus final periodic coordinate",
         "closed_path": "final periodic coordinate equals start coordinate",
+        "invalid_direction_rule": "reject in every public path helper before allocation or transport",
         "max_path_steps": 1048576,
         "su2_compatibility_contract": "YM-WILSON-LOOP-V1",
     },
