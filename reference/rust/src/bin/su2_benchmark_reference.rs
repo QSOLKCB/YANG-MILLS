@@ -66,8 +66,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("master_seed={MASTER_SEED:016x}");
     println!("chain0_id={}", CHAIN_IDS[0]);
     println!("chain1_id={}", CHAIN_IDS[1]);
+    println!("chain0_sampler_id={}", first.sampler_id);
+    println!("chain1_sampler_id={}", second.sampler_id);
+    println!("chain0_rng_id={}", first.rng_id);
+    println!("chain1_rng_id={}", second.rng_id);
     println!("chain0_derived_seed={:016x}", first.derived_seed);
     println!("chain1_derived_seed={:016x}", second.derived_seed);
+    println!(
+        "chain0_max_heatbath_attempts_per_link={}",
+        first.config.max_heatbath_attempts_per_link
+    );
+    println!(
+        "chain1_max_heatbath_attempts_per_link={}",
+        second.config.max_heatbath_attempts_per_link
+    );
     println!("thermalization_sweeps={THERMALIZATION_SWEEPS}");
     println!("measurements_per_chain={MEASUREMENTS}");
     println!("sweeps_between_measurements={SWEEPS_BETWEEN_MEASUREMENTS}");
