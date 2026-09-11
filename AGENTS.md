@@ -1,6 +1,6 @@
 # YANG-MILLS agent contract
 
-This repository intentionally separates software correctness, numerical evidence, physical inference, and mathematical proof. Coding and research agents must preserve that separation.
+This repository intentionally separates software correctness, numerical evidence, physical inference, classical geometry, continuum quantum construction, and mathematical proof. Coding and research agents must preserve that separation.
 
 ## Non-negotiable claim hierarchy
 
@@ -13,9 +13,9 @@ Use these classes:
 5. **continuum theorem** — a mathematically proved statement about the continuum theory;
 6. **Clay solution claim** — only permissible if the full official existence-and-mass-gap problem is actually proved.
 
-Standalone finite-dimensional algebra/group regressions that are not finite-lattice theorems should be published conservatively as implementation/contract facts unless the claim taxonomy is explicitly extended. Floating-point matrix-exponential, center-element, path-covariance, or gauge-invariance residual vectors are not `C1` exact results merely because the underlying mathematical identity is exact.
+A correct classical bundle/connection identity is not automatically a construction of the quantum theory. Standalone finite-dimensional algebra, Hodge-star, center, path-covariance, or gauge-invariance regressions should be published conservatively as implementation/contract facts unless the claim taxonomy is explicitly extended.
 
-Never promote a result to a stronger class because a simulation is large, a GPU agrees with a CPU, an extrapolation looks stable, or a plot is persuasive.
+Never promote a result to a stronger class because a simulation is large, a GPU agrees with a CPU, an extrapolation looks stable, or a classical equation is standard.
 
 ## Required semantic refusals
 
@@ -27,11 +27,13 @@ An agent must refuse to write or approve language asserting that this repository
 - agreement with lattice literature;
 - gauge-invariant numerical observables;
 - a formal proof about the finite lattice;
+- a classical Yang–Mills connection or self-dual solution;
+- a complete principal-bundle/curvature dictionary;
 - cross-runtime or CPU/GPU agreement.
 
 ## Mathematical authority
 
-Phase 0 / Phase 1A freeze the `SU(2)` finite-lattice authority under `reference/rust/` and its frozen contracts. Do not silently change the sign convention, plaquette orientation, direction ordering, boundary conditions, lattice dimension, Wilson normalisation, path orientation, or frozen contract identifiers.
+Phase 0 / Phase 1A freeze the `SU(2)` finite-lattice authority. Do not silently change the sign convention, plaquette orientation, direction ordering, boundary conditions, lattice dimension, Wilson normalisation, path orientation, or frozen contract identifiers.
 
 The `SU(2)` convention is
 
@@ -45,7 +47,7 @@ with Wilson action
 S_W = beta * sum_{x, mu<nu} (1 - 1/2 Re Tr U_mu_nu(x)).
 ```
 
-Phase 1B freezes a separate `SU(3)` authority in two ordered contracts. The algebra convention is
+Phase 1B freezes a separate `SU(3)` authority. The algebra convention is
 
 ```text
 T^a = lambda_a / 2
@@ -61,7 +63,7 @@ The minimal `SU(3)` Wilson action is
 S_W = beta * sum_{x, mu<nu} (1 - 1/3 Re Tr P_mu_nu(x)).
 ```
 
-Phase 1C freezes a separate center authority. Agents must keep these meanings distinct:
+Phase 1C freezes a separate center authority. Keep these meanings distinct:
 
 ```text
 abstract C3 ~= Z3
@@ -69,13 +71,11 @@ non-central <Omega> subset SU(3)
 genuine Z(SU(3)) = {I, omega I, omega^2 I}.
 ```
 
-The Phase 1C orientation is `Omega|k>=|k+1 mod 3>`. The scalar center embedding must never be conflated with `<Omega>` merely because both are abstractly `C3`.
-
-A finite-lattice center transformation may rotate an `SU(3)` Polyakov loop by `z in Z(SU(3))` while leaving the Wilson action invariant. This transformation law is **not by itself** evidence of confinement, deconfinement, spontaneous symmetry breaking, or a thermodynamic order parameter.
+A finite-lattice center transformation is not by itself evidence of confinement, deconfinement, spontaneous symmetry breaking, or a thermodynamic order parameter.
 
 ### Phase 1D path/transport authority
 
-Phase 1D must preserve the path ordering already frozen by `YM-WILSON-LOOP-V1`:
+Phase 1D preserves the path ordering already frozen by `YM-WILSON-LOOP-V1`:
 
 ```text
 +mu : use U_mu(x), then advance x->x+mu
@@ -97,19 +97,106 @@ If `gamma2 o gamma1` means traverse `gamma1` first and `gamma2` second, then
 U_{gamma2 o gamma1} = U_gamma1 U_gamma2.
 ```
 
-Do **not** replace this with the opposite textbook ordering without simultaneously introducing a new incompatible contract and converting every dependent formula. Phase 1D exists specifically to prevent silent convention drift between lattice code and continuum prose.
+Open transport is endpoint-covariant, not gauge invariant. Closed normalized traces are gauge invariant under ordinary periodic local gauge transformations. Phase 1C center transformations remain distinct.
 
-Open transport is endpoint-covariant, not gauge invariant. Closed normalized traces are gauge invariant under ordinary periodic local gauge transformations. Phase 1C center transformations remain a distinct transformation class.
+The small-loop relation is a limiting continuum statement. Never equate a finite loop or finite plaquette directly with pointwise gauge curvature. Likewise Frenet curvature, torsion, and osculating geometry are not gauge curvature `F_A`.
 
-The small-loop relation is a limiting continuum statement. Never equate a finite loop or finite plaquette directly with pointwise gauge curvature. Likewise:
+### Phase 1E classical geometry authority
+
+Phase 1E freezes `YM-CLASSICAL-GEOMETRY-V1`. It is a **classical dictionary**, not a quantum construction.
+
+The principal bundle convention is
 
 ```text
-Frenet curvature != gauge curvature F_A
-torsion != gauge curvature F_A
-osculating geometry != gauge curvature F_A.
+pi:P->M
+right action: p -> p g
+connection form: omega_P in Omega^1(P,g)
+R_g^* omega_P = Ad_(g^-1) omega_P.
 ```
 
-The Phase 1D static-potential relation `<W(R,T)> ~ exp(-V(R)T)` is only a future ensemble-analysis surface. No area law, static potential, or confinement claim is permitted from deterministic path geometry alone.
+For a local section `sigma:U->P`,
+
+```text
+A = sigma^* omega_P.
+```
+
+If `sigma'=sigma g`, then
+
+```text
+A' = g^-1 A g + g^-1 d g.
+```
+
+The already-frozen Phase 1D variable is
+
+```text
+Omega = g^-1,
+```
+
+so this must reproduce exactly
+
+```text
+A^Omega = Omega A Omega^-1 - dOmega Omega^-1.
+```
+
+Do not change one of these formulas without changing the others under a new contract version.
+
+For an associated bundle
+
+```text
+E = P x_rho V
+(p,v) ~ (p g, rho(g^-1)v),
+```
+
+local fields transform as `psi^Omega=rho(Omega)psi` and the local covariant derivative is
+
+```text
+D_A = d + rho_*(A).
+```
+
+The global curvature type is
+
+```text
+F_A in Omega^2(M, ad P),
+```
+
+with local matrix convention
+
+```text
+F_A = dA + A wedge A
+```
+
+and Bianchi identity
+
+```text
+D_A F_A = 0.
+```
+
+Do not collapse `F_A` into an ordinary scalar 2-form or into Riemann/Frenet/Gaussian curvature.
+
+The mathematical Lie algebra `su(3)` is traceless anti-Hermitian. Phase 1B's `T^a=lambda_a/2` are Hermitian generators, so the corresponding anti-Hermitian basis is `i T^a`. This bridge is frozen.
+
+For the oriented Riemannian four-dimensional convention,
+
+```text
+*^2 = +1 on 2-forms
+D_A^* F_A = - * D_A * F_A
+YM(A) = (1/2) integral_M |F_A|^2 dvol
+Euler-Lagrange: D_A^* F_A = 0.
+```
+
+A Yang–Mills connection is a critical point, not automatically a global minimizer. Self-duality/anti-self-duality plus Bianchi implies the **classical** Yang–Mills equation; it does not imply a quantum mass gap.
+
+The Levi-Civita connection is the unique torsion-free metric-compatible connection on `TM`; it is not the gauge connection. Its Riemann curvature is not `F_A`.
+
+Phase 1E freezes the transport dictionary
+
+```text
+U_gamma = P_gamma^-1,
+```
+
+where `P_gamma` is forward associated-fiber transport and `U_gamma` is the Phase 1D start-left transporter. Multi-chart transport must use path subdivision and transition-function coordinate changes; no local potential may be silently extended outside its trivialization.
+
+The finite-dimensional Rust Hodge fixture checks only sign/algebra conventions in oriented Euclidean `R^4`. It is not a continuum PDE/manifold solver.
 
 Do not import triadic ontology, Q/K/V-to-colour semantics, or other cross-domain interpretations into these authorities.
 
@@ -158,6 +245,7 @@ cargo run --quiet --locked --bin ym-su3-algebra
 cargo run --quiet --locked --bin ym-su3-lattice
 cargo run --quiet --locked --bin ym-su3-center
 cargo run --quiet --locked --bin ym-path-holonomy
+cargo run --quiet --locked --bin ym-classical-geometry
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
@@ -170,4 +258,4 @@ Floating-point equality is not assumed. Every numerical comparison must have an 
 
 ## Formalisation
 
-Do not add a theorem prover merely for prestige. Formalise only stable definitions and theorem surfaces. A finite-lattice, finite-dimensional group, or classical path-transport proof is valuable but must not be described as the continuum quantum Yang–Mills existence/mass-gap proof.
+Do not add a theorem prover merely for prestige. Formalise only stable definitions and theorem surfaces. A finite-lattice, finite-dimensional group/Hodge, or classical bundle/connection proof is valuable but must not be described as the continuum quantum Yang–Mills existence/mass-gap proof.
