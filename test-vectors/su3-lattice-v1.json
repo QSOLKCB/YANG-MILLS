@@ -1,7 +1,7 @@
 {
   "contract_id": "YM-SU3-LATTICE-V1",
   "vector_set": "SU3-LATTICE-PHASE1B-V1",
-  "status": "phase-1b-lattice-review-candidate",
+  "status": "phase-1b-frozen",
   "vectors": [
     {
       "id": "identity-3x3x3x3-beta2",
