@@ -36,6 +36,9 @@ jobs:
       - name: SU(3) center reference vectors
         run: cargo run --quiet --locked --bin ym-su3-center
 
+      - name: Path holonomy reference vectors
+        run: cargo run --quiet --locked --bin ym-path-holonomy
+
       - name: All contract checks
         run: python3 scripts/check_all_contracts.py
 

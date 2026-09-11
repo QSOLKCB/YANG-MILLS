@@ -3,11 +3,13 @@
 
 from test_contract_validation import main as test_core_contracts
 from test_su3_contract_validation import main as test_su3_contracts
+from test_path_contract_validation import main as test_path_contracts
 
 
 def main() -> None:
     test_core_contracts()
     test_su3_contracts()
+    test_path_contracts()
     print("All negative YANG-MILLS contract regression checks: passed")
 
 

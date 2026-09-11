@@ -13,7 +13,7 @@ Use these classes:
 5. **continuum theorem** — a mathematically proved statement about the continuum theory;
 6. **Clay solution claim** — only permissible if the full official existence-and-mass-gap problem is actually proved.
 
-Standalone finite-dimensional algebra/group regressions that are not finite-lattice theorems should be published conservatively as implementation/contract facts unless the claim taxonomy is explicitly extended. Floating-point matrix-exponential or center-element residual vectors are not `C1` finite-lattice exact results.
+Standalone finite-dimensional algebra/group regressions that are not finite-lattice theorems should be published conservatively as implementation/contract facts unless the claim taxonomy is explicitly extended. Floating-point matrix-exponential, center-element, path-covariance, or gauge-invariance residual vectors are not `C1` exact results merely because the underlying mathematical identity is exact.
 
 Never promote a result to a stronger class because a simulation is large, a GPU agrees with a CPU, an extrapolation looks stable, or a plot is persuasive.
 
@@ -31,7 +31,7 @@ An agent must refuse to write or approve language asserting that this repository
 
 ## Mathematical authority
 
-Phase 0 / Phase 1A freeze the `SU(2)` finite-lattice authority under `reference/rust/` and its frozen contracts. Do not silently change the sign convention, plaquette orientation, direction ordering, boundary conditions, lattice dimension, Wilson normalisation, or frozen contract identifiers.
+Phase 0 / Phase 1A freeze the `SU(2)` finite-lattice authority under `reference/rust/` and its frozen contracts. Do not silently change the sign convention, plaquette orientation, direction ordering, boundary conditions, lattice dimension, Wilson normalisation, path orientation, or frozen contract identifiers.
 
 The `SU(2)` convention is
 
@@ -61,7 +61,7 @@ The minimal `SU(3)` Wilson action is
 S_W = beta * sum_{x, mu<nu} (1 - 1/3 Re Tr P_mu_nu(x)).
 ```
 
-Phase 1C introduces a **new** contract rather than mutating either frozen Phase 1B identifier. Agents must keep these three meanings separate:
+Phase 1C freezes a separate center authority. Agents must keep these meanings distinct:
 
 ```text
 abstract C3 ~= Z3
@@ -69,9 +69,47 @@ non-central <Omega> subset SU(3)
 genuine Z(SU(3)) = {I, omega I, omega^2 I}.
 ```
 
-The Phase 1C orientation is `Omega|k>=|k+1 mod 3>`. An exact group-valued witness `diag(-1,-1,1)` proves that this permutation embedding is not central. The scalar center embedding must commute with tested `SU(3)` matrices and must never be conflated with `<Omega>` merely because both are abstractly `C3`.
+The Phase 1C orientation is `Omega|k>=|k+1 mod 3>`. The scalar center embedding must never be conflated with `<Omega>` merely because both are abstractly `C3`.
 
-A finite-lattice center transformation may rotate an `SU(3)` Polyakov loop by `z in Z(SU(3))` while leaving the Wilson action invariant. This transformation law is **not by itself** evidence of confinement, deconfinement, spontaneous symmetry breaking, or a thermodynamic order parameter. Those inferences require later ensemble/statistical contracts.
+A finite-lattice center transformation may rotate an `SU(3)` Polyakov loop by `z in Z(SU(3))` while leaving the Wilson action invariant. This transformation law is **not by itself** evidence of confinement, deconfinement, spontaneous symmetry breaking, or a thermodynamic order parameter.
+
+### Phase 1D path/transport authority
+
+Phase 1D must preserve the path ordering already frozen by `YM-WILSON-LOOP-V1`:
+
+```text
++mu : use U_mu(x), then advance x->x+mu
+-mu : first advance x->x-mu, then use U_mu(x-mu)^dagger
+path product : multiply segments left-to-right in traversal order.
+```
+
+The matching continuum convention is
+
+```text
+dU_gamma/dt = U_gamma a_gamma(t)
+A^Omega = Omega A Omega^-1 - dOmega Omega^-1
+U_gamma^Omega = Omega(start) U_gamma Omega(end)^-1.
+```
+
+If `gamma2 o gamma1` means traverse `gamma1` first and `gamma2` second, then
+
+```text
+U_{gamma2 o gamma1} = U_gamma1 U_gamma2.
+```
+
+Do **not** replace this with the opposite textbook ordering without simultaneously introducing a new incompatible contract and converting every dependent formula. Phase 1D exists specifically to prevent silent convention drift between lattice code and continuum prose.
+
+Open transport is endpoint-covariant, not gauge invariant. Closed normalized traces are gauge invariant under ordinary periodic local gauge transformations. Phase 1C center transformations remain a distinct transformation class.
+
+The small-loop relation is a limiting continuum statement. Never equate a finite loop or finite plaquette directly with pointwise gauge curvature. Likewise:
+
+```text
+Frenet curvature != gauge curvature F_A
+torsion != gauge curvature F_A
+osculating geometry != gauge curvature F_A.
+```
+
+The Phase 1D static-potential relation `<W(R,T)> ~ exp(-V(R)T)` is only a future ensemble-analysis surface. No area law, static potential, or confinement claim is permitted from deterministic path geometry alone.
 
 Do not import triadic ontology, Q/K/V-to-colour semantics, or other cross-domain interpretations into these authorities.
 
@@ -83,14 +121,7 @@ GLUBALL `v1.0.0` is an engineering donor only. The recorded tag target is:
 80941183d14531093117e122da0fc32c13d2464b
 ```
 
-Allowed donor ideas include:
-
-- provenance sealing;
-- contract/version discipline;
-- deterministic test vectors;
-- reference-vs-accelerator separation;
-- residual acceptance;
-- bounded stress/testing patterns.
+Allowed donor ideas include provenance sealing, contract/version discipline, deterministic test vectors, reference-vs-accelerator separation, residual acceptance, and bounded stress/testing patterns.
 
 Not imported as Yang–Mills physics:
 
@@ -126,16 +157,17 @@ cargo run --quiet --locked --bin ym-su2-reference
 cargo run --quiet --locked --bin ym-su3-algebra
 cargo run --quiet --locked --bin ym-su3-lattice
 cargo run --quiet --locked --bin ym-su3-center
+cargo run --quiet --locked --bin ym-path-holonomy
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
 
 The unified contract entry points are authoritative. Adding a new contract surface without registering it in those commands is a readiness failure.
 
-Tests must fail closed on invalid lattice extents, invalid group construction, non-finite inputs, group-product acceptance failures, broken contract structure, or weakened claim boundaries. Public `Result` APIs may not turn an admissible numerical failure into a panic merely because an internal helper expected success.
+Tests must fail closed on invalid lattice extents, invalid group construction, invalid/oversized paths, non-finite inputs, group-product acceptance failures, broken contract structure, or weakened claim boundaries. Public `Result` APIs may not turn an admissible numerical or allocation failure into a panic merely because an internal helper expected success.
 
 Floating-point equality is not assumed. Every numerical comparison must have an explicit tolerance and must not be advertised as bitwise cross-platform identity unless separately established.
 
 ## Formalisation
 
-Do not add a theorem prover merely for prestige. Formalise only stable definitions and theorem surfaces. A finite-lattice or finite-dimensional algebra/group proof is valuable but must not be described as the continuum Yang–Mills existence/mass-gap proof.
+Do not add a theorem prover merely for prestige. Formalise only stable definitions and theorem surfaces. A finite-lattice, finite-dimensional group, or classical path-transport proof is valuable but must not be described as the continuum quantum Yang–Mills existence/mass-gap proof.
