@@ -11,9 +11,9 @@ mod su2_ensemble;
 
 use su2_benchmark::{
     summarize_two_chains, AUTOCORRELATION_MAX_LAG, BENCHMARK_ID, BETA, CHAIN_IDS, EXTENTS,
-    MASTER_SEED, MAX_HEATBATH_ATTEMPTS_PER_LINK, MEASUREMENTS,
-    OVERRELAXATION_SWEEPS_PER_HEATBATH, PRIMARY_DOI, SOURCE_ENVELOPE_MAX, SOURCE_ENVELOPE_MIN,
-    SWEEPS_BETWEEN_MEASUREMENTS, THERMALIZATION_SWEEPS,
+    MASTER_SEED, MAX_HEATBATH_ATTEMPTS_PER_LINK, MEASUREMENTS, OVERRELAXATION_SWEEPS_PER_HEATBATH,
+    PRIMARY_DOI, SOURCE_ENVELOPE_MAX, SOURCE_ENVELOPE_MIN, SWEEPS_BETWEEN_MEASUREMENTS,
+    THERMALIZATION_SWEEPS,
 };
 use su2_ensemble::{run_chain, EnsembleConfig};
 
@@ -69,9 +69,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("thermalization_sweeps={THERMALIZATION_SWEEPS}");
     println!("measurements_per_chain={MEASUREMENTS}");
     println!("sweeps_between_measurements={SWEEPS_BETWEEN_MEASUREMENTS}");
-    println!(
-        "overrelaxation_sweeps_per_heatbath={OVERRELAXATION_SWEEPS_PER_HEATBATH}"
-    );
+    println!("overrelaxation_sweeps_per_heatbath={OVERRELAXATION_SWEEPS_PER_HEATBATH}");
     println!("autocorrelation_max_lag={AUTOCORRELATION_MAX_LAG}");
     println!("source_envelope_min={SOURCE_ENVELOPE_MIN:.17e}");
     println!("source_envelope_max={SOURCE_ENVELOPE_MAX:.17e}");
