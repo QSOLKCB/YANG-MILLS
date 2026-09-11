@@ -4,10 +4,10 @@
 
 #[path = "../su3.rs"]
 mod su3;
-#[path = "../su3_lattice.rs"]
-mod su3_lattice;
 #[path = "../su3_center.rs"]
 mod su3_center;
+#[path = "../su3_lattice.rs"]
+mod su3_lattice;
 
 use su3::{Complex64, Mat3, Su3};
 use su3_center::{
@@ -26,9 +26,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let noncentral_residual = cycle_noncentral_residual()?;
 
     let z = center_element(g)?;
-    let sample = Su3::from_algebra_coefficients([
-        0.3, -0.2, 0.1, 0.05, -0.07, 0.11, -0.09, 0.13,
-    ])?;
+    let sample = Su3::from_algebra_coefficients([0.3, -0.2, 0.1, 0.05, -0.07, 0.11, -0.09, 0.13])?;
     let center_commutator = center_commutator_residual(g, sample)?;
 
     let lattice = Su3Lattice4::new_identity([3, 3, 3, 3])?;
@@ -60,7 +58,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("omega_noncentral_residual={noncentral_residual:.17e}");
     println!("center_commutator_residual={center_commutator:.17e}");
     println!("center_unitarity_residual={:.17e}", z.unitarity_residual());
-    println!("center_determinant_residual={:.17e}", z.determinant_residual());
+    println!(
+        "center_determinant_residual={:.17e}",
+        z.determinant_residual()
+    );
     println!("polyakov_center_rotation_residual={polyakov_residual:.17e}");
     println!("center_transform_action_residual={action_residual:.17e}");
     println!("confinement_claimed=false");
