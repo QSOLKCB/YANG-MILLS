@@ -39,7 +39,7 @@ def validate_ensemble_contract(payload: dict[str, Any]) -> None:
         CONTRACT_PATH,
     )
     require(payload["contract_id"] == "YM-SU2-ENSEMBLE-V1", "ensemble contract id drift")
-    require(payload["status"] == "phase-2a-review-candidate", "ensemble status drift")
+    require(payload["status"] == "phase-2a-frozen", "ensemble status drift")
     require(
         payload["depends_on"]
         == [
@@ -183,7 +183,7 @@ def validate_ensemble_vectors(payload: dict[str, Any]) -> None:
     exact_keys(payload, {"contract_id", "vector_set", "status", "vectors"}, VECTOR_PATH)
     require(payload["contract_id"] == "YM-SU2-ENSEMBLE-V1", "vector contract id drift")
     require(payload["vector_set"] == "SU2-ENSEMBLE-PHASE2A-V1", "vector set id drift")
-    require(payload["status"] == "phase-2a-review-candidate", "vector status drift")
+    require(payload["status"] == "phase-2a-frozen", "vector status drift")
     ids = [vector.get("id") for vector in payload["vectors"]]
     require(
         ids
