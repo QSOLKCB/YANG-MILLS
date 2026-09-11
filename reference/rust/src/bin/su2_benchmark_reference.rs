@@ -74,9 +74,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("overrelaxation_sweeps_per_heatbath={OVERRELAXATION_SWEEPS_PER_HEATBATH}");
     println!("autocorrelation_max_lag={AUTOCORRELATION_MAX_LAG}");
     println!("stationarity_half_measurements={STATIONARITY_HALF_MEASUREMENTS}");
-    println!(
-        "stationarity_autocorrelation_max_lag={STATIONARITY_AUTOCORRELATION_MAX_LAG}"
-    );
+    println!("stationarity_autocorrelation_max_lag={STATIONARITY_AUTOCORRELATION_MAX_LAG}");
     println!("maximum_stationarity_z={MAX_STATIONARITY_Z:.17e}");
     println!("source_envelope_min={SOURCE_ENVELOPE_MIN:.17e}");
     println!("source_envelope_max={SOURCE_ENVELOPE_MAX:.17e}");
