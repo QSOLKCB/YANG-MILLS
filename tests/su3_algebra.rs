@@ -184,11 +184,7 @@ fn determinant_acceptance_is_symmetric_under_dagger_at_the_boundary() {
     ]);
 
     let direct = matrix.determinant().sub(Complex64::ONE).abs();
-    let dagger_direct = matrix
-        .dagger()
-        .determinant()
-        .sub(Complex64::ONE)
-        .abs();
+    let dagger_direct = matrix.dagger().determinant().sub(Complex64::ONE).abs();
 
     assert!(matrix.unitarity_residual() <= SU3_ACCEPTANCE_TOLERANCE);
     assert!(direct <= SU3_ACCEPTANCE_TOLERANCE);
