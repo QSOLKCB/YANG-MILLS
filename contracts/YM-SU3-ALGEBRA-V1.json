@@ -1,0 +1,37 @@
+{
+  "contract_id": "YM-SU3-ALGEBRA-V1",
+  "status": "phase-1b-algebra-frozen",
+  "scope": "standalone SU(3) algebra and group reference mathematics",
+  "representation": {
+    "fundamental_dimension": 3,
+    "scalar_type": "complex-f64",
+    "generator_basis": "canonical-gell-mann",
+    "generator_count": 8,
+    "T_definition": "T^a=lambda_a/2",
+    "trace_normalization": "Tr(lambda_a lambda_b)=2 delta_ab"
+  },
+  "structure_constants": {
+    "commutator": "[T^a,T^b]=i f^{abc} T^c",
+    "anticommutator": "{T^a,T^b}=(1/3)delta_ab I+d^{abc}T^c",
+    "f_extraction": "f^{abc}=2 Im Tr([T^a,T^b]T^c)",
+    "d_extraction": "d^{abc}=2 Re Tr({T^a,T^b}T^c)"
+  },
+  "casimirs": {
+    "quadratic_fundamental": "sum_a T^a T^a=(4/3)I",
+    "cubic_operator": "sum_abc d^{abc}T^aT^bT^c=(10/9)I"
+  },
+  "exponentiation": {
+    "map": "U(theta)=exp(i sum_a theta_a T^a)",
+    "coefficient_domain": "all theta_a finite and abs(theta_a)<=64",
+    "method": "scaling-and-squaring-taylor-64",
+    "scale_target_one_norm": 0.5,
+    "unitarity_residual": "max(max_abs(U^dagger U-I),max_abs(U U^dagger-I))",
+    "unitarity_acceptance_tolerance": 5e-12,
+    "determinant_residual": "max(abs(det(U)-1),abs(det(U^dagger)-1))",
+    "determinant_one_acceptance_tolerance": 5e-12,
+    "projection_to_su3_used": false
+  },
+  "lattice_links_enabled": false,
+  "cross_domain_semantic_ontology_imported": false,
+  "claim_scope": "finite-dimensional SU(3) algebra/group reference only"
+}

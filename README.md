@@ -10,7 +10,7 @@ YANG-MILLS studies lattice gauge dynamics, gauge-invariant observables, glueball
 
 Phase 0 was merged in PR #1. It established the project constitution, claim boundary, GLUBALL engineering-donor boundary, machine-readable contracts, and a minimal four-dimensional periodic `SU(2)` Wilson-lattice reference core.
 
-Phase 1A extends that core with finite-lattice observables and local mechanics:
+Phase 1A was merged in PR #2 and froze the finite-lattice `SU(2)` observable/mechanics surface:
 
 - bounded periodic `SU(2)` reference lattices;
 - exact deterministic `YM-SU2-CONFIG-V1` configuration serialization;
@@ -22,7 +22,14 @@ Phase 1A extends that core with finite-lattice observables and local mechanics:
 - analytic/gauge-invariance/cyclic-trace regression tests;
 - frozen contracts `YM-SU2-LATTICE-V1` and `YM-WILSON-LOOP-V1`.
 
-Phase 1A still does **not** perform Monte Carlo ensemble generation, glueball extraction, continuum extrapolation, or any proof-facing continuum construction.
+Phase 1B is completed on PR #3 and freezes `SU(3)` in two ordered gates:
+
+1. `YM-SU3-ALGEBRA-V1` — canonical Gell-Mann generators, `f^{abc}`/`d^{abc}`, quadratic/cubic Casimir regressions, bounded `U(theta)=exp(i theta_a T^a)`, and fail-closed unitarity/determinant acceptance;
+2. `YM-SU3-LATTICE-V1` — a bounded periodic four-dimensional `SU(3)` link/plaquette/Wilson-action layer with local gauge transformations, introduced only after the algebra authority was review-clean and frozen.
+
+See [`docs/SU3_ALGEBRA.md`](docs/SU3_ALGEBRA.md) and [`docs/SU3_LATTICE.md`](docs/SU3_LATTICE.md).
+
+No current phase performs Monte Carlo ensemble generation, glueball extraction, continuum extrapolation, or any proof-facing continuum construction.
 
 ## The target
 
@@ -63,7 +70,7 @@ U_mu_nu(x) = U_mu(x)
              U_nu(x)^dagger.
 ```
 
-The Wilson action is
+The `SU(2)` Wilson action is
 
 ```text
 S_W = beta * sum_p (1 - 1/2 Re Tr U_p).
@@ -71,11 +78,31 @@ S_W = beta * sum_p (1 - 1/2 Re Tr U_p).
 
 For the quaternion representation, `1/2 Re Tr U` is the scalar quaternion component before floating-point rounding.
 
+## `SU(3)` reference surface
+
+The frozen fundamental-representation convention is
+
+```text
+T^a = lambda_a / 2
+Tr(lambda_a lambda_b) = 2 delta_ab
+U(theta) = exp(i sum_a theta_a T^a).
+```
+
+The checked `Su3` type requires both `U^dagger U` and `U U^dagger` to be identity within the frozen tolerance and separately requires `det(U)=1` within tolerance. No projection-to-`SU(3)` step hides acceptance failures.
+
+The minimal Phase 1B lattice action is
+
+```text
+S_W = beta * sum_p (1 - 1/3 Re Tr U_p).
+```
+
+The exact three-cycle permutation matrix is used only as a traceless `SU(3)` regression fixture. Its use here is **not** a center-symmetry claim; `C3` embeddings and the genuine `Z(SU(3))` center belong to Phase 1C.
+
 ## Oriented paths and Wilson loops
 
 A forward path step `+mu` uses `U_mu(x)` and advances to `x + mu`. A backward step `-mu` first moves to `x - mu` and then uses `U_mu(x - mu)^dagger`.
 
-For a closed path `C`, Phase 1A defines
+For a closed `SU(2)` path `C`, Phase 1A defines
 
 ```text
 W(C) = 1/2 Re Tr product_C U
@@ -99,18 +126,20 @@ Requires the pinned Rust toolchain in [`rust-toolchain.toml`](rust-toolchain.tom
 cargo fmt --all -- --check
 cargo test --all-targets --locked
 cargo run --quiet --locked --bin ym-su2-reference
-python3 scripts/check_contracts.py
-python3 scripts/test_contract_validation.py
+cargo run --quiet --locked --bin ym-su3-algebra
+cargo run --quiet --locked --bin ym-su3-lattice
+python3 scripts/check_all_contracts.py
+python3 scripts/test_all_contract_validation.py
 ```
 
-The reference executable checks the Phase 0 action vectors plus Phase 1A rectangle, Polyakov-loop, local-action-difference, and canonical-serialization invariants.
+The unified contract entry points are authoritative for every currently advertised contract surface. A local readiness check must not run only the legacy core contract checker once a newer phase has registered additional contracts.
 
 ## Repository map
 
 ```text
 contracts/             machine-readable contract surfaces
 docs/                  constitution, donor boundary, model, evidence rules
-reference/rust/        canonical finite-lattice reference implementation
+reference/rust/        canonical finite-lattice and algebra reference implementations
 test-vectors/          human- and machine-readable regression vectors
 tests/                 integration tests
 scripts/               fail-closed contract checks
@@ -125,7 +154,7 @@ See [`docs/DONOR_BOUNDARY.md`](docs/DONOR_BOUNDARY.md).
 
 ## Roadmap
 
-The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 1A establishes the frozen finite `SU(2)` observable/mechanics surface. Later Phase 1 work adds `SU(3)` algebra, center symmetry, path/continuum dictionaries, then subsequent phases add ensemble generation, glueball observables, published-baseline reproduction, HPC acceleration, continuum scaling, constructive analysis, and formalization of stable theorem surfaces.
+The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 1A freezes the finite `SU(2)` observable/mechanics surface and Phase 1B freezes the independently tested `SU(3)` algebra plus minimal lattice-link authority. Phase 1C next separates abstract `C3 ~= Z3` from concrete non-central/central `SU(3)` embeddings; later Phase 1 work adds path/continuum dictionaries, followed by ensemble generation, glueball observables, published-baseline reproduction, HPC acceleration, continuum scaling, constructive analysis, and formalization of stable theorem surfaces.
 
 ## Licence
 

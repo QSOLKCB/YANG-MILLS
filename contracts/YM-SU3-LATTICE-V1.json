@@ -1,0 +1,41 @@
+{
+  "contract_id": "YM-SU3-LATTICE-V1",
+  "status": "phase-1b-frozen",
+  "depends_on": {
+    "contract_id": "YM-SU3-ALGEBRA-V1",
+    "required_status": "phase-1b-algebra-frozen"
+  },
+  "gauge_group": "SU(3)",
+  "dimension": 4,
+  "boundary_conditions": "periodic",
+  "link_storage": "positive-directions-only",
+  "negative_transport_rule": "U_mu(x-mu)^dagger",
+  "plaquette_orientation": "U_mu(x) U_nu(x+mu) U_mu(x+nu)^dagger U_nu(x)^dagger",
+  "wilson_action": {
+    "formula": "S=beta*sum_x,sum_mu<nu(1-(1/3)*ReTr(P_mu_nu(x)))",
+    "beta_domain": "finite and >=0",
+    "non_finite_result": "reject"
+  },
+  "gauge_transform": {
+    "formula": "U_mu(x)->Omega(x) U_mu(x) Omega(x+mu)^dagger",
+    "site_field_sampling": "exactly-once-per-site-before-link-transform",
+    "action_invariant_within_declared_tolerance": true
+  },
+  "group_acceptance": {
+    "source_contract": "YM-SU3-ALGEBRA-V1",
+    "projection_to_su3_used": false,
+    "link_products_fail_closed": true
+  },
+  "reference_limits": {
+    "max_links": 262144,
+    "allocation": "try_reserve_exact-before-resize",
+    "overflow": "reject-before-allocation"
+  },
+  "fixture_boundary": {
+    "traceless_cycle_link": "3-cycle permutation matrix used only as exact SU(3) regression fixture",
+    "center_symmetry_interpretation_claimed": false
+  },
+  "monte_carlo_enabled": false,
+  "confinement_claimed": false,
+  "claim_scope": "finite-lattice SU(3) reference mechanics only"
+}

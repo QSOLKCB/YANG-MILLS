@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+"""Run every currently advertised negative contract regression gate."""
+
+from test_contract_validation import main as test_core_contracts
+from test_su3_contract_validation import main as test_su3_contracts
+
+
+def main() -> None:
+    test_core_contracts()
+    test_su3_contracts()
+    print("All negative YANG-MILLS contract regression checks: passed")
+
+
+if __name__ == "__main__":
+    main()
