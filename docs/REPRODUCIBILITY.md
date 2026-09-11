@@ -89,7 +89,7 @@ Because the source comparison is graphical, the predeclared `[0.59,0.62]` interv
 
 The frozen Phase 2B run uses master seed `2b00201211160101`, chain IDs `0` and `1`, 40 discarded thermalisation sweeps, 48 measurements per chain, one complete Markov sweep between measurements, one over-relaxation sweep per heat-bath sweep, and autocorrelation lag 12.
 
-The first predeclared candidate run produced:
+The first predeclared external-comparison run produced:
 
 ```text
 chain 0 mean = 0.6026867250625984
@@ -101,7 +101,20 @@ minimum chain ESS ~= 7.74585617
 maximum link-unit residual ~= 6.66e-16
 ```
 
-This lies inside the frozen published source-resolution envelope and satisfies all declared chain-diagnostic gates.
+This lies inside the frozen published source-resolution envelope and satisfies the independent-chain gates. Because both chains share the cold identity start, that agreement alone is not treated as an equilibration proof.
+
+### Post-thermalisation stationarity gate
+
+The hardened Phase 2B authority additionally requires a within-chain stationarity check for both reference chains. Each 48-measurement post-thermalisation series is split into first/last 24-measurement halves. Each half is analyzed with the frozen Phase 2A autocorrelation-aware diagnostic using `max_lag=6`, and Phase 2B records
+
+```text
+stationarity_z = |mean_first - mean_second|
+                 / sqrt(SE_first^2 + SE_second^2).
+```
+
+Both chains must satisfy `stationarity_z <= 5`. This directly checks for detectable drift remaining after the declared 40 discarded thermalisation sweeps. It is still a bounded diagnostic rather than proof that all equilibration or systematic errors are absent.
+
+The stationarity split, lag, threshold, half-means, half standard errors, and drift-z values are part of the frozen benchmark evidence and may not be silently omitted or weakened.
 
 ### Evidence archive
 
@@ -112,19 +125,22 @@ The canonical `ym-su2-plaquette-baseline` runtime emits into the commit-tied Git
 - master seed, chain IDs, and derived seeds;
 - full raw measurement series for both chains;
 - per-chain means, standard errors, ESS, integrated autocorrelation times, and heat-bath acceptance;
+- first-half/second-half stationarity means and drift-z statistics;
 - pooled mean/diagnostic standard error and chain-consistency statistic;
 - maximum final link-unit residual;
 - explicit Phase 2 graduation and claim-boundary flags.
 
 Thus the Actions run itself is a source-commit/toolchain-bound evidence record. Any scientific release should additionally preserve those measurements as an explicit artifact or content-addressed dataset rather than relying only on CI retention.
 
-Phase 2B freezes
+Phase 2B may freeze
 
 ```text
 published_plaquette_baseline_reproduced = true
 phase2_graduation_gate_satisfied       = true
 su3_ensemble_enabled                   = false
 ```
+
+only when the external envelope, independent-chain, within-chain stationarity, ESS, acceptance, and group-invariant gates all pass on the exact frozen head.
 
 This agreement validates the finite-lattice `SU(2)` sampler in the declared regime. It does not imply confinement, continuum QFT existence, or a mass-gap proof.
 
