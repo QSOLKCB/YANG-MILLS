@@ -1013,7 +1013,7 @@ mod tests {
     fn near_unit_serialized_link_local_delta_matches_full_action() {
         let identity = Lattice4::new_identity([2, 2, 2, 2]).unwrap();
         let encoded = identity.to_canonical_config().unwrap();
-        let near_one = 1.0 - 5.0e-13;
+        let near_one: f64 = 1.0 - 5.0e-13;
         let near_hex = format!("{:016x}", near_one.to_bits());
         let mutated = encoded.replacen("3ff0000000000000", &near_hex, 1);
         let lattice = Lattice4::from_canonical_config(&mutated).unwrap();
