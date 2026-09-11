@@ -91,6 +91,14 @@ def main() -> None:
     )
 
     broken = copy.deepcopy(contract)
+    broken["comparison_rule"]["zero_variance_stationarity_rejected"] = False
+    expect_reject(
+        lambda payload: validate_exact(CONTRACT_PATH, payload, EXPECTED_BASELINE_CONTRACT),
+        broken,
+        "zero-variance stationarity refusal removed",
+    )
+
+    broken = copy.deepcopy(contract)
     broken["phase2_gate"]["published_plaquette_baseline_reproduced"] = False
     expect_reject(
         lambda payload: validate_exact(CONTRACT_PATH, payload, EXPECTED_BASELINE_CONTRACT),
@@ -136,6 +144,14 @@ def main() -> None:
         lambda payload: validate_exact(VECTOR_PATH, payload, EXPECTED_BASELINE_VECTORS),
         broken,
         "stationarity vector weakened",
+    )
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][2]["zero_variance_half_rejected"] = False
+    expect_reject(
+        lambda payload: validate_exact(VECTOR_PATH, payload, EXPECTED_BASELINE_VECTORS),
+        broken,
+        "zero-variance stationarity vector weakened",
     )
 
     broken = copy.deepcopy(vectors)
