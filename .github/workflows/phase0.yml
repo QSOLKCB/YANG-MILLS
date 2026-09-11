@@ -30,6 +30,9 @@ jobs:
       - name: SU(3) algebra reference vectors
         run: cargo run --quiet --locked --bin ym-su3-algebra
 
+      - name: SU(3) lattice reference vectors
+        run: cargo run --quiet --locked --bin ym-su3-lattice
+
       - name: All contract checks
         run: python3 scripts/check_all_contracts.py
 
