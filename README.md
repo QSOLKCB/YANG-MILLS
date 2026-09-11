@@ -6,19 +6,23 @@ YANG-MILLS studies lattice gauge dynamics, gauge-invariant observables, glueball
 
 > Numerical evidence is not a proof of the Millennium Problem.
 
-## Phase 0 bootstrap
+## Current implementation surface
 
-PR #1 establishes the project constitution and a deliberately small reference implementation:
+Phase 0 was merged in PR #1. It established the project constitution, claim boundary, GLUBALL engineering-donor boundary, machine-readable contracts, and a minimal four-dimensional periodic `SU(2)` Wilson-lattice reference core.
 
-- the Clay target and claim boundary;
-- the GLUBALL engineering-donor boundary;
-- mathematical and evidence contracts;
-- a deterministic four-dimensional periodic `SU(2)` lattice core in Rust;
-- Wilson plaquettes and the Wilson action;
-- analytic and gauge-invariance regression tests;
-- CI gates for contracts and the reference core.
+Phase 1A extends that core with finite-lattice observables and local mechanics:
 
-The Phase 0 reference core does **not** perform Monte Carlo ensemble generation, glueball extraction, continuum extrapolation, or any proof-facing continuum construction. Those are later phases.
+- bounded periodic `SU(2)` reference lattices;
+- exact deterministic `YM-SU2-CONFIG-V1` configuration serialization;
+- arbitrary oriented lattice paths with forward and reverse-link transport;
+- Wilson loops and rectangular `R x T` loops;
+- Polyakov loops as gauge-invariant observables, without a confinement claim;
+- staples, local link action, and local action differences;
+- deterministic left-link update primitives for later ensemble algorithms;
+- analytic/gauge-invariance/cyclic-trace regression tests;
+- candidate contracts `YM-SU2-LATTICE-V1` and `YM-WILSON-LOOP-V1`.
+
+Phase 1A still does **not** perform Monte Carlo ensemble generation, glueball extraction, continuum extrapolation, or any proof-facing continuum construction.
 
 ## The target
 
@@ -38,7 +42,7 @@ A finite-lattice spectral estimate may be scientifically useful evidence. It is 
 
 ## `SU(2)` reference surface
 
-The initial code uses the standard quaternion representation of `SU(2)`. A unit quaternion
+The code uses the standard unit-quaternion representation of `SU(2)`. A unit quaternion
 
 ```text
 q = (a0, a1, a2, a3)
@@ -59,38 +63,57 @@ U_mu_nu(x) = U_mu(x)
              U_nu(x)^dagger.
 ```
 
-The Phase 0 Wilson action is
+The Wilson action is
 
 ```text
 S_W = beta * sum_p (1 - 1/2 Re Tr U_p).
 ```
 
-For the quaternion representation, `1/2 Re Tr U_p` is exactly the scalar quaternion component before floating-point rounding.
+For the quaternion representation, `1/2 Re Tr U` is the scalar quaternion component before floating-point rounding.
+
+## Oriented paths and Wilson loops
+
+A forward path step `+mu` uses `U_mu(x)` and advances to `x + mu`. A backward step `-mu` first moves to `x - mu` and then uses `U_mu(x - mu)^dagger`.
+
+For a closed path `C`, Phase 1A defines
+
+```text
+W(C) = 1/2 Re Tr product_C U
+```
+
+with factors multiplied in traversal order. Open paths are valid transport paths but are rejected by the `wilson_loop` API unless they close on the periodic lattice.
+
+Polyakov loops wrap one complete periodic lattice extent. Their presence in the reference surface is an observable definition only; no confinement/deconfinement inference is made in Phase 1A.
+
+## Deterministic configuration encoding
+
+`YM-SU2-CONFIG-V1` serializes a lattice in a canonical site-major/link-direction order. Each quaternion component is stored as its exact IEEE-754 binary64 bit pattern using 16 lowercase hexadecimal digits. Round-trip parsing must reproduce the canonical text exactly and must preserve the unit-quaternion invariant.
+
+This is an implementation/provenance surface, not a physical observable.
 
 ## Run the reference checks
 
 Requires the pinned Rust toolchain in [`rust-toolchain.toml`](rust-toolchain.toml).
 
 ```bash
-cargo test --all-targets
-cargo run --quiet --bin ym-su2-reference
+cargo fmt --all -- --check
+cargo test --all-targets --locked
+cargo run --quiet --locked --bin ym-su2-reference
 python3 scripts/check_contracts.py
+python3 scripts/test_contract_validation.py
 ```
 
-The executable reports two deliberately simple reference cases:
-
-1. the identity lattice, whose Wilson action is zero;
-2. a `3^4` lattice with one link set to a traceless `SU(2)` element, whose action is analytically `6 beta`.
+The reference executable checks the Phase 0 action vectors plus Phase 1A rectangle, Polyakov-loop, local-action-difference, and canonical-serialization invariants.
 
 ## Repository map
 
 ```text
-contracts/             machine-readable Phase 0 contract surfaces
+contracts/             machine-readable contract surfaces
 docs/                  constitution, donor boundary, model, evidence rules
 reference/rust/        canonical finite-lattice reference implementation
 test-vectors/          human- and machine-readable regression vectors
 tests/                 integration tests
-scripts/               contract checks
+scripts/               fail-closed contract checks
 .github/workflows/      CI gates
 ```
 
@@ -102,7 +125,7 @@ See [`docs/DONOR_BOUNDARY.md`](docs/DONOR_BOUNDARY.md).
 
 ## Roadmap
 
-The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 1 expands the finite lattice core; later phases add ensemble generation, glueball observables, published-baseline reproduction, HPC acceleration, continuum scaling, constructive analysis, and finally formalization of stable theorem surfaces.
+The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 1A establishes the finite `SU(2)` observable/mechanics surface. Later Phase 1 work adds `SU(3)` algebra, center symmetry, path/continuum dictionaries, then subsequent phases add ensemble generation, glueball observables, published-baseline reproduction, HPC acceleration, continuum scaling, constructive analysis, and formalization of stable theorem surfaces.
 
 ## Licence
 

@@ -1,0 +1,59 @@
+{
+  "contract_id": "YM-WILSON-LOOP-V1",
+  "vector_set": "SU2-OBSERVABLES-PHASE1A-V1",
+  "status": "phase-1a-review-candidate",
+  "vectors": [
+    {
+      "id": "identity-rectangle-2x1",
+      "extents": [3, 3, 3, 3],
+      "configuration": "all links identity",
+      "observable": "rectangular_wilson_loop",
+      "start": [0, 0, 0, 0],
+      "mu": 0,
+      "nu": 1,
+      "r": 2,
+      "t": 1,
+      "expected": 1.0,
+      "tolerance": 0.0,
+      "claim_class": "C1"
+    },
+    {
+      "id": "single-traceless-rectangle-2x1",
+      "extents": [3, 3, 3, 3],
+      "configuration": "all identity except U_0([0,0,0,0])=(0,1,0,0)",
+      "observable": "rectangular_wilson_loop",
+      "start": [0, 0, 0, 0],
+      "mu": 0,
+      "nu": 1,
+      "r": 2,
+      "t": 1,
+      "expected": 0.0,
+      "tolerance": 1e-12,
+      "claim_class": "C1"
+    },
+    {
+      "id": "single-traceless-polyakov-dir0",
+      "extents": [3, 3, 3, 3],
+      "configuration": "all identity except U_0([0,0,0,0])=(0,1,0,0)",
+      "observable": "polyakov_loop",
+      "start": [0, 0, 0, 0],
+      "direction": 0,
+      "expected": 0.0,
+      "tolerance": 1e-12,
+      "claim_class": "C1"
+    },
+    {
+      "id": "single-traceless-local-delta-to-identity",
+      "extents": [3, 3, 3, 3],
+      "configuration": "all identity except U_0([0,0,0,0])=(0,1,0,0)",
+      "observable": "local_action_difference",
+      "site": [0, 0, 0, 0],
+      "direction": 0,
+      "candidate": "identity",
+      "beta": 2.0,
+      "expected": -12.0,
+      "tolerance": 1e-12,
+      "claim_class": "C1"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "contract_id": "YM-SU2-LATTICE-V1",
+  "status": "phase-1a-review-candidate",
+  "gauge_group": "SU(2)",
+  "dimension": 4,
+  "boundary_conditions": "periodic",
+  "link_storage": "positive-directions-only",
+  "negative_link_rule": "U_mu(x-mu)^dagger",
+  "plaquette_orientation": "U_mu(x) U_nu(x+mu) U_mu(x+nu)^dagger U_nu(x)^dagger",
+  "wilson_action": {
+    "formula": "S=beta*sum_x,sum_mu<nu(1-(1/2)*ReTr(P_mu_nu(x)))",
+    "beta_domain": "finite and >=0",
+    "non_finite_result": "reject"
+  },
+  "reference_limits": {
+    "max_links": 1048576,
+    "allocation": "try_reserve_exact-before-resize",
+    "overflow": "reject-before-allocation"
+  },
+  "configuration_encoding": {
+    "contract_id": "YM-SU2-CONFIG-V1",
+    "header": "YM-SU2-CONFIG-V1",
+    "component_encoding": "lowercase-16-hex-digit-ieee754-binary64-bits",
+    "link_order": "site-major-x0-x1-x2-x3-then-direction-0-1-2-3",
+    "round_trip": "exact-canonical-text",
+    "unit_tolerance": 2e-12
+  },
+  "local_update_surface": {
+    "staple_terms_per_link": 6,
+    "local_action_difference": "new-local-action-minus-old-local-action",
+    "left_update": "U_mu(x)<-Delta*U_mu(x)"
+  },
+  "claim_scope": "finite-lattice exact and reference-numerical mechanics only"
+}
