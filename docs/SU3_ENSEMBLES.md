@@ -30,11 +30,19 @@ For every lattice link `U_mu(x)` and every generator
 T^a = lambda_a / 2,  a = 0,...,7,
 ```
 
-the reference draws
+the reference consumes one raw `SplitMix64` `u64` for the angle. Bit 63 selects the sign and the low 52 bits select a magnitude index
 
 ```text
-theta = proposal_angle * (2u - 1),  u in [0,1),
-R = exp(i theta T^a),
+m = raw & (2^52 - 1)
+|theta| = proposal_angle * (2m + 1) / 2^53.
+```
+
+The resulting finite binary64 support is strictly inside `(-proposal_angle,+proposal_angle)`. Toggling only bit 63 while preserving the low 52 bits produces the exact floating inverse angle `-theta`; the ignored raw bits `52..62` give equal multiplicity to every pair. This closes the half-open-endpoint asymmetry that would occur with a direct `2u-1` map from `u in [0,1)`.
+
+The group proposal remains
+
+```text
+R = exp(i theta T^a)
 U_candidate = R U_old.
 ```
 
@@ -46,13 +54,13 @@ The bounded binary64 reference requires
 
 Positive values below `1e-8`, including subnormal values such as `f64::MIN_POSITIVE`, are rejected as numerically inert for this reference surface rather than being accepted as nominally nonzero updates. The lower bound is an implementation-resolution guard, not a physical scale.
 
-Because `theta` and `-theta` have equal density and `R(-theta)=R(theta)^-1`, the proposal is symmetric. The acceptance probability is therefore
+Because the implemented finite proposal grid has exact equal-probability `theta/-theta` pairs and `R(-theta)=R(theta)^-1`, the symmetric-proposal Metropolis rule is
 
 ```text
 A = min(1, exp(-DeltaS)).
 ```
 
-The reference consumes a second uniform draw for **every** generator proposal, including downhill or zero-action proposals. This makes the random-stream consumption rule explicit rather than data-dependent.
+The reference consumes a second PRNG output for the acceptance draw for **every** generator proposal, including downhill or zero-action proposals. The frozen stream therefore consumes exactly two PRNG outputs per proposal.
 
 At `beta=0`, `DeltaS=0` exactly under the Wilson action, so every valid proposal must be accepted. This is an executable transition-kernel sanity check only. A short random walk from the cold lattice is not declared to be an exact Haar draw and no `beta=0` equilibrium expectation is frozen in Phase 2C1.
 
@@ -78,7 +86,7 @@ Candidate evaluation is allocation-free. The implementation substitutes `U_candi
 
 A deterministic regression compares this local result against a complete Wilson-action recomputation after a one-link replacement. Local bookkeeping is therefore tested against the already-frozen global action rather than accepted by definition.
 
-## Frozen update order
+## Frozen update order and bounded schedule
 
 One complete Markov sweep is:
 
@@ -93,6 +101,21 @@ There are exactly
 ```
 
 Metropolis proposals per sweep.
+
+The Phase 2C1 binary64 reference admits at most
+
+```text
+512 total Markov sweeps
+512 retained measurements
+```
+
+with the usual checked schedule
+
+```text
+thermalization_sweeps + measurements*sweeps_between_measurements.
+```
+
+The old exploratory `262144`-sweep bound is not part of the frozen authority. Review found deterministic determinant drift on a much longer beta-zero trajectory, so the admitted V1 bound was reduced and the **maximum accepted 512-sweep schedule is executed in CI** at `2^4`, `beta=0`, chain `0`, and `proposal_angle=1.0`, requiring the final unitarity and determinant residuals to remain below `5e-12`.
 
 No gauge fixing is performed. Gauge-dependent link state is implementation state; the recorded observable is the normalized gauge-invariant average plaquette.
 
@@ -124,7 +147,7 @@ chain 1: 8aba19af6781dc09
 
 The seed is reproducibility metadata, not a physical parameter.
 
-## Measurements and diagnostics
+## Measurements, diagnostics, and literal golden chain
 
 The recorded observable is
 
@@ -134,29 +157,50 @@ Pbar = (1/(6V)) sum_x sum_(mu<nu) (1/3) ReTr P_mu,nu(x).
 
 For exact `SU(3)` matrices its normalized real trace lies in `[-1/2,1]`; the floating reference permits only the separately declared numerical tolerance around that interval.
 
-Phase 2C1 reuses the already-frozen Phase 2A arithmetic definitions for mean, autocorrelation sequence, positive-window integrated autocorrelation time, ESS, and diagnostic standard error. Reusing those numerical utilities does not make the `SU(3)` sampler part of the `SU(2)` contract.
+Phase 2C1 reuses the already-frozen Phase 2A arithmetic definitions for mean, variance, autocorrelation sequence, positive-window integrated autocorrelation time, ESS, and diagnostic standard error. Reusing those numerical utilities does not make the `SU(3)` sampler part of the `SU(2)` contract.
 
-The chain report retains:
+The canonical beta-zero reference chain is frozen at:
 
-- sampler, proposal, RNG, and stream identifiers;
-- master/chain/derived seed metadata;
-- lattice, coupling, proposal angle, thermalisation, and measurement cadence;
-- total Metropolis proposals and accepts;
+```text
+lattice = 2^4
+master seed = 3c00198212230101
+chain ID = 0
+derived seed = 94c715630ee8e90a
+thermalisation sweeps = 4
+measurements = 16
+stride = 1
+proposal angle = 0.35
+autocorrelation max lag = 4
+```
+
+It executes `20` sweeps, `10240` proposals, and `10240` accepts. Its review-hardened literal regression freezes the complete 16-value raw plaquette series plus the mean, variance, lag-0…4 autocorrelation sequence, positive-window lag, `tau_int`, ESS, standard error, and final group residuals with an absolute floating tolerance of `1e-12`. This is intentionally stronger than simply running the same implementation twice and comparing the two runs.
+
+The canonical runtime emits into the commit-tied Actions log:
+
+- sampler/proposal/RNG/stream identities;
+- master seed, chain ID, and derived seed;
+- lattice, beta, proposal angle, finite-grid identity, and maximum reference sweep bound;
+- thermalisation, measurement count, cadence, and autocorrelation lag;
+- total proposal/accept accounting and acceptance fraction;
 - the complete raw plaquette series;
-- autocorrelation/ESS diagnostics;
-- final maximum link unitarity and determinant-one residuals.
+- mean, variance, full requested autocorrelation sequence, positive-window lag, `tau_int`, ESS, and standard error;
+- final maximum link unitarity and determinant-one residuals;
+- explicit Phase 2C1 claim-boundary flags.
 
 ## What Phase 2C1 validates
 
 The frozen executable surface requires:
 
 - literal identity and golden seed checks;
+- exact paired finite proposal-angle support;
+- exactly two PRNG outputs consumed per proposal;
 - exact beta-zero all-accept accounting;
 - local-vs-global Wilson-action difference agreement;
 - allocation-free candidate evaluation of the six affected plaquettes;
 - an executable `proposal_angle >= 1e-8` resolution floor;
-- fixed-chain deterministic replay;
+- literal golden reference-chain measurements and diagnostics;
 - distinct chain IDs producing distinct evidence;
+- maximum admitted schedule group-residual stress;
 - bounded/fail-closed configuration validation;
 - generated links remaining inside the frozen `SU(3)` group acceptance tolerance.
 
