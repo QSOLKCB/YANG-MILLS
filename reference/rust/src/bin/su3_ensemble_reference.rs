@@ -114,10 +114,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "effective_sample_size={:.17e}",
         report.diagnostics.effective_sample_size
     );
-    println!(
-        "standard_error={:.17e}",
-        report.diagnostics.standard_error
-    );
+    println!("standard_error={:.17e}", report.diagnostics.standard_error);
     println!(
         "final_link_unitarity_residual={:.17e}",
         report.final_link_unitarity_residual
