@@ -175,8 +175,16 @@ fn frozen_reference_chain_matches_literal_golden_evidence() {
     for (actual, expected) in report.measurements.iter().zip(expected_measurements) {
         assert_close(*actual, expected, GOLDEN_TOLERANCE);
     }
-    assert_close(report.diagnostics.mean, 2.62529908924654887e-1, GOLDEN_TOLERANCE);
-    assert_close(report.diagnostics.variance, 1.60297860259618306e-2, GOLDEN_TOLERANCE);
+    assert_close(
+        report.diagnostics.mean,
+        2.62529908924654887e-1,
+        GOLDEN_TOLERANCE,
+    );
+    assert_close(
+        report.diagnostics.variance,
+        1.60297860259618306e-2,
+        GOLDEN_TOLERANCE,
+    );
     assert_eq!(
         report.diagnostics.autocorrelation.len(),
         expected_autocorrelation.len()
