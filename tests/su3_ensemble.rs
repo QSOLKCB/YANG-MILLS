@@ -17,7 +17,8 @@ use su2_ensemble::SplitMix64;
 use su3::Su3;
 use su3_ensemble::{
     derive_su3_chain_seed, local_action_difference, metropolis_sweep, run_chain, Su3EnsembleConfig,
-    Su3EnsembleError, LINK_RESIDUAL_LIMIT, PROPOSAL_ID, RNG_ID, SAMPLER_ID, STREAM_ID,
+    Su3EnsembleError, LINK_RESIDUAL_LIMIT, MIN_PROPOSAL_ANGLE, PROPOSAL_ID, RNG_ID, SAMPLER_ID,
+    STREAM_ID,
 };
 use su3_lattice::Su3Lattice4;
 
@@ -92,6 +93,29 @@ fn distinct_su3_chain_ids_produce_distinct_evidence() {
     let second = run_chain(config(1)).unwrap();
     assert_ne!(first.derived_seed, second.derived_seed);
     assert_ne!(first.measurements, second.measurements);
+}
+
+#[test]
+fn proposal_angle_floor_is_executable_and_fail_closed() {
+    assert_eq!(MIN_PROPOSAL_ANGLE, 1.0e-8);
+
+    let mut boundary = config(0);
+    boundary.proposal_angle = MIN_PROPOSAL_ANGLE;
+    assert!(boundary.validate().is_ok());
+
+    let mut inert = config(0);
+    inert.proposal_angle = f64::MIN_POSITIVE;
+    assert_eq!(
+        inert.validate().unwrap_err(),
+        Su3EnsembleError::ProposalAngleOutsideReferenceRange
+    );
+
+    let mut below = config(0);
+    below.proposal_angle = MIN_PROPOSAL_ANGLE * 0.5;
+    assert_eq!(
+        below.validate().unwrap_err(),
+        Su3EnsembleError::ProposalAngleOutsideReferenceRange
+    );
 }
 
 #[test]
