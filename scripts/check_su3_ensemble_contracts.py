@@ -11,8 +11,8 @@ from check_contracts import load
 
 CONTRACT_PATH = "contracts/YM-SU3-ENSEMBLE-V1.json"
 VECTOR_PATH = "test-vectors/su3-ensemble-v1.json"
-CONTRACT_SHA256 = "77656622eb8452268fc21ffd13836e3e1704ce0ae5655ad96cf9e5c613af7622"
-VECTOR_SHA256 = "9c41d1073de078c04979562b56d28c18d695159f9645e2eab0618a9f7b18ddd6"
+CONTRACT_SHA256 = "493f243d9243c009a26915f42cb0172c6eb6771bd99e57629d2fb7aedfc8f173"
+VECTOR_SHA256 = "52047cc6756a9a7bc65645a858015d787bfb2eea3ebc9304e4e423b4bc6e7982"
 
 
 def canonical_sha256(payload: dict[str, Any]) -> str:
@@ -32,6 +32,17 @@ def validate_su3_ensemble_contract(payload: dict[str, Any]) -> None:
         raise ValueError(f"{CONTRACT_PATH}: contract ID drift")
     if payload["status"] != "phase-2c1-frozen":
         raise ValueError(f"{CONTRACT_PATH}: frozen status drift")
+    if payload["reference_bounds"]["max_schedule_sweeps"] != 512:
+        raise ValueError(f"{CONTRACT_PATH}: executable schedule bound drift")
+    angle_grid = payload["proposal"]["angle_grid"]
+    if angle_grid["sign_bit"] != 63 or angle_grid["magnitude_bits"] != 52:
+        raise ValueError(f"{CONTRACT_PATH}: paired proposal grid drift")
+    if angle_grid["endpoints_excluded"] is not True or angle_grid["equal_multiplicity"] is not True:
+        raise ValueError(f"{CONTRACT_PATH}: proposal symmetry weakened")
+    if payload["reproducibility"]["literal_golden_reference_chain_required"] is not True:
+        raise ValueError(f"{CONTRACT_PATH}: literal golden chain requirement weakened")
+    if payload["reproducibility"]["complete_reference_runtime_evidence_required"] is not True:
+        raise ValueError(f"{CONTRACT_PATH}: complete runtime evidence requirement weakened")
     if payload["phase2c_gate"]["published_su3_baseline_reproduced"] is not False:
         raise ValueError(f"{CONTRACT_PATH}: premature SU(3) benchmark claim")
     if payload["phase2c_gate"]["glueball_analysis_enabled"] is not False:
@@ -49,6 +60,16 @@ def validate_su3_ensemble_vectors(payload: dict[str, Any]) -> None:
         raise ValueError(f"{VECTOR_PATH}: vector-set ID drift")
     if payload["status"] != "phase-2c1-frozen":
         raise ValueError(f"{VECTOR_PATH}: frozen status drift")
+    by_id = {vector["id"]: vector for vector in payload["vectors"]}
+    if by_id["paired-angle-grid"]["exact_inverse_pairing"] is not True:
+        raise ValueError(f"{VECTOR_PATH}: exact inverse pairing weakened")
+    if by_id["maximum-schedule-group-stress"]["maximum_total_sweeps"] != 512:
+        raise ValueError(f"{VECTOR_PATH}: maximum schedule stress drift")
+    golden = by_id["frozen-reference-chain-golden-evidence"]
+    if golden["metropolis_proposals"] != 10240 or golden["metropolis_accepts"] != 10240:
+        raise ValueError(f"{VECTOR_PATH}: golden proposal accounting drift")
+    if len(golden["raw_measurements"]) != 16:
+        raise ValueError(f"{VECTOR_PATH}: golden raw evidence length drift")
 
 
 def main() -> None:
