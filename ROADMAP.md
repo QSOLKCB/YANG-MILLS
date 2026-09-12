@@ -203,7 +203,7 @@ Primary source: Langfeld, Lucini & Rago, *Physical Review Letters* **109**, 1116
 
 ### Phase 2C1 — separately versioned `SU(3)` sampler mechanics
 
-**Status: implemented as a review candidate in PR #9; external `SU(3)` benchmark intentionally not selected yet.**
+**Status: completed, independently reviewed, CI-green, and frozen in PR #9 pending merge.**
 
 - [x] Specify a new `SU(3)` ensemble contract, `YM-SU3-ENSEMBLE-V1`, rather than extending `YM-SU2-ENSEMBLE-V1`.
 - [x] Select and justify a correctness-first symmetric single-generator Metropolis algorithm under the frozen `SU(3)` lattice/action conventions, while explicitly not claiming Cabibbo–Marinari or Kennedy–Pendleton heatbath semantics.
@@ -212,7 +212,7 @@ Primary source: Langfeld, Lucini & Rago, *Physical Review Letters* **109**, 1116
 - [x] Require `1e-8 <= proposal_angle <= 1` so numerically inert positive proposal scales fail closed.
 - [x] Compute candidate local action differences allocation-free from exactly the six affected plaquettes and regress them against a complete Wilson-action difference.
 
-**Phase 2C1 candidate gate:** `published_su3_baseline_reproduced=false`, `glueball_analysis_enabled=false`, and `phase2c_complete=false` remain mandatory. `YM-SU3-ENSEMBLE-V1` and `SU3-ENSEMBLE-PHASE2C1-V1` may be sealed only after the sampler mechanics are independently reviewed and the exact final head is CI-green.
+**Phase 2C1 freeze gate:** `YM-SU3-ENSEMBLE-V1` and `SU3-ENSEMBLE-PHASE2C1-V1` are sealed as `phase-2c1-frozen`. The boundary flags `published_su3_baseline_reproduced=false`, `glueball_analysis_enabled=false`, and `phase2c_complete=false` remain mandatory; incompatible sampler, proposal, stream, update-order, local-action, diagnostic, or evidence semantics require a new identifier.
 
 ### Phase 2C2 — independent published `SU(3)` validation
 
