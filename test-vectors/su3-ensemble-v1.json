@@ -1,0 +1,68 @@
+{
+  "contract_id": "YM-SU3-ENSEMBLE-V1",
+  "vector_set": "SU3-ENSEMBLE-PHASE2C1-V1",
+  "status": "phase-2c1-candidate",
+  "vectors": [
+    {
+      "id": "su3-stream-golden-seeds",
+      "master_seed": "3c00198212230101",
+      "chain_ids": [0, 1],
+      "derived_seeds_hex": [
+        "94c715630ee8e90a",
+        "8aba19af6781dc09"
+      ],
+      "claim_class": "C0"
+    },
+    {
+      "id": "beta-zero-metropolis-all-accept",
+      "extents": [2, 2, 2, 2],
+      "beta": 0.0,
+      "proposal_angle": 0.35,
+      "expected_proposals_per_sweep": 512,
+      "expected_accepts_per_sweep": 512,
+      "claim_class": "C0"
+    },
+    {
+      "id": "local-action-difference-vs-full-action",
+      "extents": [2, 2, 2, 2],
+      "beta": 5.7,
+      "link": {
+        "x": [0, 0, 0, 0],
+        "mu": 2
+      },
+      "generator": 4,
+      "angle": 0.21,
+      "absolute_residual_max": 2e-11,
+      "claim_class": "C2"
+    },
+    {
+      "id": "fixed-chain-replay",
+      "master_seed": "3c00198212230101",
+      "chain_id": 0,
+      "expected": "identical derived seed, proposal/accept counts, raw measurements, diagnostics, and final link residuals under the same reference implementation/toolchain",
+      "claim_class": "C0"
+    },
+    {
+      "id": "distinct-chain-evidence",
+      "master_seed": "3c00198212230101",
+      "chain_ids": [0, 1],
+      "expected": "distinct derived seeds and distinct raw measurement series",
+      "claim_class": "C0"
+    },
+    {
+      "id": "link-group-invariants",
+      "unitarity_residual_max": 5e-12,
+      "determinant_residual_max": 5e-12,
+      "claim_class": "C2"
+    },
+    {
+      "id": "phase2c1-boundary",
+      "sampler_mechanics_implemented": true,
+      "published_su3_baseline_reproduced": false,
+      "glueball_analysis_enabled": false,
+      "phase2c_complete": false,
+      "expected": "sampler mechanics may freeze before any external SU(3) benchmark is selected or inspected",
+      "claim_class": "C0"
+    }
+  ]
+}
