@@ -44,8 +44,16 @@ def main() -> None:
     expect_reject(validate_su3_ensemble_contract, broken, "RNG consumption drift")
 
     broken = copy.deepcopy(contract)
+    broken["reference_bounds"]["proposal_angle_min"] = 0.0
+    expect_reject(validate_su3_ensemble_contract, broken, "proposal-angle floor removed")
+
+    broken = copy.deepcopy(contract)
     broken["local_action"]["affected_plaquettes"] = 4
     expect_reject(validate_su3_ensemble_contract, broken, "local action topology drift")
+
+    broken = copy.deepcopy(contract)
+    broken["local_action"]["candidate_evaluation"] = "clone the complete lattice for every proposal"
+    expect_reject(validate_su3_ensemble_contract, broken, "allocation-free local delta removed")
 
     broken = copy.deepcopy(contract)
     broken["reference_bounds"]["link_unitarity_residual_max"] = 1.0
@@ -70,6 +78,10 @@ def main() -> None:
     broken = copy.deepcopy(vectors)
     broken["vectors"][1]["expected_accepts_per_sweep"] = 511
     expect_reject(validate_su3_ensemble_vectors, broken, "beta-zero acceptance drift")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][3]["proposal_angle_min"] = 0.0
+    expect_reject(validate_su3_ensemble_vectors, broken, "proposal-resolution vector drift")
 
     print("Negative Phase 2C1 SU(3) ensemble contract regression checks: passed")
 
