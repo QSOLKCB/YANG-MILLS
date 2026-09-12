@@ -24,6 +24,7 @@ pub const STREAM_DOMAIN: u64 = 0x5355_3345_4e53_5631;
 pub const MAX_REFERENCE_BETA: f64 = 12.0;
 pub const MAX_REFERENCE_SWEEPS: usize = 1 << 18;
 pub const MAX_REFERENCE_MEASUREMENTS: usize = 1 << 18;
+pub const MIN_PROPOSAL_ANGLE: f64 = 1.0e-8;
 pub const MAX_PROPOSAL_ANGLE: f64 = 1.0;
 pub const PLAQUETTE_TOLERANCE: f64 = 1.0e-12;
 pub const LINK_RESIDUAL_LIMIT: f64 = 5.0e-12;
@@ -47,7 +48,7 @@ impl Su3EnsembleConfig {
             return Err(Su3EnsembleError::BetaOutsideReferenceRange);
         }
         if !self.proposal_angle.is_finite()
-            || self.proposal_angle <= 0.0
+            || self.proposal_angle < MIN_PROPOSAL_ANGLE
             || self.proposal_angle > MAX_PROPOSAL_ANGLE
         {
             return Err(Su3EnsembleError::ProposalAngleOutsideReferenceRange);
@@ -228,32 +229,67 @@ pub fn average_plaquette(lattice: &Su3Lattice4) -> Result<f64, Su3EnsembleError>
     Ok(mean)
 }
 
-pub fn local_link_action(
+fn local_link_action_with_value(
     lattice: &Su3Lattice4,
     x: [usize; DIM],
     mu: usize,
+    link_value: Su3,
     beta: f64,
 ) -> Result<f64, Su3EnsembleError> {
     if !beta.is_finite() || beta < 0.0 || beta > MAX_REFERENCE_BETA {
         return Err(Su3EnsembleError::BetaOutsideReferenceRange);
     }
+
+    // Validate the target coordinate/direction through the frozen lattice API
+    // before using the local substitution formulas below.
+    lattice.link(x, mu)?;
     let extents = lattice.extents();
     let mut sum = 0.0_f64;
     for nu in 0..DIM {
         if nu == mu {
             continue;
         }
+
+        // Forward plaquette P_{mu,nu}(x): the varied link is the first factor.
+        let x_mu = lattice.neighbor_plus(x, mu)?;
+        let x_nu = lattice.neighbor_plus(x, nu)?;
+        let forward = link_value
+            .mul(lattice.link(x_mu, nu)?)?
+            .mul(lattice.link(x_nu, mu)?.dagger())?
+            .mul(lattice.link(x, nu)?.dagger())?;
+
+        // Backward plaquette P_{mu,nu}(x-nu): the varied link U_mu(x)
+        // is the third factor and therefore enters as link_value^dagger.
         let backward_x = x_minus(x, nu, extents);
-        for base in [x, backward_x] {
-            let plaquette = lattice.plaquette(base, mu, nu)?;
-            sum += 1.0 - normalized_real_trace(plaquette);
+        let backward_x_mu = lattice.neighbor_plus(backward_x, mu)?;
+        let backward = lattice
+            .link(backward_x, mu)?
+            .mul(lattice.link(backward_x_mu, nu)?)?
+            .mul(link_value.dagger())?
+            .mul(lattice.link(backward_x, nu)?.dagger())?;
+
+        sum += 1.0 - normalized_real_trace(forward);
+        sum += 1.0 - normalized_real_trace(backward);
+        if !sum.is_finite() {
+            return Err(Su3EnsembleError::NonFiniteStatistic);
         }
     }
+
     let action = beta * sum;
     if !action.is_finite() {
         return Err(Su3EnsembleError::NonFiniteStatistic);
     }
     Ok(action)
+}
+
+pub fn local_link_action(
+    lattice: &Su3Lattice4,
+    x: [usize; DIM],
+    mu: usize,
+    beta: f64,
+) -> Result<f64, Su3EnsembleError> {
+    let old = lattice.link(x, mu)?;
+    local_link_action_with_value(lattice, x, mu, old, beta)
 }
 
 pub fn local_action_difference(
@@ -263,11 +299,10 @@ pub fn local_action_difference(
     candidate: Su3,
     beta: f64,
 ) -> Result<f64, Su3EnsembleError> {
-    let old = local_link_action(lattice, x, mu, beta)?;
-    let mut proposed = lattice.clone();
-    proposed.set_link(x, mu, candidate)?;
-    let new = local_link_action(&proposed, x, mu, beta)?;
-    let difference = new - old;
+    let old = lattice.link(x, mu)?;
+    let old_action = local_link_action_with_value(lattice, x, mu, old, beta)?;
+    let new_action = local_link_action_with_value(lattice, x, mu, candidate, beta)?;
+    let difference = new_action - old_action;
     if !difference.is_finite() {
         return Err(Su3EnsembleError::NonFiniteStatistic);
     }
@@ -289,7 +324,10 @@ pub fn metropolis_sweep(
     if !beta.is_finite() || beta < 0.0 || beta > MAX_REFERENCE_BETA {
         return Err(Su3EnsembleError::BetaOutsideReferenceRange);
     }
-    if !proposal_angle.is_finite() || proposal_angle <= 0.0 || proposal_angle > MAX_PROPOSAL_ANGLE {
+    if !proposal_angle.is_finite()
+        || proposal_angle < MIN_PROPOSAL_ANGLE
+        || proposal_angle > MAX_PROPOSAL_ANGLE
+    {
         return Err(Su3EnsembleError::ProposalAngleOutsideReferenceRange);
     }
 
