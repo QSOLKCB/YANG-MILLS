@@ -2,7 +2,7 @@
 
 Phase 2C1 introduces a separately versioned stochastic surface for pure `SU(3)` Wilson lattice gauge theory. It does not extend `YM-SU2-ENSEMBLE-V1`, and it does not inherit the external `SU(2)` benchmark result from Phase 2B.
 
-The candidate authority is:
+The frozen authority is:
 
 ```text
 YM-SU3-ENSEMBLE-V1
@@ -18,7 +18,7 @@ The classic `SU(3)` updating literature includes Cabibbo and Marinari's `SU(2)`-
 - N. Cabibbo and E. Marinari, *A new method for updating SU(N) matrices in computer simulations of gauge theories*, Phys. Lett. B **119**, 387–390 (1982), DOI `10.1016/0370-2693(82)90696-7`.
 - A. D. Kennedy and B. J. Pendleton, *Improved heatbath method for Monte Carlo calculations in lattice gauge theories*, Phys. Lett. B **156**, 393–399 (1985), DOI `10.1016/0370-2693(85)91632-6`.
 
-Phase 2C1 does **not** claim to implement either algorithm. Instead it freezes a correctness-first symmetric Metropolis kernel over the already-sealed Gell-Mann generator basis. This avoids introducing a second layer of subgroup-factorization and conditional-density conventions before the basic `SU(3)` stochastic evidence path is independently reviewed.
+Phase 2C1 does **not** claim to implement either algorithm. Instead it freezes a correctness-first symmetric Metropolis kernel over the already-sealed Gell-Mann generator basis. This avoids introducing a second layer of subgroup-factorization and conditional-density conventions before the basic `SU(3)` stochastic evidence path is independently validated.
 
 Metropolis acceptance is the standard symmetric-proposal rule associated with N. Metropolis et al., *Equation of State Calculations by Fast Computing Machines*, J. Chem. Phys. **21**, 1087 (1953), DOI `10.1063/1.1699114`.
 
@@ -68,7 +68,7 @@ S_local(U_mu(x))
   ].
 ```
 
-The candidate difference is
+The local difference is
 
 ```text
 DeltaS = S_local(candidate) - S_local(old).
@@ -148,7 +148,7 @@ The chain report retains:
 
 ## What Phase 2C1 validates
 
-The candidate executable surface requires:
+The frozen executable surface requires:
 
 - literal identity and golden seed checks;
 - exact beta-zero all-accept accounting;
@@ -164,7 +164,7 @@ These are finite-dimensional software and finite-lattice numerical checks. They 
 
 ## Phase 2C2 remains deliberately open
 
-Only after the sampler mechanics are independently reviewed and frozen should the repository select a peer-reviewed pure-`SU(3)` Wilson-action benchmark, predeclare its volume/coupling/observable/statistical gates, and run independent chains against it.
+With the sampler mechanics frozen, Phase 2C2 may now select a peer-reviewed pure-`SU(3)` Wilson-action benchmark, predeclare its volume/coupling/observable/statistical gates, and run independent chains against it. The benchmark target and gates must be selected before its result is inspected.
 
 Until that gate is passed:
 
