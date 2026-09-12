@@ -6,7 +6,10 @@
     {
       "id": "su3-stream-golden-seeds",
       "master_seed": "3c00198212230101",
-      "chain_ids": [0, 1],
+      "chain_ids": [
+        0,
+        1
+      ],
       "derived_seeds_hex": [
         "94c715630ee8e90a",
         "8aba19af6781dc09"
@@ -15,7 +18,12 @@
     },
     {
       "id": "beta-zero-metropolis-all-accept",
-      "extents": [2, 2, 2, 2],
+      "extents": [
+        2,
+        2,
+        2,
+        2
+      ],
       "beta": 0.0,
       "proposal_angle": 0.35,
       "expected_proposals_per_sweep": 512,
@@ -24,16 +32,34 @@
     },
     {
       "id": "local-action-difference-vs-full-action",
-      "extents": [2, 2, 2, 2],
+      "extents": [
+        2,
+        2,
+        2,
+        2
+      ],
       "beta": 5.7,
       "link": {
-        "x": [0, 0, 0, 0],
+        "x": [
+          0,
+          0,
+          0,
+          0
+        ],
         "mu": 2
       },
       "generator": 4,
       "angle": 0.21,
       "absolute_residual_max": 2e-11,
+      "candidate_evaluation": "allocation-free six-plaquette substitution",
       "claim_class": "C2"
+    },
+    {
+      "id": "proposal-angle-resolution-floor",
+      "proposal_angle_min": 1e-08,
+      "below_minimum_rejected": true,
+      "f64_min_positive_rejected": true,
+      "claim_class": "C0"
     },
     {
       "id": "fixed-chain-replay",
@@ -45,7 +71,10 @@
     {
       "id": "distinct-chain-evidence",
       "master_seed": "3c00198212230101",
-      "chain_ids": [0, 1],
+      "chain_ids": [
+        0,
+        1
+      ],
       "expected": "distinct derived seeds and distinct raw measurement series",
       "claim_class": "C0"
     },
