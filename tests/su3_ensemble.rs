@@ -16,9 +16,10 @@ mod su3_lattice;
 use su2_ensemble::SplitMix64;
 use su3::Su3;
 use su3_ensemble::{
-    derive_su3_chain_seed, local_action_difference, metropolis_sweep, run_chain, Su3EnsembleConfig,
-    Su3EnsembleError, LINK_RESIDUAL_LIMIT, MIN_PROPOSAL_ANGLE, PROPOSAL_ID, RNG_ID, SAMPLER_ID,
-    STREAM_ID,
+    derive_su3_chain_seed, local_action_difference, metropolis_sweep, proposal_angle_from_u64,
+    run_chain, Su3EnsembleConfig, Su3EnsembleError, ANGLE_GRID_MAGNITUDE_BITS,
+    LINK_RESIDUAL_LIMIT, MAX_PROPOSAL_ANGLE, MAX_REFERENCE_MEASUREMENTS, MAX_REFERENCE_SWEEPS,
+    MIN_PROPOSAL_ANGLE, PROPOSAL_ID, RNG_ID, SAMPLER_ID, STREAM_ID,
 };
 use su3_lattice::Su3Lattice4;
 
@@ -49,14 +50,36 @@ fn su3_stream_derivation_has_golden_values() {
 }
 
 #[test]
-fn beta_zero_sweep_accepts_every_generator_proposal() {
+fn proposal_angle_grid_is_exactly_paired() {
+    assert_eq!(ANGLE_GRID_MAGNITUDE_BITS, 52);
+    let proposal_angle = 0.35;
+    for raw in [0_u64, 1, 0x000f_ffff_ffff_ffff, 0x1234_5678_9abc_def0] {
+        let negative_raw = raw & !(1_u64 << 63);
+        let positive_raw = negative_raw | (1_u64 << 63);
+        let negative = proposal_angle_from_u64(negative_raw, proposal_angle).unwrap();
+        let positive = proposal_angle_from_u64(positive_raw, proposal_angle).unwrap();
+        assert_eq!(positive, -negative);
+        assert!(positive > 0.0 && positive < proposal_angle);
+        assert!(negative < 0.0 && negative > -proposal_angle);
+    }
+}
+
+#[test]
+fn beta_zero_sweep_accepts_every_generator_proposal_and_consumes_two_rng_outputs_each() {
     let mut lattice = Su3Lattice4::new_identity([2, 2, 2, 2]).unwrap();
-    let mut rng = SplitMix64::new(derive_su3_chain_seed(MASTER_SEED, 0));
+    let seed = derive_su3_chain_seed(MASTER_SEED, 0);
+    let mut rng = SplitMix64::new(seed);
     let accounting = metropolis_sweep(&mut lattice, 0.0, 0.35, &mut rng).unwrap();
     assert_eq!(accounting.proposals, (lattice.link_count() * 8) as u64);
     assert_eq!(accounting.accepts, accounting.proposals);
     assert!(lattice.max_link_unitarity_residual() <= LINK_RESIDUAL_LIMIT);
     assert!(lattice.max_link_determinant_residual() <= LINK_RESIDUAL_LIMIT);
+
+    let mut expected_rng = SplitMix64::new(seed);
+    for _ in 0..accounting.proposals * 2 {
+        expected_rng.next_u64();
+    }
+    assert_eq!(rng.next_u64(), expected_rng.next_u64());
 }
 
 #[test]
@@ -93,6 +116,27 @@ fn distinct_su3_chain_ids_produce_distinct_evidence() {
     let second = run_chain(config(1)).unwrap();
     assert_ne!(first.derived_seed, second.derived_seed);
     assert_ne!(first.measurements, second.measurements);
+}
+
+#[test]
+fn maximum_accepted_schedule_preserves_group_bounds() {
+    assert_eq!(MAX_REFERENCE_SWEEPS, 512);
+    assert_eq!(MAX_REFERENCE_MEASUREMENTS, 512);
+    let stress = Su3EnsembleConfig {
+        extents: [2, 2, 2, 2],
+        beta: 0.0,
+        master_seed: MASTER_SEED,
+        chain_id: 0,
+        thermalization_sweeps: MAX_REFERENCE_SWEEPS - 2,
+        measurements: 2,
+        sweeps_between_measurements: 1,
+        proposal_angle: MAX_PROPOSAL_ANGLE,
+        autocorrelation_max_lag: 1,
+    };
+    let report = run_chain(stress).unwrap();
+    assert_eq!(report.total_sweeps, MAX_REFERENCE_SWEEPS);
+    assert!(report.final_link_unitarity_residual <= LINK_RESIDUAL_LIMIT);
+    assert!(report.final_link_determinant_residual <= LINK_RESIDUAL_LIMIT);
 }
 
 #[test]
@@ -139,5 +183,12 @@ fn invalid_su3_sampler_inputs_fail_closed() {
     assert_eq!(
         run_chain(bad).unwrap_err(),
         Su3EnsembleError::ZeroMeasurementStride
+    );
+
+    let mut bad = config(0);
+    bad.thermalization_sweeps = MAX_REFERENCE_SWEEPS;
+    assert_eq!(
+        run_chain(bad).unwrap_err(),
+        Su3EnsembleError::ScheduleOutsideReferenceRange
     );
 }
