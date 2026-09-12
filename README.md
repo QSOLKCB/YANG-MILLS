@@ -40,7 +40,7 @@ The predeclared published source-resolution envelope was `[0.59,0.62]`. Two inde
 
 and chain-consistency `z ~= 0.946`. The minimum chain ESS was about `7.75`, and the maximum final `SU(2)` unit-link residual was `6.66e-16`. Review hardening split each post-thermalisation chain into first/last 24-measurement halves and required autocorrelation-aware drift `z <= 5`; the two chains produced stationarity `z ~= 2.396` and `z ~= 1.138`, respectively. This closes the finite-lattice Phase 2 graduation gate for the declared `SU(2)` regime. It does **not** establish confinement, continuum quantum-field existence, or a positive continuum mass gap.
 
-Phase 2C1 is frozen in PR #9. It introduces the separately versioned `SU(3)` ensemble authority `YM-SU3-ENSEMBLE-V1`, using a correctness-first symmetric single-generator Metropolis kernel over the frozen Gell-Mann basis, a domain-separated `YM-SU3-STREAM-V1` chain identity, allocation-free six-plaquette local action differences, raw average-plaquette evidence, and the already-frozen numerical autocorrelation/ESS definitions. See [`docs/SU3_ENSEMBLES.md`](docs/SU3_ENSEMBLES.md). The external peer-reviewed `SU(3)` benchmark remains deliberately open for Phase 2C2, so `published_su3_baseline_reproduced=false`, `glueball_analysis_enabled=false`, and `phase2c_complete=false`.
+Phase 2C1 is frozen in PR #9. It introduces the separately versioned `SU(3)` ensemble authority `YM-SU3-ENSEMBLE-V1`, using a correctness-first symmetric single-generator Metropolis kernel over the frozen Gell-Mann basis, a domain-separated `YM-SU3-STREAM-V1` chain identity, an exactly paired finite binary64 proposal-angle grid, allocation-free six-plaquette local action differences, a stress-tested 512-sweep reference bound, complete raw runtime evidence, and literal golden-chain regression vectors. See [`docs/SU3_ENSEMBLES.md`](docs/SU3_ENSEMBLES.md). The external peer-reviewed `SU(3)` benchmark remains deliberately open for Phase 2C2, so `published_su3_baseline_reproduced=false`, `glueball_analysis_enabled=false`, and `phase2c_complete=false`.
 
 No current phase performs glueball extraction, a continuum/infinite-volume limit, construction of the interacting quantum theory, or a mass-gap proof.
 
@@ -224,18 +224,26 @@ rng_id      = SPLITMIX64-V1
 stream_id   = YM-SU3-STREAM-V1
 ```
 
-At every link, the reference visits the eight frozen Gell-Mann directions in order and proposes
+At every link, the reference visits the eight frozen Gell-Mann directions in order. One raw `SplitMix64` word defines an exactly paired finite angle grid:
 
 ```text
-theta = proposal_angle * (2u - 1)
+m = raw_u64 & (2^52 - 1)
+|theta| = proposal_angle * (2m + 1) / 2^53
+sign(theta) = bit 63
 R = exp(i theta T^a)
 U_candidate = R U_old
 A = min(1, exp(-DeltaS)).
 ```
 
+Toggling bit 63 gives the exact floating inverse angle, the endpoints `+/-proposal_angle` are excluded, and each inverse pair has equal multiplicity. A second PRNG output is consumed for the acceptance draw for every proposal.
+
 The proposal angle is bounded by `1e-8 <= proposal_angle <= 1`; smaller positive values fail closed as numerically inert. Candidate `DeltaS` is evaluated allocation-free from only the six affected plaquettes and is regression-checked against a complete Wilson-action difference.
 
-Phase 2C1 has its own domain-separated chain-seed derivation, fixed site/direction/generator update order, raw normalized `(1/3)ReTr` average-plaquette measurements, proposal/accept accounting, and final link unitarity/determinant residual gates. A `beta=0` all-accept regression checks the transition kernel but is **not** represented as an exact Haar-equilibrium sample.
+The frozen binary64 reference admits at most `512` total sweeps and `512` measurements. CI executes the maximum accepted `2^4`, beta-zero, chain-0 schedule at `proposal_angle=1.0` and requires the final link unitarity and determinant residuals to remain below `5e-12`.
+
+Phase 2C1 has its own domain-separated chain-seed derivation, fixed site/direction/generator update order, raw normalized `(1/3)ReTr` average-plaquette measurements, proposal/accept accounting, and final link unitarity/determinant residual gates. The canonical runtime emits the complete raw series, variance, full requested autocorrelation sequence, positive-window lag, `tau_int`, ESS, standard error, configuration/stream identity, and group residuals into the commit-tied Actions log. A literal golden 16-measurement beta-zero chain independently pins those outputs so deterministic semantic drift cannot pass merely by replaying itself.
+
+A `beta=0` all-accept regression checks the transition kernel but is **not** represented as an exact Haar-equilibrium sample.
 
 The sampler mechanics are frozen before selecting an external `SU(3)` finite-lattice benchmark. Phase 2C2 therefore retains
 
