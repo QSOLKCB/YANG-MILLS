@@ -35,8 +35,9 @@
   "reference_bounds": {
     "beta_min": 0.0,
     "beta_max": 12.0,
-    "proposal_angle_min_exclusive": 0.0,
+    "proposal_angle_min": 1e-08,
     "proposal_angle_max": 1.0,
+    "proposal_angle_below_min_rejected_as_numerically_inert": true,
     "max_schedule_sweeps": 262144,
     "max_measurements": 262144,
     "autocorrelation_max_lag_must_be_less_than_measurements": true,
@@ -58,6 +59,7 @@
   "local_action": {
     "affected_plaquettes": 6,
     "definition": "for link U_mu(x), sum the forward and x-nu plaquettes for every nu!=mu using 1-(1/3)ReTr P",
+    "candidate_evaluation": "allocation-free substitution of the candidate into the six affected plaquettes; no full-lattice clone",
     "difference": "DeltaS=S_local(candidate)-S_local(old)",
     "regression": "local DeltaS must match the full Wilson-action difference on a deterministic one-link proposal"
   },
