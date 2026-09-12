@@ -37,6 +37,16 @@ pub const STATIONARITY_AUTOCORRELATION_MAX_LAG: usize = 6;
 pub const MAX_STATIONARITY_Z: f64 = 5.0;
 pub const MAX_LINK_UNIT_RESIDUAL: f64 = 1.0e-12;
 pub const PLAQUETTE_SAMPLE_TOLERANCE: f64 = 1.0e-12;
+pub const LINKS_PER_HEATBATH_SWEEP: u64 =
+    (EXTENTS[0] * EXTENTS[1] * EXTENTS[2] * EXTENTS[3] * 4) as u64;
+pub const EXPECTED_HEATBATH_SWEEPS: usize =
+    THERMALIZATION_SWEEPS + MEASUREMENTS * SWEEPS_BETWEEN_MEASUREMENTS;
+pub const EXPECTED_OVERRELAXATION_SWEEPS: usize =
+    EXPECTED_HEATBATH_SWEEPS * OVERRELAXATION_SWEEPS_PER_HEATBATH;
+pub const EXPECTED_HEATBATH_UPDATES: u64 =
+    LINKS_PER_HEATBATH_SWEEP * EXPECTED_HEATBATH_SWEEPS as u64;
+pub const MAX_EXPECTED_HEATBATH_PROPOSALS: u64 =
+    EXPECTED_HEATBATH_UPDATES * MAX_HEATBATH_ATTEMPTS_PER_LINK as u64;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum BenchmarkError {
@@ -44,7 +54,9 @@ pub enum BenchmarkError {
     DuplicateChainIdentity,
     DuplicateMeasurementSeries,
     InvalidPlaquetteSample,
+    InvalidHeatbathAccounting,
     InvalidAcceptanceEvidence,
+    InvalidLinkUnitResidual,
     StationarityDiagnosticFailed,
     NonFiniteStatistic,
 }
@@ -62,8 +74,14 @@ impl fmt::Display for BenchmarkError {
             Self::InvalidPlaquetteSample => {
                 "retained plaquette evidence lies outside the physical SU(2) range"
             }
+            Self::InvalidHeatbathAccounting => {
+                "heat-bath sweep/update accounting does not match the frozen schedule"
+            }
             Self::InvalidAcceptanceEvidence => {
                 "heat-bath acceptance evidence is inconsistent with proposal/update counts"
+            }
+            Self::InvalidLinkUnitResidual => {
+                "final link-unit residual must be finite and nonnegative"
             }
             Self::StationarityDiagnosticFailed => {
                 "post-thermalisation stationarity diagnostic could not be evaluated"
@@ -128,13 +146,20 @@ fn measurements_are_physical(values: &[f64]) -> bool {
         .all(|value| value.is_finite() && (lower..=upper).contains(value))
 }
 
-fn acceptance_from_counts(report: &ChainReport) -> Result<f64, BenchmarkError> {
-    if report.heatbath_proposals == 0
-        || report.heatbath_updates == 0
-        || report.heatbath_updates > report.heatbath_proposals
+fn validate_heatbath_accounting(report: &ChainReport) -> Result<(), BenchmarkError> {
+    if report.total_heatbath_sweeps != EXPECTED_HEATBATH_SWEEPS
+        || report.total_overrelaxation_sweeps != EXPECTED_OVERRELAXATION_SWEEPS
+        || report.heatbath_updates != EXPECTED_HEATBATH_UPDATES
+        || report.heatbath_proposals < EXPECTED_HEATBATH_UPDATES
+        || report.heatbath_proposals > MAX_EXPECTED_HEATBATH_PROPOSALS
     {
-        return Err(BenchmarkError::InvalidAcceptanceEvidence);
+        return Err(BenchmarkError::InvalidHeatbathAccounting);
     }
+    Ok(())
+}
+
+fn acceptance_from_counts(report: &ChainReport) -> Result<f64, BenchmarkError> {
+    validate_heatbath_accounting(report)?;
     let acceptance = report.heatbath_updates as f64 / report.heatbath_proposals as f64;
     if !acceptance.is_finite()
         || acceptance <= 0.0
@@ -227,6 +252,13 @@ pub fn summarize_two_chains(
     }
     let _first_acceptance = acceptance_from_counts(first)?;
     let _second_acceptance = acceptance_from_counts(second)?;
+    if !first.final_link_unit_residual.is_finite()
+        || !second.final_link_unit_residual.is_finite()
+        || first.final_link_unit_residual < 0.0
+        || second.final_link_unit_residual < 0.0
+    {
+        return Err(BenchmarkError::InvalidLinkUnitResidual);
+    }
 
     // The retained measurement series are the evidence authority. Recompute
     // the frozen Phase 2A diagnostics here rather than trusting cached fields
@@ -257,8 +289,6 @@ pub fn summarize_two_chains(
             .iter()
             .all(|value| value.is_finite())
         || !max_stationarity_z.is_finite()
-        || !first.final_link_unit_residual.is_finite()
-        || !second.final_link_unit_residual.is_finite()
     {
         return Err(BenchmarkError::NonFiniteStatistic);
     }
@@ -341,19 +371,19 @@ mod tests {
         let config = benchmark_config(chain_id);
         let chain_diagnostics = diagnostics(&measurements, AUTOCORRELATION_MAX_LAG)
             .expect("synthetic benchmark diagnostics must be valid");
-        let total_heatbath_sweeps =
-            THERMALIZATION_SWEEPS + MEASUREMENTS * SWEEPS_BETWEEN_MEASUREMENTS;
+        let heatbath_proposals = EXPECTED_HEATBATH_UPDATES * 2;
+        let mean_heatbath_acceptance = EXPECTED_HEATBATH_UPDATES as f64 / heatbath_proposals as f64;
 
         ChainReport {
             sampler_id: SAMPLER_ID,
             rng_id: RNG_ID,
             config,
             derived_seed: derive_chain_seed(MASTER_SEED, chain_id),
-            total_heatbath_sweeps,
-            total_overrelaxation_sweeps: total_heatbath_sweeps * OVERRELAXATION_SWEEPS_PER_HEATBATH,
-            heatbath_proposals: 100,
-            heatbath_updates: 40,
-            mean_heatbath_acceptance: 0.4,
+            total_heatbath_sweeps: EXPECTED_HEATBATH_SWEEPS,
+            total_overrelaxation_sweeps: EXPECTED_OVERRELAXATION_SWEEPS,
+            heatbath_proposals,
+            heatbath_updates: EXPECTED_HEATBATH_UPDATES,
+            mean_heatbath_acceptance,
             measurements,
             diagnostics: chain_diagnostics,
             final_link_unit_residual: 0.0,
@@ -394,6 +424,12 @@ mod tests {
     }
 
     #[test]
+    fn executable_benchmark_identity_matches_frozen_contract() {
+        assert_eq!(BENCHMARK_ID, "YM-SU2-PLAQUETTE-BASELINE-V1");
+        assert_eq!(PRIMARY_DOI, "10.1103/PhysRevLett.109.111601");
+    }
+
+    #[test]
     fn executable_source_envelope_matches_frozen_contract() {
         assert_eq!(SOURCE_ENVELOPE_MIN, 0.59);
         assert_eq!(SOURCE_ENVELOPE_MAX, 0.62);
@@ -418,6 +454,11 @@ mod tests {
         assert_eq!(MAX_STATIONARITY_Z, 5.0);
         assert_eq!(MAX_LINK_UNIT_RESIDUAL, 1.0e-12);
         assert_eq!(PLAQUETTE_SAMPLE_TOLERANCE, 1.0e-12);
+        assert_eq!(LINKS_PER_HEATBATH_SWEEP, 40_000);
+        assert_eq!(EXPECTED_HEATBATH_SWEEPS, 88);
+        assert_eq!(EXPECTED_OVERRELAXATION_SWEEPS, 88);
+        assert_eq!(EXPECTED_HEATBATH_UPDATES, 3_520_000);
+        assert_eq!(MAX_EXPECTED_HEATBATH_PROPOSALS, 35_200_000_000);
     }
 
     #[test]
@@ -445,6 +486,60 @@ mod tests {
         assert_eq!(
             summarize_two_chains(&wrong_seed, &second),
             Err(BenchmarkError::WrongBenchmarkConfiguration)
+        );
+    }
+
+    #[test]
+    fn complete_heatbath_accounting_is_required() {
+        let second = synthetic_report(CHAIN_IDS[1], stationary_measurements(1));
+
+        let mut wrong_sweeps = synthetic_report(CHAIN_IDS[0], stationary_measurements(0));
+        wrong_sweeps.total_heatbath_sweeps -= 1;
+        assert_eq!(
+            summarize_two_chains(&wrong_sweeps, &second),
+            Err(BenchmarkError::InvalidHeatbathAccounting)
+        );
+
+        let mut wrong_overrelaxation = synthetic_report(CHAIN_IDS[0], stationary_measurements(0));
+        wrong_overrelaxation.total_overrelaxation_sweeps -= 1;
+        assert_eq!(
+            summarize_two_chains(&wrong_overrelaxation, &second),
+            Err(BenchmarkError::InvalidHeatbathAccounting)
+        );
+
+        let mut partial_updates = synthetic_report(CHAIN_IDS[0], stationary_measurements(0));
+        partial_updates.heatbath_updates -= 1;
+        assert_eq!(
+            summarize_two_chains(&partial_updates, &second),
+            Err(BenchmarkError::InvalidHeatbathAccounting)
+        );
+
+        let mut too_many_proposals = synthetic_report(CHAIN_IDS[0], stationary_measurements(0));
+        too_many_proposals.heatbath_proposals = MAX_EXPECTED_HEATBATH_PROPOSALS + 1;
+        too_many_proposals.mean_heatbath_acceptance =
+            too_many_proposals.heatbath_updates as f64 / too_many_proposals.heatbath_proposals as f64;
+        assert_eq!(
+            summarize_two_chains(&too_many_proposals, &second),
+            Err(BenchmarkError::InvalidHeatbathAccounting)
+        );
+    }
+
+    #[test]
+    fn negative_link_unit_residuals_fail_closed() {
+        let second = synthetic_report(CHAIN_IDS[1], stationary_measurements(1));
+        let mut first = synthetic_report(CHAIN_IDS[0], stationary_measurements(0));
+        first.final_link_unit_residual = -1.0e-16;
+        assert_eq!(
+            summarize_two_chains(&first, &second),
+            Err(BenchmarkError::InvalidLinkUnitResidual)
+        );
+
+        let first = synthetic_report(CHAIN_IDS[0], stationary_measurements(0));
+        let mut second = synthetic_report(CHAIN_IDS[1], stationary_measurements(1));
+        second.final_link_unit_residual = -1.0;
+        assert_eq!(
+            summarize_two_chains(&first, &second),
+            Err(BenchmarkError::InvalidLinkUnitResidual)
         );
     }
 
@@ -491,18 +586,19 @@ mod tests {
         let mut zero_counts = synthetic_report(CHAIN_IDS[0], stationary_measurements(0));
         zero_counts.heatbath_proposals = 0;
         zero_counts.heatbath_updates = 0;
-        zero_counts.mean_heatbath_acceptance = 0.4;
+        zero_counts.mean_heatbath_acceptance = 0.0;
         assert_eq!(
             summarize_two_chains(&zero_counts, &second),
-            Err(BenchmarkError::InvalidAcceptanceEvidence)
+            Err(BenchmarkError::InvalidHeatbathAccounting)
         );
 
         let mut too_many_updates = synthetic_report(CHAIN_IDS[0], stationary_measurements(0));
-        too_many_updates.heatbath_updates = too_many_updates.heatbath_proposals + 1;
-        too_many_updates.mean_heatbath_acceptance = 1.01;
+        too_many_updates.heatbath_updates = EXPECTED_HEATBATH_UPDATES + 1;
+        too_many_updates.mean_heatbath_acceptance =
+            too_many_updates.heatbath_updates as f64 / too_many_updates.heatbath_proposals as f64;
         assert_eq!(
             summarize_two_chains(&too_many_updates, &second),
-            Err(BenchmarkError::InvalidAcceptanceEvidence)
+            Err(BenchmarkError::InvalidHeatbathAccounting)
         );
     }
 
