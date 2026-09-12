@@ -24,6 +24,15 @@ use su3_ensemble::{
 use su3_lattice::Su3Lattice4;
 
 const MASTER_SEED: u64 = 0x3c00_1982_1223_0101;
+const GOLDEN_TOLERANCE: f64 = 1.0e-12;
+
+fn assert_close(actual: f64, expected: f64, tolerance: f64) {
+    let residual = (actual - expected).abs();
+    assert!(
+        residual <= tolerance,
+        "actual={actual:.17e} expected={expected:.17e} residual={residual:.17e} tolerance={tolerance:.17e}"
+    );
+}
 
 fn config(chain_id: u64) -> Su3EnsembleConfig {
     Su3EnsembleConfig {
@@ -36,6 +45,20 @@ fn config(chain_id: u64) -> Su3EnsembleConfig {
         sweeps_between_measurements: 1,
         proposal_angle: 0.35,
         autocorrelation_max_lag: 3,
+    }
+}
+
+fn golden_reference_config() -> Su3EnsembleConfig {
+    Su3EnsembleConfig {
+        extents: [2, 2, 2, 2],
+        beta: 0.0,
+        master_seed: MASTER_SEED,
+        chain_id: 0,
+        thermalization_sweeps: 4,
+        measurements: 16,
+        sweeps_between_measurements: 1,
+        proposal_angle: 0.35,
+        autocorrelation_max_lag: 4,
     }
 }
 
@@ -108,6 +131,90 @@ fn fixed_su3_chain_replays_exactly() {
     assert_eq!(first.mean_metropolis_acceptance, 1.0);
     assert!(first.final_link_unitarity_residual <= LINK_RESIDUAL_LIMIT);
     assert!(first.final_link_determinant_residual <= LINK_RESIDUAL_LIMIT);
+}
+
+#[test]
+fn frozen_reference_chain_matches_literal_golden_evidence() {
+    let report = run_chain(golden_reference_config()).unwrap();
+    let expected_measurements = [
+        5.51131757634889419e-1,
+        4.64428483345143694e-1,
+        4.13423063465136076e-1,
+        3.70395675185656026e-1,
+        3.25397965511869558e-1,
+        2.92903295387945295e-1,
+        2.60310597926820042e-1,
+        2.36574875699527926e-1,
+        1.97672750298023475e-1,
+        2.05790714869198532e-1,
+        1.82522028231865502e-1,
+        1.73138323749457673e-1,
+        1.65377046330956817e-1,
+        1.36300015815418868e-1,
+        1.24603649844680045e-1,
+        1.00508299497889045e-1,
+    ];
+    let expected_autocorrelation = [
+        1.00000000000000000e0,
+        7.96231311978802925e-1,
+        6.32515403870984816e-1,
+        4.61868969143371944e-1,
+        2.95389462535960656e-1,
+    ];
+
+    assert_eq!(report.sampler_id, "YM-SU3-ENSEMBLE-V1");
+    assert_eq!(report.proposal_id, "YM-SU3-GENERATOR-METROPOLIS-V1");
+    assert_eq!(report.rng_id, "SPLITMIX64-V1");
+    assert_eq!(report.stream_id, "YM-SU3-STREAM-V1");
+    assert_eq!(report.derived_seed, 0x94c7_1563_0ee8_e90a);
+    assert_eq!(report.total_sweeps, 20);
+    assert_eq!(report.metropolis_proposals, 10_240);
+    assert_eq!(report.metropolis_accepts, 10_240);
+    assert_eq!(report.mean_metropolis_acceptance, 1.0);
+    assert_eq!(report.measurements.len(), expected_measurements.len());
+    for (actual, expected) in report.measurements.iter().zip(expected_measurements) {
+        assert_close(*actual, expected, GOLDEN_TOLERANCE);
+    }
+    assert_close(report.diagnostics.mean, 2.62529908924654887e-1, GOLDEN_TOLERANCE);
+    assert_close(report.diagnostics.variance, 1.60297860259618306e-2, GOLDEN_TOLERANCE);
+    assert_eq!(
+        report.diagnostics.autocorrelation.len(),
+        expected_autocorrelation.len()
+    );
+    for (actual, expected) in report
+        .diagnostics
+        .autocorrelation
+        .iter()
+        .zip(expected_autocorrelation)
+    {
+        assert_close(*actual, expected, GOLDEN_TOLERANCE);
+    }
+    assert_eq!(report.diagnostics.positive_window_lag, 4);
+    assert_close(
+        report.diagnostics.integrated_autocorrelation_time,
+        2.68600514752912023,
+        GOLDEN_TOLERANCE,
+    );
+    assert_close(
+        report.diagnostics.effective_sample_size,
+        2.97840084459974719,
+        GOLDEN_TOLERANCE,
+    );
+    assert_close(
+        report.diagnostics.standard_error,
+        7.33621903465298680e-2,
+        GOLDEN_TOLERANCE,
+    );
+    assert_close(
+        report.final_link_unitarity_residual,
+        5.55111512312578270e-15,
+        GOLDEN_TOLERANCE,
+    );
+    assert_close(
+        report.final_link_determinant_residual,
+        6.24993689024632627e-15,
+        GOLDEN_TOLERANCE,
+    );
 }
 
 #[test]
