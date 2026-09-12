@@ -8,10 +8,10 @@ use yang_mills_reference::{Lattice4, ReferenceError, Su2};
 mod su2_ensemble;
 #[path = "../su3.rs"]
 mod su3;
-#[path = "../su3_lattice.rs"]
-mod su3_lattice;
 #[path = "../su3_ensemble.rs"]
 mod su3_ensemble;
+#[path = "../su3_lattice.rs"]
+mod su3_lattice;
 
 use su3_ensemble::{run_chain, Su3EnsembleConfig, LINK_RESIDUAL_LIMIT};
 
@@ -57,7 +57,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("total_sweeps={}", report.total_sweeps);
     println!("metropolis_proposals={}", report.metropolis_proposals);
     println!("metropolis_accepts={}", report.metropolis_accepts);
-    println!("metropolis_acceptance={:.17e}", report.mean_metropolis_acceptance);
+    println!(
+        "metropolis_acceptance={:.17e}",
+        report.mean_metropolis_acceptance
+    );
     println!("mean_plaquette={:.17e}", report.diagnostics.mean);
     println!(
         "tau_int={:.17e}",
