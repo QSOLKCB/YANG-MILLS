@@ -38,6 +38,14 @@ R = exp(i theta T^a),
 U_candidate = R U_old.
 ```
 
+The bounded binary64 reference requires
+
+```text
+1e-8 <= proposal_angle <= 1.
+```
+
+Positive values below `1e-8`, including subnormal values such as `f64::MIN_POSITIVE`, are rejected as numerically inert for this reference surface rather than being accepted as nominally nonzero updates. The lower bound is an implementation-resolution guard, not a physical scale.
+
 Because `theta` and `-theta` have equal density and `R(-theta)=R(theta)^-1`, the proposal is symmetric. The acceptance probability is therefore
 
 ```text
@@ -65,6 +73,8 @@ The candidate difference is
 ```text
 DeltaS = S_local(candidate) - S_local(old).
 ```
+
+Candidate evaluation is allocation-free. The implementation substitutes `U_candidate` directly into the forward plaquette as the first factor and into the `x-nu` plaquette as the daggered third factor, evaluating only the six affected plaquettes. It does **not** clone the lattice or allocate a temporary full configuration for every proposal.
 
 A deterministic regression compares this local result against a complete Wilson-action recomputation after a one-link replacement. Local bookkeeping is therefore tested against the already-frozen global action rather than accepted by definition.
 
@@ -143,6 +153,8 @@ The candidate executable surface requires:
 - literal identity and golden seed checks;
 - exact beta-zero all-accept accounting;
 - local-vs-global Wilson-action difference agreement;
+- allocation-free candidate evaluation of the six affected plaquettes;
+- an executable `proposal_angle >= 1e-8` resolution floor;
 - fixed-chain deterministic replay;
 - distinct chain IDs producing distinct evidence;
 - bounded/fail-closed configuration validation;
