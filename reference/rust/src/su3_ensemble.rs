@@ -196,10 +196,7 @@ pub fn derive_su3_chain_seed(master_seed: u64, chain_id: u64) -> u64 {
 /// The high bit selects the sign. The low 52 bits select an odd multiple of
 /// 2^-53 in (0,1), so toggling only the sign bit produces the exact floating
 /// inverse angle while neither endpoint +/-proposal_angle is present.
-pub fn proposal_angle_from_u64(
-    raw: u64,
-    proposal_angle: f64,
-) -> Result<f64, Su3EnsembleError> {
+pub fn proposal_angle_from_u64(raw: u64, proposal_angle: f64) -> Result<f64, Su3EnsembleError> {
     validate_proposal_angle(proposal_angle)?;
     let magnitude_index = raw & ANGLE_GRID_MAGNITUDE_MASK;
     let odd_numerator = magnitude_index
