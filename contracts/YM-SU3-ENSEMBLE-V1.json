@@ -1,0 +1,111 @@
+{
+  "contract_id": "YM-SU3-ENSEMBLE-V1",
+  "status": "phase-2c1-candidate",
+  "scope": "bounded reproducible SU(3) Wilson-action Markov-chain ensemble generation and diagnostics",
+  "depends_on": [
+    {
+      "contract_id": "YM-SU3-ALGEBRA-V1",
+      "required_status": "phase-1b-algebra-frozen"
+    },
+    {
+      "contract_id": "YM-SU3-LATTICE-V1",
+      "required_status": "phase-1b-frozen"
+    }
+  ],
+  "literature_context": {
+    "metropolis_reference": "N. Metropolis et al., J. Chem. Phys. 21, 1087 (1953), DOI 10.1063/1.1699114",
+    "su3_update_context": "N. Cabibbo and E. Marinari, Phys. Lett. B 119, 387 (1982), DOI 10.1016/0370-2693(82)90696-7",
+    "heatbath_context": "A. D. Kennedy and B. J. Pendleton, Phys. Lett. B 156, 393 (1985), DOI 10.1016/0370-2693(85)91632-6",
+    "implementation_claim": "the reference independently specifies a symmetric single-generator Metropolis kernel; it does not claim to implement Cabibbo-Marinari quasi-heatbath or Kennedy-Pendleton heatbath"
+  },
+  "identities": {
+    "sampler_id": "YM-SU3-ENSEMBLE-V1",
+    "proposal_id": "YM-SU3-GENERATOR-METROPOLIS-V1",
+    "rng_id": "SPLITMIX64-V1",
+    "stream_id": "YM-SU3-STREAM-V1"
+  },
+  "stream": {
+    "splitmix64_core_reused_from_phase2a": true,
+    "domain_separator_hex": "535533454e535631",
+    "derived_seed_rule": "mix64(master_seed XOR 0x535533454e535631 XOR ((chain_id+1)*0x9e3779b97f4a7c15 mod 2^64))",
+    "seed_is_physical_parameter": false,
+    "cross_platform_bitwise_floating_identity_claimed": false,
+    "two_uniform_draws_per_generator_proposal": true
+  },
+  "reference_bounds": {
+    "beta_min": 0.0,
+    "beta_max": 12.0,
+    "proposal_angle_min_exclusive": 0.0,
+    "proposal_angle_max": 1.0,
+    "max_schedule_sweeps": 262144,
+    "max_measurements": 262144,
+    "autocorrelation_max_lag_must_be_less_than_measurements": true,
+    "lattice_must_fit_frozen_su3_reference_link_bound": true,
+    "link_unitarity_residual_max": 5e-12,
+    "link_determinant_residual_max": 5e-12
+  },
+  "proposal": {
+    "generator_basis": "frozen T^a=lambda_a/2 for a=0..7",
+    "generator_order": "a=0,1,2,3,4,5,6,7 for every link",
+    "angle_rule": "theta=proposal_angle*(2u-1), u uniform in [0,1)",
+    "rotation": "R=exp(i theta T^a) using frozen YM-SU3-ALGEBRA-V1 exponentiation",
+    "link_update": "U_candidate=R U_old",
+    "proposal_symmetry": "theta and -theta have equal density, so the proposal kernel is symmetric",
+    "acceptance": "min(1,exp(-DeltaS)) with DeltaS the frozen Wilson-action local difference",
+    "acceptance_draw_rule": "consume one uniform acceptance draw for every proposal, including DeltaS<=0",
+    "beta_zero_rule": "DeltaS=0 and every valid proposal is accepted"
+  },
+  "local_action": {
+    "affected_plaquettes": 6,
+    "definition": "for link U_mu(x), sum the forward and x-nu plaquettes for every nu!=mu using 1-(1/3)ReTr P",
+    "difference": "DeltaS=S_local(candidate)-S_local(old)",
+    "regression": "local DeltaS must match the full Wilson-action difference on a deterministic one-link proposal"
+  },
+  "update_order": {
+    "site_order": "lexicographic x0,x1,x2,x3",
+    "direction_order": "mu=0,1,2,3 at each site",
+    "generator_order": "a=0..7 at each link",
+    "markov_sweep": "one proposal for every generator at every link in the frozen nested order",
+    "proposals_per_sweep": "8 * link_count"
+  },
+  "schedule": {
+    "initial_configuration": "cold identity SU(3) lattice",
+    "thermalization": "discard thermalization_sweeps complete Markov sweeps before measurements",
+    "measurement_cadence": "perform sweeps_between_measurements complete Markov sweeps before each recorded measurement",
+    "total_sweep_count": "thermalization_sweeps + measurements*sweeps_between_measurements, checked for overflow and bounded",
+    "observable": "average plaquette=(1/(6V))*sum_x,sum_mu<nu (1/3)ReTr P_mu_nu(x)",
+    "normalized_su3_plaquette_range": "[-1/2,1] up to declared floating tolerance"
+  },
+  "diagnostics": {
+    "definition_source": "reuse the frozen Phase 2A arithmetic/autocorrelation/ESS definitions as numerical utilities, without inheriting the SU(2) sampler contract",
+    "raw_measurements_retained": true,
+    "mean": true,
+    "integrated_autocorrelation_time": true,
+    "effective_sample_size": true,
+    "diagnostic_standard_error": true
+  },
+  "reproducibility": {
+    "fixed_chain_replay_required": true,
+    "distinct_chain_ids_required": true,
+    "golden_derived_seed_vectors_required": true,
+    "proposal_and_stream_ids_required": true,
+    "thermalization_and_measurement_metadata_required": true,
+    "metropolis_proposal_and_accept_counts_required": true,
+    "final_unitarity_and_determinant_residuals_required": true
+  },
+  "phase2c_gate": {
+    "sampler_mechanics_implemented": true,
+    "published_su3_baseline_reproduced": false,
+    "external_benchmark_must_be_selected_after_sampler_freeze": true,
+    "glueball_analysis_enabled": false,
+    "phase2c_complete": false
+  },
+  "claim_boundary": {
+    "ensemble_measurements_are_finite_lattice_numerical_observations": true,
+    "beta_zero_acceptance_is_not_a_haar_equilibrium_claim": true,
+    "sampler_mechanics_imply_correct_equilibrium_distribution_without_external_validation": false,
+    "plaquette_measurement_implies_confinement": false,
+    "finite_lattice_ensemble_implies_continuum_qft": false,
+    "finite_lattice_ensemble_implies_positive_mass_gap": false
+  }
+}
