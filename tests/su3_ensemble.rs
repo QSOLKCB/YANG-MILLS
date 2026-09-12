@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-use yang_mills_reference::{Lattice4, ReferenceError, Su2};
+use yang_mills_reference::{Lattice4, ReferenceError, Su2, DIM};
 
 #[path = "../reference/rust/src/su2_ensemble.rs"]
 mod su2_ensemble;
