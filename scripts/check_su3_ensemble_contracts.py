@@ -11,8 +11,8 @@ from check_contracts import load
 
 CONTRACT_PATH = "contracts/YM-SU3-ENSEMBLE-V1.json"
 VECTOR_PATH = "test-vectors/su3-ensemble-v1.json"
-CONTRACT_SHA256 = "f0107ca34c7706495e4df34e5a5f0860d07093570639008a6bde994cdd003d66"
-VECTOR_SHA256 = "b741ba27bd7740abf7654a5719fb86a0a33e4251238f70d5924eebfa113a9b07"
+CONTRACT_SHA256 = "fafdb90d7d1a22e86d72e034dd7fb3008952ded5492da14c48d6249e782e9b9a"
+VECTOR_SHA256 = "d1dd12ee262b19d29d57eff6b0f9dfecaeae91e389ed2d2097f8b10869a6500e"
 
 
 def canonical_sha256(payload: dict[str, Any]) -> str:
