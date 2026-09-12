@@ -516,8 +516,8 @@ mod tests {
 
         let mut too_many_proposals = synthetic_report(CHAIN_IDS[0], stationary_measurements(0));
         too_many_proposals.heatbath_proposals = MAX_EXPECTED_HEATBATH_PROPOSALS + 1;
-        too_many_proposals.mean_heatbath_acceptance =
-            too_many_proposals.heatbath_updates as f64 / too_many_proposals.heatbath_proposals as f64;
+        too_many_proposals.mean_heatbath_acceptance = too_many_proposals.heatbath_updates as f64
+            / too_many_proposals.heatbath_proposals as f64;
         assert_eq!(
             summarize_two_chains(&too_many_proposals, &second),
             Err(BenchmarkError::InvalidHeatbathAccounting)
