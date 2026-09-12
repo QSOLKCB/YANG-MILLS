@@ -17,6 +17,7 @@
       "proposal_angle": 0.35,
       "expected_proposals_per_sweep": 512,
       "expected_accepts_per_sweep": 512,
+      "expected_rng_outputs_per_proposal": 2,
       "claim_class": "C0"
     },
     {
@@ -38,11 +39,85 @@
       "claim_class": "C0"
     },
     {
-      "id": "fixed-chain-replay",
+      "id": "paired-angle-grid",
+      "sign_bit": 63,
+      "magnitude_bits": 52,
+      "angle_rule": "theta = sign(bit63) * proposal_angle * (2m+1) / 2^53",
+      "endpoints_excluded": true,
+      "exact_inverse_pairing": true,
+      "equal_multiplicity": true,
+      "claim_class": "C0"
+    },
+    {
+      "id": "maximum-schedule-group-stress",
+      "extents": [2, 2, 2, 2],
+      "beta": 0.0,
       "master_seed": "3c00198212230101",
       "chain_id": 0,
-      "expected": "identical derived seed, proposal/accept counts, raw measurements, diagnostics, and final link residuals under the same reference implementation/toolchain",
-      "claim_class": "C0"
+      "proposal_angle": 1.0,
+      "maximum_total_sweeps": 512,
+      "measurements": 2,
+      "autocorrelation_max_lag": 1,
+      "unitarity_residual_max": 5e-12,
+      "determinant_residual_max": 5e-12,
+      "expected": "the accepted maximum schedule completes without violating the frozen group residual gates",
+      "claim_class": "C2"
+    },
+    {
+      "id": "frozen-reference-chain-golden-evidence",
+      "config": {
+        "extents": [2, 2, 2, 2],
+        "beta": 0.0,
+        "master_seed": "3c00198212230101",
+        "chain_id": 0,
+        "thermalization_sweeps": 4,
+        "measurements": 16,
+        "sweeps_between_measurements": 1,
+        "proposal_angle": 0.35,
+        "autocorrelation_max_lag": 4
+      },
+      "derived_seed_hex": "94c715630ee8e90a",
+      "total_sweeps": 20,
+      "metropolis_proposals": 10240,
+      "metropolis_accepts": 10240,
+      "mean_metropolis_acceptance": 1.0,
+      "raw_measurements": [
+        0.5511317576348894,
+        0.4644284833451437,
+        0.4134230634651361,
+        0.37039567518565603,
+        0.32539796551186956,
+        0.2929032953879453,
+        0.26031059792682004,
+        0.23657487569952793,
+        0.19767275029802348,
+        0.20579071486919853,
+        0.1825220282318655,
+        0.17313832374945767,
+        0.16537704633095682,
+        0.13630001581541887,
+        0.12460364984468005,
+        0.10050829949788905
+      ],
+      "diagnostics": {
+        "mean": 0.2625299089246549,
+        "variance": 0.01602978602596183,
+        "autocorrelation": [
+          1.0,
+          0.7962313119788029,
+          0.6325154038709848,
+          0.46186896914337194,
+          0.29538946253596066
+        ],
+        "positive_window_lag": 4,
+        "integrated_autocorrelation_time": 2.6860051475291202,
+        "effective_sample_size": 2.978400844599747,
+        "standard_error": 0.07336219034652987
+      },
+      "final_link_unitarity_residual": 5.551115123125783e-15,
+      "final_link_determinant_residual": 6.249936890246326e-15,
+      "floating_absolute_tolerance": 1e-12,
+      "claim_class": "C2"
     },
     {
       "id": "distinct-chain-evidence",
@@ -63,7 +138,7 @@
       "published_su3_baseline_reproduced": false,
       "glueball_analysis_enabled": false,
       "phase2c_complete": false,
-      "expected": "sampler mechanics may freeze before any external SU(3) benchmark is selected or inspected",
+      "expected": "frozen sampler mechanics do not authorize Phase 2C2 or glueball analysis",
       "claim_class": "C0"
     }
   ]
