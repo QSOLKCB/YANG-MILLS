@@ -14,7 +14,7 @@
 
 use core::fmt;
 
-use crate::su2_ensemble::{derive_chain_seed, diagnostics, ChainReport, RNG_ID, SAMPLER_ID};
+use crate::su2_ensemble::{diagnostics, ChainReport};
 
 pub const BENCHMARK_ID: &str = "YM-SU2-PLAQUETTE-BASELINE-V1";
 pub const PRIMARY_DOI: &str = "10.1103/PhysRevLett.109.111601";
@@ -24,6 +24,10 @@ pub const SOURCE_ENVELOPE_MIN: f64 = 0.59;
 pub const SOURCE_ENVELOPE_MAX: f64 = 0.62;
 pub const MASTER_SEED: u64 = 0x2b00_2012_1116_0101;
 pub const CHAIN_IDS: [u64; 2] = [0, 1];
+pub const FROZEN_PHASE2A_SAMPLER_ID: &str = "YM-SU2-ENSEMBLE-V1";
+pub const FROZEN_PHASE2A_RNG_ID: &str = "SPLITMIX64-V1";
+pub const FROZEN_CHAIN_DERIVED_SEEDS: [u64; 2] =
+    [0x044d_f781_f86a_2ade, 0x4ebd_9478_3d50_8d2e];
 pub const THERMALIZATION_SWEEPS: usize = 40;
 pub const MEASUREMENTS: usize = 48;
 pub const SWEEPS_BETWEEN_MEASUREMENTS: usize = 1;
@@ -120,11 +124,22 @@ pub struct BenchmarkSummary {
     pub phase2_graduation_gate_satisfied: bool,
 }
 
+fn frozen_derived_seed(chain_id: u64) -> Option<u64> {
+    match chain_id {
+        0 => Some(FROZEN_CHAIN_DERIVED_SEEDS[0]),
+        1 => Some(FROZEN_CHAIN_DERIVED_SEEDS[1]),
+        _ => None,
+    }
+}
+
 fn report_matches_benchmark(report: &ChainReport, chain_id: u64) -> bool {
+    let Some(expected_derived_seed) = frozen_derived_seed(chain_id) else {
+        return false;
+    };
     let config = report.config;
-    report.sampler_id == SAMPLER_ID
-        && report.rng_id == RNG_ID
-        && report.derived_seed == derive_chain_seed(MASTER_SEED, chain_id)
+    report.sampler_id == FROZEN_PHASE2A_SAMPLER_ID
+        && report.rng_id == FROZEN_PHASE2A_RNG_ID
+        && report.derived_seed == expected_derived_seed
         && config.extents == EXTENTS
         && config.beta == BETA
         && config.master_seed == MASTER_SEED
@@ -350,7 +365,7 @@ pub fn summarize_two_chains(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::su2_ensemble::EnsembleConfig;
+    use crate::su2_ensemble::{derive_chain_seed, EnsembleConfig, RNG_ID, SAMPLER_ID};
 
     fn benchmark_config(chain_id: u64) -> EnsembleConfig {
         EnsembleConfig {
@@ -375,10 +390,11 @@ mod tests {
         let mean_heatbath_acceptance = EXPECTED_HEATBATH_UPDATES as f64 / heatbath_proposals as f64;
 
         ChainReport {
-            sampler_id: SAMPLER_ID,
-            rng_id: RNG_ID,
+            sampler_id: FROZEN_PHASE2A_SAMPLER_ID,
+            rng_id: FROZEN_PHASE2A_RNG_ID,
             config,
-            derived_seed: derive_chain_seed(MASTER_SEED, chain_id),
+            derived_seed: frozen_derived_seed(chain_id)
+                .expect("synthetic benchmark chain ID must have a frozen golden seed"),
             total_heatbath_sweeps: EXPECTED_HEATBATH_SWEEPS,
             total_overrelaxation_sweeps: EXPECTED_OVERRELAXATION_SWEEPS,
             heatbath_proposals,
@@ -427,6 +443,27 @@ mod tests {
     fn executable_benchmark_identity_matches_frozen_contract() {
         assert_eq!(BENCHMARK_ID, "YM-SU2-PLAQUETTE-BASELINE-V1");
         assert_eq!(PRIMARY_DOI, "10.1103/PhysRevLett.109.111601");
+    }
+
+    #[test]
+    fn phase2a_stream_identity_and_derivation_match_golden_values() {
+        assert_eq!(FROZEN_PHASE2A_SAMPLER_ID, "YM-SU2-ENSEMBLE-V1");
+        assert_eq!(FROZEN_PHASE2A_RNG_ID, "SPLITMIX64-V1");
+        assert_eq!(
+            FROZEN_CHAIN_DERIVED_SEEDS,
+            [0x044d_f781_f86a_2ade, 0x4ebd_9478_3d50_8d2e]
+        );
+
+        assert_eq!(SAMPLER_ID, "YM-SU2-ENSEMBLE-V1");
+        assert_eq!(RNG_ID, "SPLITMIX64-V1");
+        assert_eq!(
+            derive_chain_seed(0x2b00_2012_1116_0101, 0),
+            0x044d_f781_f86a_2ade
+        );
+        assert_eq!(
+            derive_chain_seed(0x2b00_2012_1116_0101, 1),
+            0x4ebd_9478_3d50_8d2e
+        );
     }
 
     #[test]
