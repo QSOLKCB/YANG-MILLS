@@ -7,6 +7,7 @@ from test_path_contract_validation import main as test_path_contracts
 from test_classical_geometry_contract_validation import main as test_classical_geometry_contracts
 from test_su2_ensemble_contract_validation import main as test_su2_ensemble_contracts
 from test_su2_baseline_contract_validation import main as test_su2_baseline_contracts
+from test_su3_ensemble_contract_validation import main as test_su3_ensemble_contracts
 
 
 def main() -> None:
@@ -16,6 +17,7 @@ def main() -> None:
     test_classical_geometry_contracts()
     test_su2_ensemble_contracts()
     test_su2_baseline_contracts()
+    test_su3_ensemble_contracts()
     print("All negative YANG-MILLS contract regression checks: passed")
 
 
