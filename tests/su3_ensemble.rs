@@ -8,17 +8,16 @@ use yang_mills_reference::{Lattice4, ReferenceError, Su2};
 mod su2_ensemble;
 #[path = "../reference/rust/src/su3.rs"]
 mod su3;
-#[path = "../reference/rust/src/su3_lattice.rs"]
-mod su3_lattice;
 #[path = "../reference/rust/src/su3_ensemble.rs"]
 mod su3_ensemble;
+#[path = "../reference/rust/src/su3_lattice.rs"]
+mod su3_lattice;
 
 use su2_ensemble::SplitMix64;
 use su3::Su3;
 use su3_ensemble::{
-    derive_su3_chain_seed, local_action_difference, metropolis_sweep, run_chain,
-    Su3EnsembleConfig, Su3EnsembleError, LINK_RESIDUAL_LIMIT, PROPOSAL_ID, RNG_ID, SAMPLER_ID,
-    STREAM_ID,
+    derive_su3_chain_seed, local_action_difference, metropolis_sweep, run_chain, Su3EnsembleConfig,
+    Su3EnsembleError, LINK_RESIDUAL_LIMIT, PROPOSAL_ID, RNG_ID, SAMPLER_ID, STREAM_ID,
 };
 use su3_lattice::Su3Lattice4;
 
@@ -44,8 +43,14 @@ fn su3_stream_derivation_has_golden_values() {
     assert_eq!(PROPOSAL_ID, "YM-SU3-GENERATOR-METROPOLIS-V1");
     assert_eq!(RNG_ID, "SPLITMIX64-V1");
     assert_eq!(STREAM_ID, "YM-SU3-STREAM-V1");
-    assert_eq!(derive_su3_chain_seed(MASTER_SEED, 0), 0x94c7_1563_0ee8_e90a);
-    assert_eq!(derive_su3_chain_seed(MASTER_SEED, 1), 0x8aba_19af_6781_dc09);
+    assert_eq!(
+        derive_su3_chain_seed(MASTER_SEED, 0),
+        0x94c7_1563_0ee8_e90a
+    );
+    assert_eq!(
+        derive_su3_chain_seed(MASTER_SEED, 1),
+        0x8aba_19af_6781_dc09
+    );
 }
 
 #[test]
@@ -71,7 +76,10 @@ fn local_delta_matches_full_wilson_action_difference() {
     let mut proposed = lattice.clone();
     proposed.set_link([0, 0, 0, 0], 2, candidate).unwrap();
     let full = proposed.wilson_action(beta).unwrap() - lattice.wilson_action(beta).unwrap();
-    assert!((local - full).abs() <= 2.0e-11, "local={local:.17e} full={full:.17e}");
+    assert!(
+        (local - full).abs() <= 2.0e-11,
+        "local={local:.17e} full={full:.17e}"
+    );
 }
 
 #[test]
