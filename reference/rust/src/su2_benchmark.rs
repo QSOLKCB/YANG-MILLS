@@ -26,8 +26,7 @@ pub const MASTER_SEED: u64 = 0x2b00_2012_1116_0101;
 pub const CHAIN_IDS: [u64; 2] = [0, 1];
 pub const FROZEN_PHASE2A_SAMPLER_ID: &str = "YM-SU2-ENSEMBLE-V1";
 pub const FROZEN_PHASE2A_RNG_ID: &str = "SPLITMIX64-V1";
-pub const FROZEN_CHAIN_DERIVED_SEEDS: [u64; 2] =
-    [0x044d_f781_f86a_2ade, 0x4ebd_9478_3d50_8d2e];
+pub const FROZEN_CHAIN_DERIVED_SEEDS: [u64; 2] = [0x044d_f781_f86a_2ade, 0x4ebd_9478_3d50_8d2e];
 pub const THERMALIZATION_SWEEPS: usize = 40;
 pub const MEASUREMENTS: usize = 48;
 pub const SWEEPS_BETWEEN_MEASUREMENTS: usize = 1;
