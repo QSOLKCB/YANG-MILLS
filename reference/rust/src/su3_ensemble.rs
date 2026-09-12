@@ -141,8 +141,12 @@ impl fmt::Display for Su3EnsembleError {
             Self::AutocorrelationLagOutOfRange => {
                 "SU(3) autocorrelation lag must be smaller than the measurement count"
             }
-            Self::ScheduleOutsideReferenceRange => "SU(3) schedule exceeds the bounded reference range",
-            Self::LatticeOutsideReferenceRange => "SU(3) lattice exceeds the bounded reference range",
+            Self::ScheduleOutsideReferenceRange => {
+                "SU(3) schedule exceeds the bounded reference range"
+            }
+            Self::LatticeOutsideReferenceRange => {
+                "SU(3) lattice exceeds the bounded reference range"
+            }
             Self::NonFiniteStatistic => "SU(3) ensemble calculation produced a non-finite value",
             Self::AccountingOverflow => "SU(3) Metropolis accounting overflowed",
             Self::Group(_) => "SU(3) group operation failed during ensemble generation",
@@ -361,7 +365,8 @@ pub fn run_chain(config: Su3EnsembleConfig) -> Result<Su3ChainReport, Su3Ensembl
         .map_err(|_| Su3EnsembleError::LatticeOutsideReferenceRange)?;
     for _ in 0..config.measurements {
         for _ in 0..config.sweeps_between_measurements {
-            let step = metropolis_sweep(&mut lattice, config.beta, config.proposal_angle, &mut rng)?;
+            let step =
+                metropolis_sweep(&mut lattice, config.beta, config.proposal_angle, &mut rng)?;
             accumulate_accounting(&mut accounting, step)?;
         }
         let measurement = average_plaquette(&lattice)?;
