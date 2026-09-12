@@ -146,7 +146,7 @@ This agreement validates the finite-lattice `SU(2)` sampler in the declared regi
 
 ## Phase 2C1 `SU(3)` sampler reproducibility
 
-`YM-SU3-ENSEMBLE-V1` is independently versioned from the Phase 2A sampler. Reusing the `SPLITMIX64-V1` core and Phase 2A diagnostic arithmetic does not reuse the `SU(2)` stream identity or external benchmark authority.
+`YM-SU3-ENSEMBLE-V1` and `SU3-ENSEMBLE-PHASE2C1-V1` are frozen as `phase-2c1-frozen`, independently versioned from the Phase 2A sampler. Reusing the `SPLITMIX64-V1` core and Phase 2A diagnostic arithmetic does not reuse the `SU(2)` stream identity or external benchmark authority.
 
 A Phase 2C1 evidence record must preserve:
 
@@ -167,7 +167,7 @@ A Phase 2C1 evidence record must preserve:
 
 The bounded reference requires `1e-8 <= proposal_angle <= 1`. Positive values below the floor fail closed as numerically inert; the floor is a binary64 reference-resolution guard rather than a physical scale.
 
-Candidate local action differences are computed allocation-free from the six affected plaquettes. Replacing that path with a full-lattice clone per proposal changes the computational/fail-closed contract and is forbidden under the same identifier.
+Candidate-link local action differences are computed allocation-free from the six affected plaquettes. Replacing that path with a full-lattice clone per proposal changes the computational/fail-closed contract and is forbidden under the same identifier.
 
 For master seed `3c00198212230101`, the golden Phase 2C1 derived seeds are
 
