@@ -36,11 +36,15 @@ pub const STATIONARITY_HALF_MEASUREMENTS: usize = MEASUREMENTS / 2;
 pub const STATIONARITY_AUTOCORRELATION_MAX_LAG: usize = 6;
 pub const MAX_STATIONARITY_Z: f64 = 5.0;
 pub const MAX_LINK_UNIT_RESIDUAL: f64 = 1.0e-12;
+pub const PLAQUETTE_SAMPLE_TOLERANCE: f64 = 1.0e-12;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum BenchmarkError {
     WrongBenchmarkConfiguration,
     DuplicateChainIdentity,
+    DuplicateMeasurementSeries,
+    InvalidPlaquetteSample,
+    InvalidAcceptanceEvidence,
     StationarityDiagnosticFailed,
     NonFiniteStatistic,
 }
@@ -52,6 +56,15 @@ impl fmt::Display for BenchmarkError {
                 "chain report does not match the frozen Phase 2B benchmark configuration"
             }
             Self::DuplicateChainIdentity => "benchmark chains must have distinct stream identities",
+            Self::DuplicateMeasurementSeries => {
+                "benchmark chains must retain distinct raw measurement series"
+            }
+            Self::InvalidPlaquetteSample => {
+                "retained plaquette evidence lies outside the physical SU(2) range"
+            }
+            Self::InvalidAcceptanceEvidence => {
+                "heat-bath acceptance evidence is inconsistent with proposal/update counts"
+            }
             Self::StationarityDiagnosticFailed => {
                 "post-thermalisation stationarity diagnostic could not be evaluated"
             }
@@ -105,6 +118,32 @@ fn report_matches_benchmark(report: &ChainReport, chain_id: u64) -> bool {
         && config.overrelaxation_sweeps_per_heatbath == OVERRELAXATION_SWEEPS_PER_HEATBATH
         && config.max_heatbath_attempts_per_link == MAX_HEATBATH_ATTEMPTS_PER_LINK
         && config.autocorrelation_max_lag == AUTOCORRELATION_MAX_LAG
+}
+
+fn measurements_are_physical(values: &[f64]) -> bool {
+    let lower = -1.0 - PLAQUETTE_SAMPLE_TOLERANCE;
+    let upper = 1.0 + PLAQUETTE_SAMPLE_TOLERANCE;
+    values
+        .iter()
+        .all(|value| value.is_finite() && (lower..=upper).contains(value))
+}
+
+fn acceptance_from_counts(report: &ChainReport) -> Result<f64, BenchmarkError> {
+    if report.heatbath_proposals == 0
+        || report.heatbath_updates == 0
+        || report.heatbath_updates > report.heatbath_proposals
+    {
+        return Err(BenchmarkError::InvalidAcceptanceEvidence);
+    }
+    let acceptance = report.heatbath_updates as f64 / report.heatbath_proposals as f64;
+    if !acceptance.is_finite()
+        || acceptance <= 0.0
+        || acceptance > 1.0
+        || report.mean_heatbath_acceptance != acceptance
+    {
+        return Err(BenchmarkError::InvalidAcceptanceEvidence);
+    }
+    Ok(acceptance)
 }
 
 fn is_constant_series(values: &[f64]) -> bool {
@@ -178,6 +217,16 @@ pub fn summarize_two_chains(
     if first.derived_seed == second.derived_seed {
         return Err(BenchmarkError::DuplicateChainIdentity);
     }
+    if first.measurements == second.measurements {
+        return Err(BenchmarkError::DuplicateMeasurementSeries);
+    }
+    if !measurements_are_physical(&first.measurements)
+        || !measurements_are_physical(&second.measurements)
+    {
+        return Err(BenchmarkError::InvalidPlaquetteSample);
+    }
+    let _first_acceptance = acceptance_from_counts(first)?;
+    let _second_acceptance = acceptance_from_counts(second)?;
 
     // The retained measurement series are the evidence authority. Recompute
     // the frozen Phase 2A diagnostics here rather than trusting cached fields
@@ -249,11 +298,7 @@ pub fn summarize_two_chains(
     let diagnostics_trustworthy = min_effective_sample_size >= MIN_CHAIN_ESS
         && chain_consistency_z <= MAX_CHAIN_CONSISTENCY_Z
         && max_stationarity_z <= MAX_STATIONARITY_Z
-        && max_link_unit_residual <= MAX_LINK_UNIT_RESIDUAL
-        && first.mean_heatbath_acceptance.is_finite()
-        && second.mean_heatbath_acceptance.is_finite()
-        && first.mean_heatbath_acceptance > 0.0
-        && second.mean_heatbath_acceptance > 0.0;
+        && max_link_unit_residual <= MAX_LINK_UNIT_RESIDUAL;
 
     Ok(BenchmarkSummary {
         chain_means,
@@ -315,10 +360,37 @@ mod tests {
         }
     }
 
-    fn stationary_measurements() -> Vec<f64> {
+    fn stationary_measurements(phase: usize) -> Vec<f64> {
         (0..MEASUREMENTS)
-            .map(|index| if index % 2 == 0 { 0.601 } else { 0.603 })
+            .map(|index| {
+                if (index + phase) % 2 == 0 {
+                    0.601
+                } else {
+                    0.603
+                }
+            })
             .collect()
+    }
+
+    fn drifting_measurements(phase: usize) -> Vec<f64> {
+        let mut measurements = Vec::with_capacity(MEASUREMENTS);
+        for index in 0..STATIONARITY_HALF_MEASUREMENTS {
+            let alternating = if (index + phase) % 2 == 0 {
+                0.001
+            } else {
+                -0.001
+            };
+            measurements.push(0.601 + alternating);
+        }
+        for index in 0..STATIONARITY_HALF_MEASUREMENTS {
+            let alternating = if (index + phase) % 2 == 0 {
+                0.001
+            } else {
+                -0.001
+            };
+            measurements.push(0.603 + alternating);
+        }
+        measurements
     }
 
     #[test]
@@ -329,15 +401,29 @@ mod tests {
 
     #[test]
     fn executable_diagnostic_thresholds_match_frozen_contract() {
+        assert_eq!(BETA, 2.3);
+        assert_eq!(EXTENTS, [10, 10, 10, 10]);
+        assert_eq!(MASTER_SEED, 0x2b00_2012_1116_0101);
+        assert_eq!(CHAIN_IDS, [0, 1]);
+        assert_eq!(THERMALIZATION_SWEEPS, 40);
+        assert_eq!(MEASUREMENTS, 48);
+        assert_eq!(SWEEPS_BETWEEN_MEASUREMENTS, 1);
+        assert_eq!(OVERRELAXATION_SWEEPS_PER_HEATBATH, 1);
+        assert_eq!(MAX_HEATBATH_ATTEMPTS_PER_LINK, 10_000);
+        assert_eq!(AUTOCORRELATION_MAX_LAG, 12);
         assert_eq!(MIN_CHAIN_ESS, 6.0);
         assert_eq!(MAX_CHAIN_CONSISTENCY_Z, 5.0);
+        assert_eq!(STATIONARITY_HALF_MEASUREMENTS, 24);
+        assert_eq!(STATIONARITY_AUTOCORRELATION_MAX_LAG, 6);
+        assert_eq!(MAX_STATIONARITY_Z, 5.0);
+        assert_eq!(MAX_LINK_UNIT_RESIDUAL, 1.0e-12);
+        assert_eq!(PLAQUETTE_SAMPLE_TOLERANCE, 1.0e-12);
     }
 
     #[test]
     fn frozen_chain_report_identity_is_required() {
-        let measurements = stationary_measurements();
-        let first = synthetic_report(CHAIN_IDS[0], measurements.clone());
-        let second = synthetic_report(CHAIN_IDS[1], measurements);
+        let first = synthetic_report(CHAIN_IDS[0], stationary_measurements(0));
+        let second = synthetic_report(CHAIN_IDS[1], stationary_measurements(1));
         assert!(summarize_two_chains(&first, &second).is_ok());
 
         let mut wrong_sampler = first.clone();
@@ -363,15 +449,76 @@ mod tests {
     }
 
     #[test]
+    fn duplicate_measurement_series_fail_closed() {
+        let measurements = stationary_measurements(0);
+        let first = synthetic_report(CHAIN_IDS[0], measurements.clone());
+        let second = synthetic_report(CHAIN_IDS[1], measurements);
+        assert_eq!(
+            summarize_two_chains(&first, &second),
+            Err(BenchmarkError::DuplicateMeasurementSeries)
+        );
+    }
+
+    #[test]
+    fn out_of_range_plaquette_samples_fail_closed() {
+        let mut first = synthetic_report(CHAIN_IDS[0], stationary_measurements(0));
+        let second = synthetic_report(CHAIN_IDS[1], stationary_measurements(1));
+        first.measurements[0] = 1.0 + 2.0 * PLAQUETTE_SAMPLE_TOLERANCE;
+        assert_eq!(
+            summarize_two_chains(&first, &second),
+            Err(BenchmarkError::InvalidPlaquetteSample)
+        );
+
+        let mut first = synthetic_report(CHAIN_IDS[0], stationary_measurements(0));
+        first.measurements[0] = -1.0 - 2.0 * PLAQUETTE_SAMPLE_TOLERANCE;
+        assert_eq!(
+            summarize_two_chains(&first, &second),
+            Err(BenchmarkError::InvalidPlaquetteSample)
+        );
+    }
+
+    #[test]
+    fn acceptance_evidence_is_derived_from_counts_and_verified() {
+        let second = synthetic_report(CHAIN_IDS[1], stationary_measurements(1));
+
+        let mut impossible_cached = synthetic_report(CHAIN_IDS[0], stationary_measurements(0));
+        impossible_cached.mean_heatbath_acceptance = 2.0;
+        assert_eq!(
+            summarize_two_chains(&impossible_cached, &second),
+            Err(BenchmarkError::InvalidAcceptanceEvidence)
+        );
+
+        let mut zero_counts = synthetic_report(CHAIN_IDS[0], stationary_measurements(0));
+        zero_counts.heatbath_proposals = 0;
+        zero_counts.heatbath_updates = 0;
+        zero_counts.mean_heatbath_acceptance = 0.4;
+        assert_eq!(
+            summarize_two_chains(&zero_counts, &second),
+            Err(BenchmarkError::InvalidAcceptanceEvidence)
+        );
+
+        let mut too_many_updates = synthetic_report(CHAIN_IDS[0], stationary_measurements(0));
+        too_many_updates.heatbath_updates = too_many_updates.heatbath_proposals + 1;
+        too_many_updates.mean_heatbath_acceptance = 1.01;
+        assert_eq!(
+            summarize_two_chains(&too_many_updates, &second),
+            Err(BenchmarkError::InvalidAcceptanceEvidence)
+        );
+    }
+
+    #[test]
     fn gate_diagnostics_are_derived_from_retained_measurements() {
-        let raw_measurements: Vec<f64> = (0..MEASUREMENTS)
+        let raw_first: Vec<f64> = (0..MEASUREMENTS)
             .map(|index| if index % 2 == 0 { 0.899 } else { 0.901 })
             .collect();
-        let cached = diagnostics(&stationary_measurements(), AUTOCORRELATION_MAX_LAG)
+        let raw_second: Vec<f64> = (0..MEASUREMENTS)
+            .map(|index| if index % 2 == 0 { 0.8985 } else { 0.9015 })
+            .collect();
+        let cached = diagnostics(&stationary_measurements(0), AUTOCORRELATION_MAX_LAG)
             .expect("cached synthetic diagnostics must be valid");
 
-        let mut first = synthetic_report(CHAIN_IDS[0], raw_measurements.clone());
-        let mut second = synthetic_report(CHAIN_IDS[1], raw_measurements);
+        let mut first = synthetic_report(CHAIN_IDS[0], raw_first);
+        let mut second = synthetic_report(CHAIN_IDS[1], raw_second);
         first.diagnostics = cached.clone();
         second.diagnostics = cached;
 
@@ -386,14 +533,15 @@ mod tests {
 
     #[test]
     fn zero_variance_stationarity_fails_closed() {
-        let measurements = vec![0.602; MEASUREMENTS];
+        let first_measurements = vec![0.602; MEASUREMENTS];
+        let second_measurements = vec![0.603; MEASUREMENTS];
         assert_eq!(
-            stationarity_diagnostic(&measurements),
+            stationarity_diagnostic(&first_measurements),
             Err(BenchmarkError::StationarityDiagnosticFailed)
         );
 
-        let first = synthetic_report(CHAIN_IDS[0], measurements.clone());
-        let second = synthetic_report(CHAIN_IDS[1], measurements);
+        let first = synthetic_report(CHAIN_IDS[0], first_measurements);
+        let second = synthetic_report(CHAIN_IDS[1], second_measurements);
         assert_eq!(
             summarize_two_chains(&first, &second),
             Err(BenchmarkError::StationarityDiagnosticFailed)
@@ -402,18 +550,8 @@ mod tests {
 
     #[test]
     fn executable_stationarity_gate_rejects_drift_above_frozen_threshold() {
-        let mut measurements = Vec::with_capacity(MEASUREMENTS);
-        for index in 0..STATIONARITY_HALF_MEASUREMENTS {
-            let alternating = if index % 2 == 0 { 0.001 } else { -0.001 };
-            measurements.push(0.601 + alternating);
-        }
-        for index in 0..STATIONARITY_HALF_MEASUREMENTS {
-            let alternating = if index % 2 == 0 { 0.001 } else { -0.001 };
-            measurements.push(0.603 + alternating);
-        }
-
-        let first = synthetic_report(CHAIN_IDS[0], measurements.clone());
-        let second = synthetic_report(CHAIN_IDS[1], measurements);
+        let first = synthetic_report(CHAIN_IDS[0], drifting_measurements(0));
+        let second = synthetic_report(CHAIN_IDS[1], drifting_measurements(1));
         let summary = summarize_two_chains(&first, &second)
             .expect("synthetic drifting reports must remain structurally valid");
 
