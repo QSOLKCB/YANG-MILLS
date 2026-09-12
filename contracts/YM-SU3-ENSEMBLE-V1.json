@@ -30,7 +30,9 @@
     "derived_seed_rule": "mix64(master_seed XOR 0x535533454e535631 XOR ((chain_id+1)*0x9e3779b97f4a7c15 mod 2^64))",
     "seed_is_physical_parameter": false,
     "cross_platform_bitwise_floating_identity_claimed": false,
-    "two_uniform_draws_per_generator_proposal": true
+    "rng_outputs_per_generator_proposal": 2,
+    "angle_draw": "one raw SplitMix64 u64",
+    "acceptance_draw": "one SplitMix64-derived uniform f64 in [0,1)"
   },
   "reference_bounds": {
     "beta_min": 0.0,
@@ -38,8 +40,9 @@
     "proposal_angle_min": 1e-08,
     "proposal_angle_max": 1.0,
     "proposal_angle_below_min_rejected_as_numerically_inert": true,
-    "max_schedule_sweeps": 262144,
-    "max_measurements": 262144,
+    "max_schedule_sweeps": 512,
+    "max_measurements": 512,
+    "maximum_schedule_group_stress_required": true,
     "autocorrelation_max_lag_must_be_less_than_measurements": true,
     "lattice_must_fit_frozen_su3_reference_link_bound": true,
     "link_unitarity_residual_max": 5e-12,
@@ -48,10 +51,20 @@
   "proposal": {
     "generator_basis": "frozen T^a=lambda_a/2 for a=0..7",
     "generator_order": "a=0,1,2,3,4,5,6,7 for every link",
-    "angle_rule": "theta=proposal_angle*(2u-1), u uniform in [0,1)",
+    "angle_grid": {
+      "sign_bit": 63,
+      "magnitude_bits": 52,
+      "ignored_raw_bits": "52..62",
+      "magnitude_index": "m = raw & (2^52-1)",
+      "angle_rule": "theta = sign(bit63) * proposal_angle * (2m+1) / 2^53",
+      "support": "paired nonzero binary64 grid strictly inside (-proposal_angle,+proposal_angle)",
+      "endpoints_excluded": true,
+      "exact_inverse_pairing": "toggle bit 63 while preserving low 52 bits; resulting floating angle is exactly -theta",
+      "equal_multiplicity": true
+    },
     "rotation": "R=exp(i theta T^a) using frozen YM-SU3-ALGEBRA-V1 exponentiation",
     "link_update": "U_candidate=R U_old",
-    "proposal_symmetry": "theta and -theta have equal density, so the proposal kernel is symmetric",
+    "proposal_symmetry": "the implemented finite floating proposal grid has exact equal-probability theta/-theta pairs",
     "acceptance": "min(1,exp(-DeltaS)) with DeltaS the frozen Wilson-action local difference",
     "acceptance_draw_rule": "consume one uniform acceptance draw for every proposal, including DeltaS<=0",
     "beta_zero_rule": "DeltaS=0 and every valid proposal is accepted"
@@ -82,17 +95,22 @@
     "definition_source": "reuse the frozen Phase 2A arithmetic/autocorrelation/ESS definitions as numerical utilities, without inheriting the SU(2) sampler contract",
     "raw_measurements_retained": true,
     "mean": true,
+    "variance": true,
+    "autocorrelation_sequence": true,
+    "positive_window_lag": true,
     "integrated_autocorrelation_time": true,
     "effective_sample_size": true,
     "diagnostic_standard_error": true
   },
   "reproducibility": {
     "fixed_chain_replay_required": true,
+    "literal_golden_reference_chain_required": true,
     "distinct_chain_ids_required": true,
     "golden_derived_seed_vectors_required": true,
     "proposal_and_stream_ids_required": true,
     "thermalization_and_measurement_metadata_required": true,
     "metropolis_proposal_and_accept_counts_required": true,
+    "complete_reference_runtime_evidence_required": true,
     "final_unitarity_and_determinant_residuals_required": true
   },
   "phase2c_gate": {
