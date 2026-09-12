@@ -40,7 +40,7 @@ The predeclared published source-resolution envelope was `[0.59,0.62]`. Two inde
 
 and chain-consistency `z ~= 0.946`. The minimum chain ESS was about `7.75`, and the maximum final `SU(2)` unit-link residual was `6.66e-16`. Review hardening split each post-thermalisation chain into first/last 24-measurement halves and required autocorrelation-aware drift `z <= 5`; the two chains produced stationarity `z ~= 2.396` and `z ~= 1.138`, respectively. This closes the finite-lattice Phase 2 graduation gate for the declared `SU(2)` regime. It does **not** establish confinement, continuum quantum-field existence, or a positive continuum mass gap.
 
-Phase 2C1 is implemented as a candidate in PR #9. It introduces a separately versioned `SU(3)` ensemble surface, `YM-SU3-ENSEMBLE-V1`, using a correctness-first symmetric single-generator Metropolis kernel over the frozen Gell-Mann basis, a domain-separated `YM-SU3-STREAM-V1` chain identity, allocation-free six-plaquette local action differences, raw average-plaquette evidence, and the already-frozen numerical autocorrelation/ESS definitions. See [`docs/SU3_ENSEMBLES.md`](docs/SU3_ENSEMBLES.md). The external peer-reviewed `SU(3)` benchmark remains deliberately open for Phase 2C2, so `published_su3_baseline_reproduced=false`, `glueball_analysis_enabled=false`, and `phase2c_complete=false`.
+Phase 2C1 is frozen in PR #9. It introduces the separately versioned `SU(3)` ensemble authority `YM-SU3-ENSEMBLE-V1`, using a correctness-first symmetric single-generator Metropolis kernel over the frozen Gell-Mann basis, a domain-separated `YM-SU3-STREAM-V1` chain identity, allocation-free six-plaquette local action differences, raw average-plaquette evidence, and the already-frozen numerical autocorrelation/ESS definitions. See [`docs/SU3_ENSEMBLES.md`](docs/SU3_ENSEMBLES.md). The external peer-reviewed `SU(3)` benchmark remains deliberately open for Phase 2C2, so `published_su3_baseline_reproduced=false`, `glueball_analysis_enabled=false`, and `phase2c_complete=false`.
 
 No current phase performs glueball extraction, a continuum/infinite-volume limit, construction of the interacting quantum theory, or a mass-gap proof.
 
@@ -213,7 +213,7 @@ phase2_graduation_gate_satisfied       = true
 
 The final CI runtime emits the two raw measurement series, derived seeds, per-chain diagnostics, stationarity evidence, and pooled comparison into the commit-tied Actions evidence log.
 
-## Phase 2C1 SU(3) sampler candidate
+## Phase 2C1 frozen SU(3) sampler
 
 Phase 2C1 does not extend the frozen `SU(2)` sampler. It defines an independent stochastic identity:
 
@@ -237,7 +237,7 @@ The proposal angle is bounded by `1e-8 <= proposal_angle <= 1`; smaller positive
 
 Phase 2C1 has its own domain-separated chain-seed derivation, fixed site/direction/generator update order, raw normalized `(1/3)ReTr` average-plaquette measurements, proposal/accept accounting, and final link unitarity/determinant residual gates. A `beta=0` all-accept regression checks the transition kernel but is **not** represented as an exact Haar-equilibrium sample.
 
-The external `SU(3)` finite-lattice benchmark is intentionally not selected until the sampler mechanics are frozen. Therefore the candidate retains
+The sampler mechanics are frozen before selecting an external `SU(3)` finite-lattice benchmark. Phase 2C2 therefore retains
 
 ```text
 published_su3_baseline_reproduced = false
@@ -289,7 +289,7 @@ scripts/               fail-closed contract checks
 
 ## Roadmap
 
-The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 2B closes the published `SU(2)` plaquette validation gate. Phase 2C1 introduces a separately versioned `SU(3)` sampler candidate; Phase 2C2 must independently validate it against a predeclared published `SU(3)` finite-lattice benchmark before Phase 3 may consume `SU(3)` ensemble evidence.
+The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 2B closes the published `SU(2)` plaquette validation gate. Phase 2C1 freezes a separately versioned `SU(3)` sampler; Phase 2C2 must independently validate it against a predeclared published `SU(3)` finite-lattice benchmark before Phase 3 may consume `SU(3)` ensemble evidence.
 
 ## Licence
 
