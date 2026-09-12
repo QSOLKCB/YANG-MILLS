@@ -1,6 +1,6 @@
 {
   "contract_id": "YM-SU3-ENSEMBLE-V1",
-  "status": "phase-2c1-candidate",
+  "status": "phase-2c1-frozen",
   "scope": "bounded reproducible SU(3) Wilson-action Markov-chain ensemble generation and diagnostics",
   "depends_on": [
     {
