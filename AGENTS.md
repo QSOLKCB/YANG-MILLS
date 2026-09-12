@@ -154,17 +154,64 @@ Two independent cold-start chains agreeing is not sufficient to close Phase 2B. 
 
 for both chains. This is a bounded stationarity check against a shared residual cold-start transient; it is not a proof that every systematic effect is absent. Do not remove or weaken this gate under the frozen Phase 2B identifier.
 
-The frozen reference run may close the finite-lattice Phase 2 graduation gate only if the published envelope, independent-chain, within-chain stationarity, ESS, acceptance, and link-unit gates all pass. It must retain
+The frozen reference run may close the finite-lattice Phase 2 graduation gate only if the published envelope, independent-chain, within-chain stationarity, ESS, acceptance, and link-unit gates all pass. It retains
 
 ```text
 published_plaquette_baseline_reproduced = true
 phase2_graduation_gate_satisfied       = true
-su3_ensemble_enabled                   = false
 ```
 
 Benchmark agreement validates the frozen `SU(2)` sampler only in the declared finite-lattice regime. It does **not** imply confinement, continuum QFT existence, or a positive continuum mass gap.
 
-A future `SU(3)` ensemble algorithm must receive a new versioned contract and independent review. Do not silently extend `YM-SU2-ENSEMBLE-V1` or treat the Phase 2B `SU(2)` result as authorization for unversioned `SU(3)` sampling.
+### Phase 2C1 `SU(3)` stochastic authority
+
+Phase 2C1 introduces `YM-SU3-ENSEMBLE-V1` as a **separate** stochastic contract. It may reuse the frozen `SPLITMIX64-V1` core and Phase 2A diagnostic arithmetic as numerical utilities, but it does not inherit the `SU(2)` sampler algorithm, seed derivation, benchmark result, or physical validation.
+
+The candidate identities are
+
+```text
+sampler_id  = YM-SU3-ENSEMBLE-V1
+proposal_id = YM-SU3-GENERATOR-METROPOLIS-V1
+rng_id      = SPLITMIX64-V1
+stream_id   = YM-SU3-STREAM-V1
+```
+
+with a distinct stream-domain separator and golden derived seeds. Do not replace or alias the `SU(3)` stream derivation under these identifiers.
+
+The correctness-first proposal visits generators `a=0..7` for each link after lexicographic sites and directions `mu=0..3`:
+
+```text
+theta       = proposal_angle * (2u - 1)
+R           = exp(i theta T^a)
+U_candidate = R U_old
+accept      = min(1, exp(-DeltaS)).
+```
+
+The proposal is symmetric because `theta` and `-theta` have equal density. The reference consumes exactly two uniform draws per generator proposal: one angle draw and one acceptance draw, including for `DeltaS <= 0`. A data-dependent RNG-consumption shortcut is a semantic change.
+
+The binary64 reference requires
+
+```text
+1e-8 <= proposal_angle <= 1.
+```
+
+Values below `1e-8` fail closed as numerically inert. This lower bound is a numerical-resolution guard, not a physical scale.
+
+`DeltaS` is computed from exactly the six plaquettes affected by `U_mu(x)`. Candidate evaluation must remain allocation-free: substitute the candidate directly into those six products; do **not** clone the full lattice for each proposal. The local result is regression-checked against a complete Wilson-action difference.
+
+At `beta=0`, every valid proposal must be accepted. This checks the Metropolis transition kernel only; it is not an exact Haar-equilibrium claim for a short cold-start chain.
+
+Every `SU(3)` chain report must preserve sampler/proposal/RNG/stream IDs, master/chain/derived seed metadata, extents/beta/proposal angle, thermalisation and measurement cadence, proposal/accept counts, complete raw normalized average-plaquette evidence, autocorrelation/ESS diagnostics, and final maximum link unitarity and determinant residuals.
+
+Phase 2C1 must retain
+
+```text
+published_su3_baseline_reproduced = false
+glueball_analysis_enabled         = false
+phase2c_complete                  = false
+```
+
+until a separately predeclared Phase 2C2 peer-reviewed `SU(3)` benchmark is actually reproduced. Do not use the Phase 2B `SU(2)` result as external validation for `SU(3)`.
 
 Do not import triadic ontology, Q/K/V-to-colour semantics, or other cross-domain interpretations into these authorities.
 
@@ -203,13 +250,14 @@ cargo run --quiet --locked --bin ym-path-holonomy
 cargo run --quiet --locked --bin ym-classical-geometry
 cargo run --quiet --locked --bin ym-su2-ensemble
 cargo run --quiet --locked --bin ym-su2-plaquette-baseline
+cargo run --quiet --locked --bin ym-su3-ensemble
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
 
 The unified contract entry points are authoritative. Adding a new contract surface without registering it in those commands is a readiness failure.
 
-Tests must fail closed on invalid lattice extents, invalid group construction, invalid/oversized paths, invalid ensemble schedules, non-finite inputs/statistics, rejection-limit exhaustion, broken contract structure, weakened benchmark provenance, weakened stationarity/equilibration gates, or weakened claim boundaries. Public `Result` APIs may not turn admissible numerical/allocation failures into panics.
+Tests must fail closed on invalid lattice extents, invalid group construction, invalid/oversized paths, invalid ensemble schedules, non-finite inputs/statistics, rejection-limit exhaustion, numerically inert stochastic proposals, broken contract structure, weakened benchmark provenance, weakened stationarity/equilibration gates, or weakened claim boundaries. Public `Result` APIs may not turn admissible numerical/allocation failures into panics.
 
 Floating-point equality is not assumed. Every numerical/statistical comparison must have an explicit tolerance or uncertainty rule and must not be advertised as bitwise cross-platform identity unless separately established.
 
