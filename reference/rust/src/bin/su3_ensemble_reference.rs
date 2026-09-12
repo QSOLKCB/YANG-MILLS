@@ -125,6 +125,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     println!("published_su3_baseline_reproduced=false");
     println!("glueball_analysis_enabled=false");
+    println!("phase2c_complete=false");
     println!("confinement_claimed=false");
     println!("continuum_qft_constructed=false");
     println!("positive_mass_gap_proved=false");
