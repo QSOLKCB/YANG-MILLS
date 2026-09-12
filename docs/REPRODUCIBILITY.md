@@ -158,14 +158,31 @@ A Phase 2C1 evidence record must preserve:
 - lattice extents, Wilson `beta`, and proposal angle;
 - cold-start policy;
 - lexicographic site/direction/generator update order;
-- exactly two uniform draws per generator proposal;
+- the exact paired finite angle grid identity;
+- exactly two PRNG outputs per generator proposal;
 - discarded thermalisation sweep count and measurement cadence;
 - total Metropolis proposal and accept counts;
 - complete raw normalized `(1/3)ReTr` average-plaquette series;
-- autocorrelation/ESS diagnostic settings and results;
+- variance, full requested autocorrelation sequence, positive-window lag, `tau_int`, ESS, and standard error;
 - final maximum link unitarity and determinant residuals.
 
-The bounded reference requires `1e-8 <= proposal_angle <= 1`. Positive values below the floor fail closed as numerically inert; the floor is a binary64 reference-resolution guard rather than a physical scale.
+The angle proposal uses bit 63 of one raw `SplitMix64` word for the sign and the low 52 bits for `m`, with
+
+```text
+|theta| = proposal_angle * (2m + 1) / 2^53.
+```
+
+Toggling only bit 63 gives the exact floating inverse proposal; endpoints are excluded and the ignored raw bits have equal multiplicity. A direct half-open `2u-1` mapping is not equivalent to the frozen finite proposal distribution.
+
+The bounded reference requires
+
+```text
+1e-8 <= proposal_angle <= 1
+maximum total sweeps = 512
+maximum measurements = 512.
+```
+
+Positive proposal scales below the floor fail closed as numerically inert. The old exploratory `262144`-sweep bound is not frozen: review found deterministic determinant drift on a much longer accepted trajectory, so the V1 bound was reduced to 512 and the maximum admitted beta-zero schedule with `proposal_angle=1.0` is executed in CI against the `5e-12` group-residual gates.
 
 Candidate-link local action differences are computed allocation-free from the six affected plaquettes. Replacing that path with a full-lattice clone per proposal changes the computational/fail-closed contract and is forbidden under the same identifier.
 
@@ -176,7 +193,9 @@ chain 0 = 94c715630ee8e90a
 chain 1 = 8aba19af6781dc09
 ```
 
-Fixed chain identity under the same reference/toolchain must replay identical proposal accounting, raw measurements, diagnostics, and residuals. Distinct chain IDs must produce distinct stream identities and evidence.
+The canonical chain additionally freezes literal evidence for `2^4`, beta zero, chain `0`, four discarded sweeps, 16 measurements, stride one, proposal angle `0.35`, and autocorrelation lag four. Its 16 raw plaquettes, proposal/accept counts, mean, variance, autocorrelation sequence, positive-window lag, `tau_int`, ESS, standard error, and final group residuals are executable golden vectors with `1e-12` absolute tolerance. This prevents coordinated deterministic implementation drift from passing merely because two executions still agree with each other.
+
+The `ym-su3-ensemble` runtime emits all of those fields to the commit-tied Actions log, including complete raw and diagnostic evidence rather than aggregate statistics only.
 
 The `beta=0` all-accept vector validates the transition-kernel accounting only. It is not represented as an exact finite-sample Haar-equilibrium result.
 
