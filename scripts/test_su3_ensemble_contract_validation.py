@@ -36,16 +36,36 @@ def main() -> None:
     expect_reject(validate_su3_ensemble_contract, broken, "stream domain drift")
 
     broken = copy.deepcopy(contract)
+    broken["stream"]["rng_outputs_per_generator_proposal"] = 1
+    expect_reject(validate_su3_ensemble_contract, broken, "RNG consumption weakened")
+
+    broken = copy.deepcopy(contract)
     broken["proposal"]["generator_order"] = "implementation-defined"
     expect_reject(validate_su3_ensemble_contract, broken, "generator order weakened")
 
     broken = copy.deepcopy(contract)
     broken["proposal"]["acceptance_draw_rule"] = "draw only for uphill proposals"
-    expect_reject(validate_su3_ensemble_contract, broken, "RNG consumption drift")
+    expect_reject(validate_su3_ensemble_contract, broken, "acceptance RNG consumption drift")
+
+    broken = copy.deepcopy(contract)
+    broken["proposal"]["angle_grid"]["angle_rule"] = "theta=proposal_angle*(2u-1)"
+    expect_reject(validate_su3_ensemble_contract, broken, "half-open proposal grid restored")
+
+    broken = copy.deepcopy(contract)
+    broken["proposal"]["angle_grid"]["equal_multiplicity"] = False
+    expect_reject(validate_su3_ensemble_contract, broken, "proposal inverse multiplicity weakened")
 
     broken = copy.deepcopy(contract)
     broken["reference_bounds"]["proposal_angle_min"] = 0.0
     expect_reject(validate_su3_ensemble_contract, broken, "proposal-angle floor removed")
+
+    broken = copy.deepcopy(contract)
+    broken["reference_bounds"]["max_schedule_sweeps"] = 262144
+    expect_reject(validate_su3_ensemble_contract, broken, "unverified schedule bound restored")
+
+    broken = copy.deepcopy(contract)
+    broken["reference_bounds"]["maximum_schedule_group_stress_required"] = False
+    expect_reject(validate_su3_ensemble_contract, broken, "maximum schedule stress removed")
 
     broken = copy.deepcopy(contract)
     broken["local_action"]["affected_plaquettes"] = 4
@@ -60,6 +80,14 @@ def main() -> None:
     expect_reject(validate_su3_ensemble_contract, broken, "unitarity gate weakened")
 
     broken = copy.deepcopy(contract)
+    broken["reproducibility"]["literal_golden_reference_chain_required"] = False
+    expect_reject(validate_su3_ensemble_contract, broken, "literal golden chain removed")
+
+    broken = copy.deepcopy(contract)
+    broken["reproducibility"]["complete_reference_runtime_evidence_required"] = False
+    expect_reject(validate_su3_ensemble_contract, broken, "complete runtime evidence weakened")
+
+    broken = copy.deepcopy(contract)
     broken["phase2c_gate"]["published_su3_baseline_reproduced"] = True
     expect_reject(validate_su3_ensemble_contract, broken, "premature external benchmark claim")
 
@@ -71,17 +99,35 @@ def main() -> None:
     broken["claim_boundary"]["finite_lattice_ensemble_implies_positive_mass_gap"] = True
     expect_reject(validate_su3_ensemble_contract, broken, "mass-gap overclaim")
 
+    by_id = {vector["id"]: index for index, vector in enumerate(vectors["vectors"])}
+
     broken = copy.deepcopy(vectors)
-    broken["vectors"][0]["derived_seeds_hex"][0] = "0000000000000000"
+    broken["vectors"][by_id["su3-stream-golden-seeds"]]["derived_seeds_hex"][0] = "0000000000000000"
     expect_reject(validate_su3_ensemble_vectors, broken, "golden stream drift")
 
     broken = copy.deepcopy(vectors)
-    broken["vectors"][1]["expected_accepts_per_sweep"] = 511
+    broken["vectors"][by_id["beta-zero-metropolis-all-accept"]]["expected_accepts_per_sweep"] = 511
     expect_reject(validate_su3_ensemble_vectors, broken, "beta-zero acceptance drift")
 
     broken = copy.deepcopy(vectors)
-    broken["vectors"][3]["proposal_angle_min"] = 0.0
+    broken["vectors"][by_id["proposal-angle-resolution-floor"]]["proposal_angle_min"] = 0.0
     expect_reject(validate_su3_ensemble_vectors, broken, "proposal-resolution vector drift")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][by_id["paired-angle-grid"]]["exact_inverse_pairing"] = False
+    expect_reject(validate_su3_ensemble_vectors, broken, "paired-grid inverse weakened")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][by_id["maximum-schedule-group-stress"]]["maximum_total_sweeps"] = 262144
+    expect_reject(validate_su3_ensemble_vectors, broken, "maximum schedule stress weakened")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][by_id["frozen-reference-chain-golden-evidence"]]["raw_measurements"][0] = 0.9
+    expect_reject(validate_su3_ensemble_vectors, broken, "golden raw chain drift")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][by_id["frozen-reference-chain-golden-evidence"]]["diagnostics"]["mean"] = 0.9
+    expect_reject(validate_su3_ensemble_vectors, broken, "golden diagnostic drift")
 
     print("Negative Phase 2C1 SU(3) ensemble contract regression checks: passed")
 
