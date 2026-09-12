@@ -165,9 +165,9 @@ Benchmark agreement validates the frozen `SU(2)` sampler only in the declared fi
 
 ### Phase 2C1 `SU(3)` stochastic authority
 
-Phase 2C1 introduces `YM-SU3-ENSEMBLE-V1` as a **separate** stochastic contract. It may reuse the frozen `SPLITMIX64-V1` core and Phase 2A diagnostic arithmetic as numerical utilities, but it does not inherit the `SU(2)` sampler algorithm, seed derivation, benchmark result, or physical validation.
+Phase 2C1 freezes `YM-SU3-ENSEMBLE-V1` and `SU3-ENSEMBLE-PHASE2C1-V1` as a **separate** stochastic authority with status `phase-2c1-frozen`. It may reuse the frozen `SPLITMIX64-V1` core and Phase 2A diagnostic arithmetic as numerical utilities, but it does not inherit the `SU(2)` sampler algorithm, seed derivation, benchmark result, or physical validation.
 
-The candidate identities are
+The frozen identities are
 
 ```text
 sampler_id  = YM-SU3-ENSEMBLE-V1
@@ -197,7 +197,7 @@ The binary64 reference requires
 
 Values below `1e-8` fail closed as numerically inert. This lower bound is a numerical-resolution guard, not a physical scale.
 
-`DeltaS` is computed from exactly the six plaquettes affected by `U_mu(x)`. Candidate evaluation must remain allocation-free: substitute the candidate directly into those six products; do **not** clone the full lattice for each proposal. The local result is regression-checked against a complete Wilson-action difference.
+`DeltaS` is computed from exactly the six plaquettes affected by `U_mu(x)`. Candidate-link evaluation must remain allocation-free: substitute the proposed link directly into those six products; do **not** clone the full lattice for each proposal. The local result is regression-checked against a complete Wilson-action difference.
 
 At `beta=0`, every valid proposal must be accepted. This checks the Metropolis transition kernel only; it is not an exact Haar-equilibrium claim for a short cold-start chain.
 
@@ -211,7 +211,7 @@ glueball_analysis_enabled         = false
 phase2c_complete                  = false
 ```
 
-until a separately predeclared Phase 2C2 peer-reviewed `SU(3)` benchmark is actually reproduced. Do not use the Phase 2B `SU(2)` result as external validation for `SU(3)`.
+until a separately predeclared Phase 2C2 peer-reviewed `SU(3)` benchmark is actually reproduced. Do not use the Phase 2B `SU(2)` result as external validation for `SU(3)`. Incompatible sampler, proposal, stream, update-order, local-action, diagnostic, or evidence semantics require a new contract identifier rather than mutation of the frozen V1 surface.
 
 Do not import triadic ontology, Q/K/V-to-colour semantics, or other cross-domain interpretations into these authorities.
 
