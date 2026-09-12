@@ -16,6 +16,7 @@ cargo run --quiet --locked --bin ym-su3-center
 cargo run --quiet --locked --bin ym-path-holonomy
 cargo run --quiet --locked --bin ym-classical-geometry
 cargo run --quiet --locked --bin ym-su2-ensemble
+cargo run --quiet --locked --bin ym-su2-plaquette-baseline
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
@@ -38,15 +39,7 @@ Earlier phases separate exact contract facts from floating numerical regressions
 
 ### Pseudorandom stream
 
-The reference stream is `SPLITMIX64-V1`. Reproducibility records must preserve:
-
-- master seed;
-- chain ID;
-- derived seed rule;
-- exact RNG identifier/version;
-- integer-to-`[0,1)` conversion rule.
-
-A seed is not a physical parameter. Distinct chain IDs are distinct stream identities.
+The reference stream is `SPLITMIX64-V1`. Reproducibility records must preserve master seed, chain ID, derived-seed rule, exact RNG identifier/version, and integer-to-`[0,1)` conversion rule. A seed is not a physical parameter. Distinct chain IDs are distinct stream identities.
 
 ### Sampler identity
 
@@ -60,18 +53,16 @@ A Phase 2A chain must record:
 - heat-bath rejection-attempt bound;
 - number of over-relaxation sweeps after each heat-bath sweep;
 - discarded thermalisation sweep count;
-- measurement count;
-- complete Markov sweeps between measurements;
-- observable definition;
-- raw measurement series;
-- autocorrelation maximum lag and estimator convention;
+- measurement count and cadence;
+- observable definition and raw measurement series;
+- autocorrelation estimator identity and requested lag;
 - derived diagnostics, including ESS.
 
 Fixed master seed + chain ID under the same reference implementation/toolchain must replay the same reference measurement series. Independent chain IDs must not be treated as interchangeable replays of one chain.
 
 ### Statistical diagnostics
 
-Phase 2A freezes a simple positive-window autocorrelation estimator:
+Phase 2A freezes
 
 ```text
 tau_int = 1/2 + sum consecutive positive rho_lag
@@ -80,29 +71,82 @@ ESS = min(N, N/(2 tau_int)).
 
 The recorded autocorrelation sequence uses the frozen covariance normalization from the contract. These are finite-sample diagnostics, not guarantees that thermalisation or systematic effects are absent.
 
-Raw measurements are retained in the reference `ChainReport`; a future publication or large campaign must archive them directly or by a stable content-addressed evidence reference.
-
 ### Beta-zero sanity check
 
-At `beta=0`, the exact ensemble plaquette expectation is zero under Haar measure. Phase 2A uses a fixed-seed `2^4` chain to check that the implemented sampler stays inside a deliberately broad near-zero sanity band while preserving link unitarity and producing nontrivial ESS.
+At `beta=0`, the exact ensemble plaquette expectation is zero under Haar measure. Phase 2A uses a fixed-seed `2^4` chain to check a broad near-zero sanity band while preserving link unitarity and nontrivial ESS. This C2 vector is not a substitute for an external finite-beta benchmark.
 
-This sanity vector is C2 finite-lattice numerical evidence. It is **not** a substitute for a published finite-beta benchmark.
+## Phase 2B published-baseline evidence
 
-### Phase 2 graduation boundary
+`YM-SU2-PLAQUETTE-BASELINE-V1` freezes the published finite-lattice validation surface.
 
-The frozen Phase 2A contract retains:
+The peer-reviewed primary source is Langfeld, Lucini & Rago, *Physical Review Letters* **109**, 111601 (2012), DOI `10.1103/PhysRevLett.109.111601`. The matching surface is four-dimensional `SU(2)` Wilson gauge theory on a `10^4` lattice at `beta=2.3`, with average plaquette
 
 ```text
-published_plaquette_baseline_reproduced = false
-phase2_graduation_gate_satisfied       = false
-su3_ensemble_enabled                   = false.
+(1/(6V)) sum_x sum_(mu<nu) (1/2) ReTr P_mu_nu(x).
 ```
 
-Full Phase 2 graduation requires a separately reviewed comparison to a published pure-gauge plaquette result with matching action, normalization, lattice geometry/volume, coupling regime, observable definition, and uncertainty treatment. Agreement will validate the finite-lattice sampler in that regime; it will not imply confinement, continuum QFT existence, or a mass-gap proof.
+Because the source comparison is graphical, the predeclared `[0.59,0.62]` interval is a conservative **source-resolution envelope** and must not be reported as a quoted paper statistical error bar.
+
+The frozen Phase 2B run uses master seed `2b00201211160101`, chain IDs `0` and `1`, 40 discarded thermalisation sweeps, 48 measurements per chain, one complete Markov sweep between measurements, one over-relaxation sweep per heat-bath sweep, and autocorrelation lag 12.
+
+The first predeclared external-comparison run produced:
+
+```text
+chain 0 mean = 0.6026867250625984
+chain 1 mean = 0.6018972107756385
+pooled mean  = 0.6022919679191184
+pooled diagnostic SE ~= 0.000417328609449
+chain-consistency z ~= 0.9459144054
+minimum chain ESS ~= 7.74585617
+maximum link-unit residual ~= 6.66e-16
+```
+
+This lies inside the frozen published source-resolution envelope and satisfies the independent-chain gates. Because both chains share the cold identity start, that agreement alone is not treated as an equilibration proof.
+
+### Post-thermalisation stationarity gate
+
+The hardened Phase 2B authority additionally requires a within-chain stationarity check for both reference chains. Each 48-measurement post-thermalisation series is split into first/last 24-measurement halves. Each half is analyzed with the frozen Phase 2A autocorrelation-aware diagnostic using `max_lag=6`, and Phase 2B records
+
+```text
+stationarity_z = |mean_first - mean_second|
+                 / sqrt(SE_first^2 + SE_second^2).
+```
+
+Both chains must satisfy `stationarity_z <= 5`. This directly checks for detectable drift remaining after the declared 40 discarded thermalisation sweeps. It is still a bounded diagnostic rather than proof that all equilibration or systematic errors are absent.
+
+The stationarity split, lag, threshold, half-means, half standard errors, and drift-z values are part of the frozen benchmark evidence and may not be silently omitted or weakened.
+
+### Evidence archive
+
+The canonical `ym-su2-plaquette-baseline` runtime emits into the commit-tied GitHub Actions log:
+
+- source contract and DOI;
+- lattice/coupling and source envelope;
+- master seed, chain IDs, and derived seeds;
+- full raw measurement series for both chains;
+- per-chain means, standard errors, ESS, integrated autocorrelation times, and heat-bath acceptance;
+- first-half/second-half stationarity means and drift-z statistics;
+- pooled mean/diagnostic standard error and chain-consistency statistic;
+- maximum final link-unit residual;
+- explicit Phase 2 graduation and claim-boundary flags.
+
+Thus the Actions run itself is a source-commit/toolchain-bound evidence record. Any scientific release should additionally preserve those measurements as an explicit artifact or content-addressed dataset rather than relying only on CI retention.
+
+Phase 2B may freeze
+
+```text
+published_plaquette_baseline_reproduced = true
+phase2_graduation_gate_satisfied       = true
+su3_ensemble_enabled                   = false
+```
+
+only when the external envelope, independent-chain, within-chain stationarity, ESS, acceptance, and group-invariant gates all pass on the exact frozen head.
+
+This agreement validates the finite-lattice `SU(2)` sampler in the declared regime. It does not imply confinement, continuum QFT existence, or a mass-gap proof.
 
 ## Future ensemble campaigns
 
-Beyond the small bounded reference chain, scientific campaigns should additionally record multiple independent chains, thermalisation diagnostics, chain lengths, measurement thinning/cadence rationale, autocorrelation stability under window changes, uncertainty aggregation across chains, and raw evidence sufficient for independent reanalysis.
+A future `SU(3)` generator requires a separately versioned sampler contract and independent review. Larger scientific campaigns should record multiple independent chains, thermalisation diagnostics, chain lengths, cadence rationale, autocorrelation stability under window changes, uncertainty aggregation across chains, and raw evidence sufficient for independent reanalysis.
 
 ## Future HPC work
 

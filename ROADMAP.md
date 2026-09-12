@@ -165,17 +165,17 @@ Previous QSOL-IMC work involving triadic `SU(3)`, semantic gauge fields, relatio
 
 ## Phase 2 — statistical ensemble generation
 
-Phase 2 is deliberately split so sampler mechanics can freeze without falsely claiming the published-benchmark graduation gate.
+Phase 2 separates sampler mechanics from external finite-lattice validation so neither can silently stand in for the other.
 
 ### Phase 2A — frozen `SU(2)` sampler and diagnostics
 
-**Status: implemented, independently reviewed, CI-green, and frozen in PR #7 pending merge. Full Phase 2 graduation remains open.**
+**Status: completed, independently reviewed, CI-green, frozen, and merged in PR #7.**
 
 - [x] Specify a versioned sampling algorithm before implementation as `YM-SU2-ENSEMBLE-V1`.
 - [x] Implement a literature-grounded `SU(2)` heat-bath kernel under the frozen local staple/action convention.
 - [x] Implement microcanonical `SU(2)` over-relaxation and verify Wilson-action preservation within declared tolerance.
 - [x] Freeze the reference pseudorandom stream/seed derivation while separating stream identity from physical claims.
-- [x] Record thermalisation, total sweep count, measurement cadence, update order, and chain identity.
+- [x] Record thermalisation, checked total sweep count, measurement cadence, update order, and chain identity.
 - [x] Retain raw average-plaquette measurements in the reference chain report.
 - [x] Measure a versioned autocorrelation sequence, integrated autocorrelation time, effective sample size, and diagnostic standard error.
 - [x] Add fixed-chain deterministic replay and distinct independent-chain identity regressions.
@@ -184,18 +184,31 @@ Phase 2 is deliberately split so sampler mechanics can freeze without falsely cl
 - [x] Freeze `SPLITMIX64-V1` golden integer outputs while explicitly declining universal cross-platform bitwise floating identity.
 - [x] Keep all Phase 2A ensemble measurements classified as finite-lattice numerical observations rather than physical/theorem claims.
 
-**Phase 2A freeze gate:** `YM-SU2-ENSEMBLE-V1` and `SU2-ENSEMBLE-PHASE2A-V1` are sealed as `phase-2a-frozen`. The frozen contract keeps `published_plaquette_baseline_reproduced=false`, `phase2_graduation_gate_satisfied=false`, and `su3_ensemble_enabled=false`.
+**Phase 2A freeze gate:** `YM-SU2-ENSEMBLE-V1` and `SU2-ENSEMBLE-PHASE2A-V1` are sealed as `phase-2a-frozen`. Phase 2A itself did not claim the external published benchmark; that claim is owned by Phase 2B.
 
 ### Phase 2B — published plaquette baseline and Phase 2 graduation
 
-- [ ] Select a peer-reviewed pure-`SU(2)` Wilson-action plaquette benchmark before tuning the reference implementation.
-- [ ] Match the benchmark action normalization, lattice geometry/volume, coupling regime, observable definition, and statistical treatment explicitly.
-- [ ] Run multiple independent chains with declared thermalisation and measurement cadence.
-- [ ] Reproduce the selected published plaquette expectation within justified statistical/finite-volume expectations.
-- [ ] Archive exact source commit, contract, toolchain, seeds/chain IDs, raw measurements, diagnostics, and comparison analysis.
-- [ ] Only after the `SU(2)` benchmark/diagnostics are trustworthy, specify a separately versioned `SU(3)` ensemble algorithm rather than extending `YM-SU2-ENSEMBLE-V1` silently.
+**Status: implemented, CI-green, and frozen in PR #8 pending merge.**
 
-**Phase 2 graduation gate:** ensemble results reproduce a selected published plaquette expectation in the declared matching regime within justified uncertainty. Literature agreement validates the finite-lattice sampler in that regime; it does not establish confinement, construct continuum quantum Yang–Mills theory, or prove a positive mass gap.
+- [x] Select a peer-reviewed pure-`SU(2)` Wilson-action plaquette benchmark before tuning the reference implementation.
+- [x] Match the benchmark action normalization, lattice geometry/volume, coupling regime, observable definition, and source-resolution/statistical treatment explicitly.
+- [x] Freeze two independent chain identities with declared thermalisation and measurement cadence before inspecting the benchmark result.
+- [x] Reproduce the selected published plaquette surface within the predeclared source-resolution envelope while satisfying the independent-chain diagnostics.
+- [x] Archive contract/source provenance, pinned toolchain context, seeds/chain IDs, raw measurements, diagnostics, and comparison analysis in the commit-tied runtime evidence log.
+- [x] Preserve the claim firewall: benchmark agreement is finite-lattice validation and does not imply confinement, continuum QFT existence, or a positive mass gap.
+
+Primary source: Langfeld, Lucini & Rago, *Physical Review Letters* **109**, 111601 (2012), DOI `10.1103/PhysRevLett.109.111601`, Figure 5. The frozen comparison is `SU(2)` Wilson action on `10^4` at `beta=2.3` with source-resolution envelope `[0.59,0.62]` for the normalized average plaquette. The first predeclared two-chain candidate produced pooled mean `0.6022919679`, chain-consistency `z ~= 0.946`, minimum ESS `~=7.75`, and maximum final link-unit residual `~=6.66e-16`.
+
+**Phase 2 graduation gate:** `YM-SU2-PLAQUETTE-BASELINE-V1` and `SU2-PLAQUETTE-BASELINE-PHASE2B-V1` are sealed as `phase-2b-frozen`; `published_plaquette_baseline_reproduced=true` and `phase2_graduation_gate_satisfied=true`. Literature agreement validates the finite-lattice `SU(2)` sampler in this regime; it does not establish confinement, construct continuum quantum Yang–Mills theory, or prove a positive mass gap.
+
+### Phase 2C — future separately versioned `SU(3)` ensembles
+
+Phase 2 graduation does **not** silently enable `SU(3)` sampling.
+
+- [ ] Specify a new `SU(3)` ensemble contract rather than extending `YM-SU2-ENSEMBLE-V1`.
+- [ ] Select and justify an `SU(3)` update algorithm under the frozen `SU(3)` lattice/action conventions.
+- [ ] Version RNG/stream identity, update order, thermalisation, diagnostics, and evidence independently.
+- [ ] Add independent benchmark validation before using `SU(3)` ensembles for later physics analysis.
 
 ## Phase 3 — glueball laboratory
 

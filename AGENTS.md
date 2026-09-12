@@ -13,7 +13,7 @@ Use these classes:
 5. **continuum theorem** — a mathematically proved statement about the continuum theory;
 6. **Clay solution claim** — only permissible if the full official existence-and-mass-gap problem is actually proved.
 
-A correct classical identity or statistically stable finite-lattice chain is not automatically a construction of the quantum theory. Stochastic ensemble measurements remain C2 finite-lattice numerical observations unless a stronger claim is independently justified.
+A correct classical identity or statistically stable finite-lattice chain is not automatically a construction of the quantum theory. Stochastic ensemble measurements and published finite-lattice benchmark agreement remain C2 numerical evidence unless a stronger claim is independently justified.
 
 Never promote a result because a simulation is large, a GPU agrees with a CPU, an extrapolation looks stable, a chain has a large ESS, or a literature value is reproduced.
 
@@ -29,7 +29,7 @@ An agent must refuse to write or approve language asserting that this repository
 - a formal proof about the finite lattice;
 - a classical Yang–Mills connection or self-dual solution;
 - a complete principal-bundle/curvature dictionary;
-- a thermalised-looking Markov chain, low autocorrelation, or large effective sample size;
+- a thermalised-looking Markov chain, low autocorrelation, large effective sample size, or reproduced plaquette benchmark;
 - cross-runtime or CPU/GPU agreement.
 
 ## Mathematical authority
@@ -90,34 +90,22 @@ Principal-bundle, associated-bundle, connection, curvature, Hodge, Yang–Mills 
 
 Phase 2A freezes `YM-SU2-ENSEMBLE-V1` as the first stochastic authority. It depends on the frozen `SU(2)` lattice/staple semantics and does **not** reopen those contracts.
 
-The reference pseudorandom stream is
+The reference pseudorandom stream is `SPLITMIX64-V1`, with exact integer stream semantics and versioned seed/chain derivation. A seed is provenance and stream identity, not a physical parameter. Do not replace the RNG, seed derivation, floating conversion, update order, or chain identity fields under the frozen identifier.
 
-```text
-SPLITMIX64-V1
-```
-
-with exact integer stream semantics and a versioned seed/chain derivation. A seed is provenance and stream identity, not a physical parameter. Do not replace the RNG, seed derivation, floating conversion, update order, or chain identity fields under the frozen identifier.
-
-For staple
-
-```text
-V = k Vhat,
-```
-
-the heat-bath local variable is
+For staple `V=k Vhat`, the heat-bath local variable is
 
 ```text
 R = U Vhat
 alpha = beta k
 ```
 
-with conditional law
+with mathematical conditional law
 
 ```text
 dP(R) proportional to exp(alpha r0) d_mu_Haar(R).
 ```
 
-The frozen reference draw proposes `r0` from the exact truncated exponential on `[-1,1]`, accepts with probability `sqrt(1-r0^2)`, chooses the vector direction uniformly on `S^2`, and reconstructs
+For `alpha > 1e-300`, the floating reference uses the truncated-exponential inverse proposal. For `0 <= alpha <= 1e-300`, it uses the uniform `alpha -> 0` proposal limit to avoid subnormal quantisation. Both branches then accept with Haar-Jacobian probability `sqrt(1-r0^2)`, choose the vector direction uniformly on `S^2`, and reconstruct
 
 ```text
 U_new = R Vhat^dagger.
@@ -133,33 +121,50 @@ U_new = Vhat^dagger U_old^dagger Vhat^dagger
 
 for nonzero staple norm. It is microcanonical decorrelation, not an ergodic sampler by itself.
 
-Reference update order is lexicographic sites `x0,x1,x2,x3`, then directions `mu=0,1,2,3`. A complete Markov sweep is one heat-bath sweep followed by the configured number of over-relaxation sweeps.
-
-Every reported chain must preserve:
-
-- action/lattice parameters;
-- master seed, chain ID, and derived seed;
-- thermalisation sweeps;
-- measurement count and sweep cadence;
-- over-relaxation cadence;
-- heat-bath attempt bound;
-- raw measurement series;
-- autocorrelation estimator identity and requested lag;
-- effective sample size.
-
-The Phase 2A autocorrelation/ESS estimator is versioned. Do not substitute a library default or a different window silently.
-
-The `beta=0` plaquette expectation of zero is a sampler sanity surface only. Phase 2A deliberately freezes:
+Reference update order is lexicographic sites `x0,x1,x2,x3`, then directions `mu=0,1,2,3`. A complete Markov sweep is one heat-bath sweep followed by the configured number of over-relaxation sweeps. The checked total schedule is
 
 ```text
-published_plaquette_baseline_reproduced = false
-phase2_graduation_gate_satisfied       = false
-su3_ensemble_enabled                   = false.
+thermalization_sweeps + measurements*sweeps_between_measurements
 ```
 
-Do not claim full Phase 2 graduation, a published finite-beta baseline reproduction, or enable `SU(3)` ensembles under `YM-SU2-ENSEMBLE-V1`. Those require a later reviewed gate matching the published action, normalization, volume, parameter regime, observable, and uncertainty treatment.
+and must remain inside the frozen reference bound.
 
-A low autocorrelation estimate, large ESS, or literature agreement does not imply confinement, continuum QFT existence, or a mass gap.
+Every reported chain must preserve action/lattice parameters, full seed/chain identity, thermalisation, measurement cadence, over-relaxation cadence, rejection bound, raw measurement series, autocorrelation estimator identity, and ESS.
+
+### Phase 2B published benchmark authority
+
+Phase 2B freezes `YM-SU2-PLAQUETTE-BASELINE-V1` as an external finite-lattice validation surface for the Phase 2A sampler.
+
+The primary peer-reviewed source is Langfeld, Lucini & Rago, *Physical Review Letters* **109**, 111601 (2012), DOI `10.1103/PhysRevLett.109.111601`. The frozen comparison is Figure 5 at
+
+```text
+SU(2) Wilson action
+lattice = 10^4
+beta = 2.3
+observable = (1/(6V)) sum_x sum_(mu<nu) (1/2) ReTr P_mu_nu(x)
+```
+
+Because the source comparison is graphical, the predeclared `[0.59,0.62]` interval is a **source-resolution envelope**, not a quoted paper statistical error bar. Agents may not relabel it as a paper uncertainty or widen it after inspecting the benchmark result.
+
+Two independent cold-start chains agreeing is not sufficient to close Phase 2B. The frozen benchmark must also pass the within-chain post-thermalisation stationarity gate: split each 48-measurement chain into first/last 24-measurement halves, evaluate each half with the frozen Phase 2A autocorrelation-aware diagnostic using `max_lag=6`, and require
+
+```text
+|mean_first - mean_second| / sqrt(SE_first^2 + SE_second^2) <= 5
+```
+
+for both chains. This is a bounded stationarity check against a shared residual cold-start transient; it is not a proof that every systematic effect is absent. Do not remove or weaken this gate under the frozen Phase 2B identifier.
+
+The frozen reference run may close the finite-lattice Phase 2 graduation gate only if the published envelope, independent-chain, within-chain stationarity, ESS, acceptance, and link-unit gates all pass. It must retain
+
+```text
+published_plaquette_baseline_reproduced = true
+phase2_graduation_gate_satisfied       = true
+su3_ensemble_enabled                   = false
+```
+
+Benchmark agreement validates the frozen `SU(2)` sampler only in the declared finite-lattice regime. It does **not** imply confinement, continuum QFT existence, or a positive continuum mass gap.
+
+A future `SU(3)` ensemble algorithm must receive a new versioned contract and independent review. Do not silently extend `YM-SU2-ENSEMBLE-V1` or treat the Phase 2B `SU(2)` result as authorization for unversioned `SU(3)` sampling.
 
 Do not import triadic ontology, Q/K/V-to-colour semantics, or other cross-domain interpretations into these authorities.
 
@@ -197,16 +202,17 @@ cargo run --quiet --locked --bin ym-su3-center
 cargo run --quiet --locked --bin ym-path-holonomy
 cargo run --quiet --locked --bin ym-classical-geometry
 cargo run --quiet --locked --bin ym-su2-ensemble
+cargo run --quiet --locked --bin ym-su2-plaquette-baseline
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
 
 The unified contract entry points are authoritative. Adding a new contract surface without registering it in those commands is a readiness failure.
 
-Tests must fail closed on invalid lattice extents, invalid group construction, invalid/oversized paths, invalid ensemble schedules, non-finite inputs/statistics, rejection-limit exhaustion, broken contract structure, or weakened claim boundaries. Public `Result` APIs may not turn admissible numerical/allocation failures into panics.
+Tests must fail closed on invalid lattice extents, invalid group construction, invalid/oversized paths, invalid ensemble schedules, non-finite inputs/statistics, rejection-limit exhaustion, broken contract structure, weakened benchmark provenance, weakened stationarity/equilibration gates, or weakened claim boundaries. Public `Result` APIs may not turn admissible numerical/allocation failures into panics.
 
 Floating-point equality is not assumed. Every numerical/statistical comparison must have an explicit tolerance or uncertainty rule and must not be advertised as bitwise cross-platform identity unless separately established.
 
 ## Formalisation
 
-Do not add a theorem prover merely for prestige. Formalise only stable definitions and theorem surfaces. A finite-lattice, finite-dimensional group/Hodge, classical bundle/connection, or sampler-correctness theorem is valuable but must not be described as the continuum quantum Yang–Mills existence/mass-gap proof.
+Do not add a theorem prover merely for prestige. Formalise only stable definitions and theorem surfaces. A finite-lattice, finite-dimensional group/Hodge, classical bundle/connection, sampler-correctness, or benchmark-provenance theorem is valuable but must not be described as the continuum quantum Yang–Mills existence/mass-gap proof.
