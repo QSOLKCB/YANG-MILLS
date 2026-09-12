@@ -22,12 +22,15 @@ pub const RNG_ID: &str = "SPLITMIX64-V1";
 pub const STREAM_ID: &str = "YM-SU3-STREAM-V1";
 pub const STREAM_DOMAIN: u64 = 0x5355_3345_4e53_5631;
 pub const MAX_REFERENCE_BETA: f64 = 12.0;
-pub const MAX_REFERENCE_SWEEPS: usize = 1 << 18;
-pub const MAX_REFERENCE_MEASUREMENTS: usize = 1 << 18;
+pub const MAX_REFERENCE_SWEEPS: usize = 512;
+pub const MAX_REFERENCE_MEASUREMENTS: usize = 512;
 pub const MIN_PROPOSAL_ANGLE: f64 = 1.0e-8;
 pub const MAX_PROPOSAL_ANGLE: f64 = 1.0;
 pub const PLAQUETTE_TOLERANCE: f64 = 1.0e-12;
 pub const LINK_RESIDUAL_LIMIT: f64 = 5.0e-12;
+pub const ANGLE_GRID_MAGNITUDE_BITS: u32 = 52;
+const ANGLE_GRID_MAGNITUDE_MASK: u64 = (1_u64 << ANGLE_GRID_MAGNITUDE_BITS) - 1;
+const ANGLE_GRID_SCALE: f64 = 1.0 / 9_007_199_254_740_992.0;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Su3EnsembleConfig {
@@ -42,17 +45,22 @@ pub struct Su3EnsembleConfig {
     pub autocorrelation_max_lag: usize,
 }
 
+fn validate_proposal_angle(proposal_angle: f64) -> Result<(), Su3EnsembleError> {
+    if !proposal_angle.is_finite()
+        || proposal_angle < MIN_PROPOSAL_ANGLE
+        || proposal_angle > MAX_PROPOSAL_ANGLE
+    {
+        return Err(Su3EnsembleError::ProposalAngleOutsideReferenceRange);
+    }
+    Ok(())
+}
+
 impl Su3EnsembleConfig {
     pub fn validate(self) -> Result<Self, Su3EnsembleError> {
         if !self.beta.is_finite() || self.beta < 0.0 || self.beta > MAX_REFERENCE_BETA {
             return Err(Su3EnsembleError::BetaOutsideReferenceRange);
         }
-        if !self.proposal_angle.is_finite()
-            || self.proposal_angle < MIN_PROPOSAL_ANGLE
-            || self.proposal_angle > MAX_PROPOSAL_ANGLE
-        {
-            return Err(Su3EnsembleError::ProposalAngleOutsideReferenceRange);
-        }
+        validate_proposal_angle(self.proposal_angle)?;
         if self.measurements < 2 || self.measurements > MAX_REFERENCE_MEASUREMENTS {
             return Err(Su3EnsembleError::MeasurementCountOutsideReferenceRange);
         }
@@ -183,6 +191,30 @@ pub fn derive_su3_chain_seed(master_seed: u64, chain_id: u64) -> u64 {
     mix64(master_seed ^ STREAM_DOMAIN ^ lane)
 }
 
+/// Map one raw RNG output to an exactly paired finite proposal-angle grid.
+///
+/// The high bit selects the sign. The low 52 bits select an odd multiple of
+/// 2^-53 in (0,1), so toggling only the sign bit produces the exact floating
+/// inverse angle while neither endpoint +/-proposal_angle is present.
+pub fn proposal_angle_from_u64(
+    raw: u64,
+    proposal_angle: f64,
+) -> Result<f64, Su3EnsembleError> {
+    validate_proposal_angle(proposal_angle)?;
+    let magnitude_index = raw & ANGLE_GRID_MAGNITUDE_MASK;
+    let odd_numerator = magnitude_index
+        .checked_mul(2)
+        .and_then(|value| value.checked_add(1))
+        .ok_or(Su3EnsembleError::AccountingOverflow)?;
+    let magnitude = proposal_angle * (odd_numerator as f64) * ANGLE_GRID_SCALE;
+    let sign = if raw >> 63 == 0 { -1.0 } else { 1.0 };
+    let angle = sign * magnitude;
+    if !angle.is_finite() || angle == 0.0 || angle.abs() >= proposal_angle {
+        return Err(Su3EnsembleError::NonFiniteStatistic);
+    }
+    Ok(angle)
+}
+
 fn x_minus(mut x: [usize; DIM], direction: usize, extents: [usize; DIM]) -> [usize; DIM] {
     x[direction] = if x[direction] == 0 {
         extents[direction] - 1
@@ -240,8 +272,6 @@ fn local_link_action_with_value(
         return Err(Su3EnsembleError::BetaOutsideReferenceRange);
     }
 
-    // Validate the target coordinate/direction through the frozen lattice API
-    // before using the local substitution formulas below.
     lattice.link(x, mu)?;
     let extents = lattice.extents();
     let mut sum = 0.0_f64;
@@ -250,7 +280,6 @@ fn local_link_action_with_value(
             continue;
         }
 
-        // Forward plaquette P_{mu,nu}(x): the varied link is the first factor.
         let x_mu = lattice.neighbor_plus(x, mu)?;
         let x_nu = lattice.neighbor_plus(x, nu)?;
         let forward = link_value
@@ -258,8 +287,6 @@ fn local_link_action_with_value(
             .mul(lattice.link(x_nu, mu)?.dagger())?
             .mul(lattice.link(x, nu)?.dagger())?;
 
-        // Backward plaquette P_{mu,nu}(x-nu): the varied link U_mu(x)
-        // is the third factor and therefore enters as link_value^dagger.
         let backward_x = x_minus(x, nu, extents);
         let backward_x_mu = lattice.neighbor_plus(backward_x, mu)?;
         let backward = lattice
@@ -324,12 +351,7 @@ pub fn metropolis_sweep(
     if !beta.is_finite() || beta < 0.0 || beta > MAX_REFERENCE_BETA {
         return Err(Su3EnsembleError::BetaOutsideReferenceRange);
     }
-    if !proposal_angle.is_finite()
-        || proposal_angle < MIN_PROPOSAL_ANGLE
-        || proposal_angle > MAX_PROPOSAL_ANGLE
-    {
-        return Err(Su3EnsembleError::ProposalAngleOutsideReferenceRange);
-    }
+    validate_proposal_angle(proposal_angle)?;
 
     let extents = lattice.extents();
     let mut accounting = MetropolisAccounting::default();
@@ -340,7 +362,8 @@ pub fn metropolis_sweep(
                     let x = [x0, x1, x2, x3];
                     for mu in 0..DIM {
                         for generator in 0..SU3_GENERATORS {
-                            let angle = proposal_angle * (2.0 * rng.unit_f64() - 1.0);
+                            let angle_raw = rng.next_u64();
+                            let angle = proposal_angle_from_u64(angle_raw, proposal_angle)?;
                             let rotation = generator_proposal(generator, angle)?;
                             let old = lattice.link(x, mu)?;
                             let candidate = rotation.mul(old)?;
