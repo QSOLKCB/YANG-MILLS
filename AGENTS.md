@@ -178,30 +178,38 @@ stream_id   = YM-SU3-STREAM-V1
 
 with a distinct stream-domain separator and golden derived seeds. Do not replace or alias the `SU(3)` stream derivation under these identifiers.
 
-The correctness-first proposal visits generators `a=0..7` for each link after lexicographic sites and directions `mu=0..3`:
+The correctness-first proposal visits generators `a=0..7` for each link after lexicographic sites and directions `mu=0..3`. The angle draw is an exact finite paired binary64 grid, not a direct `2u-1` transform:
 
 ```text
-theta       = proposal_angle * (2u - 1)
-R           = exp(i theta T^a)
+m = raw_u64 & (2^52 - 1)
+|theta| = proposal_angle * (2m + 1) / 2^53
+sign(theta) = bit 63
+R = exp(i theta T^a)
 U_candidate = R U_old
-accept      = min(1, exp(-DeltaS)).
+accept = min(1, exp(-DeltaS)).
 ```
 
-The proposal is symmetric because `theta` and `-theta` have equal density. The reference consumes exactly two uniform draws per generator proposal: one angle draw and one acceptance draw, including for `DeltaS <= 0`. A data-dependent RNG-consumption shortcut is a semantic change.
+Bits `52..62` are ignored. Toggling only bit 63 produces the exact floating inverse angle while preserving equal multiplicity, and neither endpoint `+/-proposal_angle` is in the support. Replacing this with a half-open `2u-1` map is a semantic change because that finite grid has an unmatched endpoint.
+
+The reference consumes exactly **two PRNG outputs per generator proposal**: one raw `u64` for the paired angle grid and one acceptance draw, including for `DeltaS <= 0`. A data-dependent RNG-consumption shortcut is a semantic change.
 
 The binary64 reference requires
 
 ```text
-1e-8 <= proposal_angle <= 1.
+1e-8 <= proposal_angle <= 1
+maximum total sweeps = 512
+maximum measurements = 512.
 ```
 
-Values below `1e-8` fail closed as numerically inert. This lower bound is a numerical-resolution guard, not a physical scale.
+Values below `1e-8` fail closed as numerically inert. The lower bound is a numerical-resolution guard, not a physical scale. The previous exploratory `262144`-sweep admission is not part of V1: the frozen maximum is 512 and CI executes a maximum-schedule beta-zero stress chain with `proposal_angle=1.0` to verify the group residual gates on the admitted boundary.
 
 `DeltaS` is computed from exactly the six plaquettes affected by `U_mu(x)`. Candidate-link evaluation must remain allocation-free: substitute the proposed link directly into those six products; do **not** clone the full lattice for each proposal. The local result is regression-checked against a complete Wilson-action difference.
 
 At `beta=0`, every valid proposal must be accepted. This checks the Metropolis transition kernel only; it is not an exact Haar-equilibrium claim for a short cold-start chain.
 
-Every `SU(3)` chain report must preserve sampler/proposal/RNG/stream IDs, master/chain/derived seed metadata, extents/beta/proposal angle, thermalisation and measurement cadence, proposal/accept counts, complete raw normalized average-plaquette evidence, autocorrelation/ESS diagnostics, and final maximum link unitarity and determinant residuals.
+Every `SU(3)` chain report must preserve sampler/proposal/RNG/stream IDs, master/chain/derived seed metadata, extents/beta/proposal angle, thermalisation and measurement cadence, proposal/accept counts, complete raw normalized average-plaquette evidence, the full requested autocorrelation evidence, ESS/SE diagnostics, and final maximum link unitarity and determinant residuals. The canonical runtime must emit that complete evidence to the commit-tied Actions log.
+
+The frozen reference chain is additionally pinned against literal golden measurements, proposal accounting, diagnostics, and residuals; a self-comparison of two executions is not sufficient authority for preserving V1 semantics.
 
 Phase 2C1 must retain
 
@@ -211,7 +219,7 @@ glueball_analysis_enabled         = false
 phase2c_complete                  = false
 ```
 
-until a separately predeclared Phase 2C2 peer-reviewed `SU(3)` benchmark is actually reproduced. Do not use the Phase 2B `SU(2)` result as external validation for `SU(3)`. Incompatible sampler, proposal, stream, update-order, local-action, diagnostic, or evidence semantics require a new contract identifier rather than mutation of the frozen V1 surface.
+until a separately predeclared Phase 2C2 peer-reviewed `SU(3)` benchmark is actually reproduced. Do not use the Phase 2B `SU(2)` result as external validation for `SU(3)`. Incompatible sampler, proposal, stream, update-order, local-action, diagnostic, evidence, or admitted-schedule semantics require a new contract identifier rather than mutation of the frozen V1 surface.
 
 Do not import triadic ontology, Q/K/V-to-colour semantics, or other cross-domain interpretations into these authorities.
 
@@ -257,7 +265,7 @@ python3 scripts/test_all_contract_validation.py
 
 The unified contract entry points are authoritative. Adding a new contract surface without registering it in those commands is a readiness failure.
 
-Tests must fail closed on invalid lattice extents, invalid group construction, invalid/oversized paths, invalid ensemble schedules, non-finite inputs/statistics, rejection-limit exhaustion, numerically inert stochastic proposals, broken contract structure, weakened benchmark provenance, weakened stationarity/equilibration gates, or weakened claim boundaries. Public `Result` APIs may not turn admissible numerical/allocation failures into panics.
+Tests must fail closed on invalid lattice extents, invalid group construction, invalid/oversized paths, invalid ensemble schedules, non-finite inputs/statistics, rejection-limit exhaustion, numerically inert or asymmetric stochastic proposals, broken contract structure, weakened benchmark provenance, weakened stationarity/equilibration gates, incomplete runtime evidence, or weakened claim boundaries. Public `Result` APIs may not turn admissible numerical/allocation failures into panics.
 
 Floating-point equality is not assumed. Every numerical/statistical comparison must have an explicit tolerance or uncertainty rule and must not be advertised as bitwise cross-platform identity unless separately established.
 
