@@ -17,9 +17,9 @@ use su2_ensemble::SplitMix64;
 use su3::Su3;
 use su3_ensemble::{
     derive_su3_chain_seed, local_action_difference, metropolis_sweep, proposal_angle_from_u64,
-    run_chain, Su3EnsembleConfig, Su3EnsembleError, ANGLE_GRID_MAGNITUDE_BITS,
-    LINK_RESIDUAL_LIMIT, MAX_PROPOSAL_ANGLE, MAX_REFERENCE_MEASUREMENTS, MAX_REFERENCE_SWEEPS,
-    MIN_PROPOSAL_ANGLE, PROPOSAL_ID, RNG_ID, SAMPLER_ID, STREAM_ID,
+    run_chain, Su3EnsembleConfig, Su3EnsembleError, ANGLE_GRID_MAGNITUDE_BITS, LINK_RESIDUAL_LIMIT,
+    MAX_PROPOSAL_ANGLE, MAX_REFERENCE_MEASUREMENTS, MAX_REFERENCE_SWEEPS, MIN_PROPOSAL_ANGLE,
+    PROPOSAL_ID, RNG_ID, SAMPLER_ID, STREAM_ID,
 };
 use su3_lattice::Su3Lattice4;
 
