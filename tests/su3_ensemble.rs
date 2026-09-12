@@ -43,14 +43,8 @@ fn su3_stream_derivation_has_golden_values() {
     assert_eq!(PROPOSAL_ID, "YM-SU3-GENERATOR-METROPOLIS-V1");
     assert_eq!(RNG_ID, "SPLITMIX64-V1");
     assert_eq!(STREAM_ID, "YM-SU3-STREAM-V1");
-    assert_eq!(
-        derive_su3_chain_seed(MASTER_SEED, 0),
-        0x94c7_1563_0ee8_e90a
-    );
-    assert_eq!(
-        derive_su3_chain_seed(MASTER_SEED, 1),
-        0x8aba_19af_6781_dc09
-    );
+    assert_eq!(derive_su3_chain_seed(MASTER_SEED, 0), 0x94c7_1563_0ee8_e90a);
+    assert_eq!(derive_su3_chain_seed(MASTER_SEED, 1), 0x8aba_19af_6781_dc09);
 }
 
 #[test]
