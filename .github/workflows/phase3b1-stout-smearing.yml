@@ -21,6 +21,7 @@ jobs:
 
       - name: Apply PR #12 review hardening
         run: |
+          python3 scripts/fix_pr12_review_helper.py
           python3 scripts/apply_pr12_review_hardening.py
           cargo fmt --all
           git config user.name "github-actions[bot]"
