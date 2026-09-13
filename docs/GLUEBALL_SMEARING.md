@@ -74,11 +74,12 @@ The reference implementation requires:
 - the identity lattice is an exact fixed point;
 - zero levels are an exact no-op;
 - temporal links are exactly unchanged;
-- the canonical nontrivial fixture changes at least one spatial link;
+- the canonical nontrivial fixture is pinned to literal one-level link/operator outputs with an absolute `1e-12` replay tolerance;
 - local gauge transformation commutes with smearing within the declared numerical tolerance;
 - the stout Hermitian/traceless generator residual remains bounded;
 - all smeared links remain inside the frozen SU(3) unitarity and determinant-one tolerances through the maximum admitted level count;
-- invalid rho, excessive levels, too-small spatial geometry, and anisotropic spatial geometry fail closed.
+- invalid rho, excessive levels, too-small spatial geometry, and anisotropic spatial geometry fail closed;
+- lattice-copy allocation failures propagate through `Result`; the public smearing path does not use an infallible full-lattice clone.
 
 ## Claim boundary
 

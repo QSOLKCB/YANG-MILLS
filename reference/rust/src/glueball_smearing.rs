@@ -25,6 +25,10 @@ pub const MAX_RHO: f64 = 0.25;
 pub const MAX_LEVELS: usize = 8;
 pub const ALGEBRA_RESIDUAL_TOLERANCE: f64 = 2.0e-12;
 pub const GAUGE_COVARIANCE_TOLERANCE: f64 = 5.0e-11;
+pub const FROZEN_OUTPUT_ABS_TOLERANCE: f64 = 1.0e-12;
+pub const FROZEN_SPATIAL_CHANGE: f64 = 0.2158247298307305;
+pub const FROZEN_SMEARED_PLAQUETTE_1X1: f64 = 0.9693015447000209;
+pub const FROZEN_SMEARED_RECTANGLE_2X1: f64 = 0.9511047606560571;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum GlueballSmearingError {
@@ -200,9 +204,27 @@ fn q_coefficients(q: Mat3) -> Result<[f64; SU3_GENERATORS], GlueballSmearingErro
     Ok(coefficients)
 }
 
+fn fallible_copy_lattice(lattice: &Su3Lattice4) -> Result<Su3Lattice4, GlueballSmearingError> {
+    let extents = lattice.extents();
+    let mut out = Su3Lattice4::new_identity(extents)?;
+    for x0 in 0..extents[0] {
+        for x1 in 0..extents[1] {
+            for x2 in 0..extents[2] {
+                for x3 in 0..extents[3] {
+                    let x = [x0, x1, x2, x3];
+                    for mu in 0..DIM {
+                        out.set_link(x, mu, lattice.link(x, mu)?)?;
+                    }
+                }
+            }
+        }
+    }
+    Ok(out)
+}
+
 fn smear_one_level(lattice: &Su3Lattice4, rho: f64) -> Result<Su3Lattice4, GlueballSmearingError> {
     let extents = lattice.extents();
-    let mut out = lattice.clone();
+    let mut out = fallible_copy_lattice(lattice)?;
     for x0 in 0..extents[0] {
         for x1 in 0..extents[1] {
             for x2 in 0..extents[2] {
@@ -238,7 +260,7 @@ pub fn spatial_stout_smear(
     levels: usize,
 ) -> Result<Su3Lattice4, GlueballSmearingError> {
     validate_parameters(lattice, rho, levels)?;
-    let mut current = lattice.clone();
+    let mut current = fallible_copy_lattice(lattice)?;
     for _ in 0..levels {
         current = smear_one_level(&current, rho)?;
     }
@@ -350,6 +372,23 @@ mod tests {
         assert!(
             residual <= GAUGE_COVARIANCE_TOLERANCE,
             "residual={residual:.17e}"
+        );
+    }
+
+    #[test]
+    fn canonical_nontrivial_output_is_frozen() {
+        let lattice = single_traceless_su3_link_lattice().unwrap();
+        let smeared = spatial_stout_smear(&lattice, CANONICAL_RHO, 1).unwrap();
+        let change = max_link_residual(&lattice, &smeared).unwrap();
+        let basis = scalar_a1pp_operator_basis(&smeared, 0).unwrap();
+        assert!((change - FROZEN_SPATIAL_CHANGE).abs() <= FROZEN_OUTPUT_ABS_TOLERANCE);
+        assert!(
+            (basis.spatial_plaquette_1x1 - FROZEN_SMEARED_PLAQUETTE_1X1).abs()
+                <= FROZEN_OUTPUT_ABS_TOLERANCE
+        );
+        assert!(
+            (basis.spatial_rectangle_2x1 - FROZEN_SMEARED_RECTANGLE_2X1).abs()
+                <= FROZEN_OUTPUT_ABS_TOLERANCE
         );
     }
 

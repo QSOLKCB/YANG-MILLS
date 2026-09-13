@@ -15,8 +15,9 @@ mod su3_lattice;
 
 use glueball_operators::scalar_a1pp_operator_basis;
 use glueball_smearing::{
-    max_link_residual, spatial_stout_smear, CANONICAL_RHO, GAUGE_COVARIANCE_TOLERANCE, MAX_LEVELS,
-    SMEARING_CONTRACT_ID, TRANSFORMATION_ID,
+    max_link_residual, spatial_stout_smear, CANONICAL_RHO, FROZEN_OUTPUT_ABS_TOLERANCE,
+    FROZEN_SMEARED_PLAQUETTE_1X1, FROZEN_SMEARED_RECTANGLE_2X1, FROZEN_SPATIAL_CHANGE,
+    GAUGE_COVARIANCE_TOLERANCE, MAX_LEVELS, SMEARING_CONTRACT_ID, TRANSFORMATION_ID,
 };
 use su3::SU3_ACCEPTANCE_TOLERANCE;
 use su3_lattice::{deterministic_su3_site_gauge, single_traceless_su3_link_lattice, Su3Lattice4};
@@ -40,8 +41,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let basis_before = scalar_a1pp_operator_basis(&lattice, 0)?;
     let basis_after = scalar_a1pp_operator_basis(&smeared, 0)?;
     let spatial_change = max_link_residual(&lattice, &smeared)?;
-    if !spatial_change.is_finite() || spatial_change <= 0.0 {
-        return Err("Phase 3B1 deterministic nontrivial field was not changed".into());
+    if !spatial_change.is_finite()
+        || (spatial_change - FROZEN_SPATIAL_CHANGE).abs() > FROZEN_OUTPUT_ABS_TOLERANCE
+        || (basis_after.spatial_plaquette_1x1 - FROZEN_SMEARED_PLAQUETTE_1X1).abs()
+            > FROZEN_OUTPUT_ABS_TOLERANCE
+        || (basis_after.spatial_rectangle_2x1 - FROZEN_SMEARED_RECTANGLE_2X1).abs()
+            > FROZEN_OUTPUT_ABS_TOLERANCE
+    {
+        return Err("Phase 3B1 frozen nontrivial output regression mismatch".into());
     }
 
     let transformed = lattice.gauge_transform(deterministic_su3_site_gauge)?;

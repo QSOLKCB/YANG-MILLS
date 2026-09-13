@@ -50,6 +50,7 @@ EXPECTED_CONTRACT: dict[str, Any] = {
         "temporal_link_rule": "U'_3(x)=U_3(x) exactly",
         "projection_step_used": False,
         "blocking_step_used": False,
+        "lattice_copy_allocation_failure_rule": "propagate via Result; no infallible Vec clone in the public smearing path",
     },
     "validation": {
         "identity_configuration_is_exact_fixed_point": True,
@@ -59,6 +60,10 @@ EXPECTED_CONTRACT: dict[str, Any] = {
         "su3_unitarity_residual_max": 5e-12,
         "su3_determinant_residual_max": 5e-12,
         "canonical_nontrivial_fixture_must_change_spatial_links": True,
+        "frozen_output_abs_tolerance": 1e-12,
+        "frozen_spatial_change": 0.2158247298307305,
+        "frozen_smeared_plaquette_1x1": 0.9693015447000209,
+        "frozen_smeared_rectangle_2x1": 0.9511047606560571,
         "non_finite_intermediate_rule": "reject",
     },
     "future_surfaces": {
@@ -146,8 +151,13 @@ EXPECTED_VECTORS: dict[str, Any] = {
             "rho": 0.1,
             "levels": 1,
             "configuration": "single traceless SU(3) cycle link",
-            "observable": "maximum all-link residual before/after smearing",
-            "expected": "finite-and-strictly-positive",
+            "observable": "canonical one-level stout output on the deterministic nontrivial fixture",
+            "expected": {
+                "maximum_all_link_residual": 0.2158247298307305,
+                "spatial_plaquette_1x1": 0.9693015447000209,
+                "spatial_rectangle_2x1": 0.9511047606560571,
+            },
+            "absolute_tolerance": 1e-12,
             "claim_class": "C2",
         },
         {

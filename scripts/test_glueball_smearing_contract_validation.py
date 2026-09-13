@@ -53,6 +53,14 @@ def main() -> None:
     expect_reject(validate_contract, broken, "undeclared blocking injected")
 
     broken = copy.deepcopy(contract)
+    broken["algorithm"]["lattice_copy_allocation_failure_rule"] = "abort on allocation failure"
+    expect_reject(validate_contract, broken, "allocation failure propagation weakened")
+
+    broken = copy.deepcopy(contract)
+    broken["validation"]["frozen_spatial_change"] = 0.0
+    expect_reject(validate_contract, broken, "frozen stout output drift")
+
+    broken = copy.deepcopy(contract)
     broken["future_surfaces"]["effective_mass_extracted"] = True
     expect_reject(validate_contract, broken, "mass extraction claimed before correlator phase")
 
@@ -67,6 +75,10 @@ def main() -> None:
     broken = copy.deepcopy(contract)
     broken["future_surfaces"]["connected_correlator_constructed"] = 0
     expect_reject(validate_contract, broken, "boolean replaced by integer")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][5]["expected"]["spatial_plaquette_1x1"] = 0.0
+    expect_reject(validate_vectors, broken, "literal stout output weakened")
 
     broken = copy.deepcopy(vectors)
     broken["vectors"][3]["expected_max"] = 1.0

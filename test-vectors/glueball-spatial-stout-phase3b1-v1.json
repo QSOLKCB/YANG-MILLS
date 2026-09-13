@@ -63,8 +63,13 @@
       "rho": 0.1,
       "levels": 1,
       "configuration": "single traceless SU(3) cycle link",
-      "observable": "maximum all-link residual before/after smearing",
-      "expected": "finite-and-strictly-positive",
+      "observable": "canonical one-level stout output on the deterministic nontrivial fixture",
+      "expected": {
+        "maximum_all_link_residual": 0.2158247298307305,
+        "spatial_plaquette_1x1": 0.9693015447000209,
+        "spatial_rectangle_2x1": 0.9511047606560571
+      },
+      "absolute_tolerance": 1e-12,
       "claim_class": "C2"
     },
     {
