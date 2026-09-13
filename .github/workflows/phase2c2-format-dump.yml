@@ -1,0 +1,32 @@
+name: Phase 2C2 formatter capture
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  format-capture:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Rust toolchain
+        run: rustup show
+
+      - name: Format working tree
+        run: cargo fmt --all
+
+      - name: Emit formatted benchmark module
+        run: |
+          echo '===BEGIN_SU3_BENCHMARK_RS==='
+          cat reference/rust/src/su3_benchmark.rs
+          echo '===END_SU3_BENCHMARK_RS==='
+
+      - name: Emit formatted benchmark binary
+        run: |
+          echo '===BEGIN_SU3_BENCHMARK_REFERENCE_RS==='
+          cat reference/rust/src/bin/su3_benchmark_reference.rs
+          echo '===END_SU3_BENCHMARK_REFERENCE_RS==='
