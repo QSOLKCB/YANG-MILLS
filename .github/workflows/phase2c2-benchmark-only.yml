@@ -21,7 +21,7 @@ jobs:
       - name: Apply fifth review hardening
         if: github.event.pull_request.head.ref == 'phase2c2-su3-published-baseline'
         run: |
-          python3 scripts/apply_pr10_review_fixes_round5.py
+          python3 scripts/run_pr10_review_fixes_round5.py
           cargo fmt --all
           git diff --check
           if ! git diff --quiet; then
