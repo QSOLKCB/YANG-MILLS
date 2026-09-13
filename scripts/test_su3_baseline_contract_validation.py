@@ -16,7 +16,11 @@ from check_su3_baseline_contracts import (
 )
 
 
-def expect_reject(callback: Callable[[dict[str, Any]], None], payload: dict[str, Any], label: str) -> None:
+def expect_reject(
+    callback: Callable[[dict[str, Any]], None],
+    payload: dict[str, Any],
+    label: str,
+) -> None:
     try:
         callback(payload)
     except (SystemExit, KeyError, TypeError, ValueError):
@@ -27,71 +31,86 @@ def expect_reject(callback: Callable[[dict[str, Any]], None], payload: dict[str,
 def main() -> None:
     contract = load(CONTRACT_PATH)
     vectors = load(VECTOR_PATH)
-
-    cases: list[tuple[str, Callable[[dict[str, Any]], None]]] = []
+    contract_cases: list[tuple[str, dict[str, Any]]] = []
 
     broken = copy.deepcopy(contract)
     broken["primary_source"]["peer_reviewed"] = False
-    cases.append(("peer-reviewed source weakened", lambda _: validate_su3_baseline_contract(broken)))
+    contract_cases.append(("peer-reviewed source weakened", broken))
 
     broken = copy.deepcopy(contract)
     broken["benchmark"]["extents"] = [6, 6, 6, 6]
-    cases.append(("benchmark volume drift", lambda _: validate_su3_baseline_contract(broken)))
+    contract_cases.append(("benchmark volume drift", broken))
 
     broken = copy.deepcopy(contract)
     broken["benchmark"]["source_envelope_max"] = 0.75
-    cases.append(("source envelope weakened", lambda _: validate_su3_baseline_contract(broken)))
+    contract_cases.append(("source envelope weakened", broken))
 
     broken = copy.deepcopy(contract)
     broken["benchmark"]["source_envelope_is_paper_error_bar"] = True
-    cases.append(("graphical envelope misrepresented", lambda _: validate_su3_baseline_contract(broken)))
+    contract_cases.append(("graphical envelope misrepresented", broken))
 
     broken = copy.deepcopy(contract)
     broken["reference_run"]["chain_ids"] = [0, 0]
-    cases.append(("independent chain identity collapsed", lambda _: validate_su3_baseline_contract(broken)))
+    contract_cases.append(("independent chain identity collapsed", broken))
 
     broken = copy.deepcopy(contract)
     broken["reference_run"]["total_sweeps_per_chain"] = 513
-    cases.append(("frozen Phase 2C1 schedule escaped", lambda _: validate_su3_baseline_contract(broken)))
+    contract_cases.append(("frozen Phase 2C1 schedule escaped", broken))
 
     broken = copy.deepcopy(contract)
     broken["comparison_rule"]["within_chain_stationarity_required"] = False
-    cases.append(("stationarity gate removed", lambda _: validate_su3_baseline_contract(broken)))
+    contract_cases.append(("stationarity gate removed", broken))
 
     broken = copy.deepcopy(contract)
     broken["predeclaration"]["benchmark_parameters_frozen_before_reference_result_inspection"] = False
-    cases.append(("predeclaration weakened", lambda _: validate_su3_baseline_contract(broken)))
+    contract_cases.append(("predeclaration weakened", broken))
 
     broken = copy.deepcopy(contract)
     broken["phase2c_gate"]["published_su3_baseline_reproduced"] = True
-    cases.append(("benchmark claimed before executable evidence", lambda _: validate_su3_baseline_contract(broken)))
+    contract_cases.append(("benchmark claimed before executable evidence", broken))
 
     broken = copy.deepcopy(contract)
     broken["phase2c_gate"]["glueball_analysis_enabled"] = True
-    cases.append(("glueball enabled before benchmark evidence", lambda _: validate_su3_baseline_contract(broken)))
+    contract_cases.append(("glueball enabled before benchmark evidence", broken))
 
     broken = copy.deepcopy(contract)
     broken["claim_boundary"]["benchmark_agreement_implies_positive_mass_gap"] = True
-    cases.append(("mass-gap overclaim", lambda _: validate_su3_baseline_contract(broken)))
+    contract_cases.append(("mass-gap overclaim", broken))
 
-    for label, callback in cases:
-        expect_reject(callback, contract, label)
+    for label, payload in contract_cases:
+        expect_reject(validate_su3_baseline_contract, payload, label)
 
     broken_vectors = copy.deepcopy(vectors)
     broken_vectors["vectors"][0]["expected_interval"] = [0.4, 0.8]
-    expect_reject(validate_su3_baseline_vectors, broken_vectors, "source vector envelope weakened")
+    expect_reject(
+        validate_su3_baseline_vectors,
+        broken_vectors,
+        "source vector envelope weakened",
+    )
 
     broken_vectors = copy.deepcopy(vectors)
     broken_vectors["vectors"][1]["chain_ids"] = [0, 0]
-    expect_reject(validate_su3_baseline_vectors, broken_vectors, "vector chain identity collapsed")
+    expect_reject(
+        validate_su3_baseline_vectors,
+        broken_vectors,
+        "vector chain identity collapsed",
+    )
 
     broken_vectors = copy.deepcopy(vectors)
     broken_vectors["vectors"][2]["constant_half_rejected"] = False
-    expect_reject(validate_su3_baseline_vectors, broken_vectors, "constant-series refusal removed")
+    expect_reject(
+        validate_su3_baseline_vectors,
+        broken_vectors,
+        "constant-series refusal removed",
+    )
 
     broken_vectors = copy.deepcopy(vectors)
     broken_vectors["vectors"][3]["phase2c_complete"] = True
-    expect_reject(validate_su3_baseline_vectors, broken_vectors, "Phase 2C vector completed prematurely")
+    expect_reject(
+        validate_su3_baseline_vectors,
+        broken_vectors,
+        "Phase 2C vector completed prematurely",
+    )
 
     print("Negative Phase 2C2 SU(3) published baseline contract regressions: passed")
 
