@@ -23,7 +23,7 @@ use su3_benchmark::{
     SOURCE_ENVELOPE_MIN, STATIONARITY_AUTOCORRELATION_MAX_LAG, STATIONARITY_HALF_MEASUREMENTS,
     SWEEPS_BETWEEN_MEASUREMENTS, THERMALIZATION_SWEEPS,
 };
-use su3_ensemble::{run_chain, Su3EnsembleConfig};
+use su3_ensemble::{run_chain, Su3ChainReport, Su3EnsembleConfig};
 
 fn config(chain_id: u64) -> Su3EnsembleConfig {
     Su3EnsembleConfig {
@@ -45,6 +45,22 @@ fn series_text(values: &[f64]) -> String {
         .map(|value| format!("{value:.17e}"))
         .collect::<Vec<_>>()
         .join(",")
+}
+
+fn print_runtime_identity(index: usize, report: &Su3ChainReport) {
+    println!("chain{index}_sampler_id={}", report.sampler_id);
+    println!("chain{index}_proposal_id={}", report.proposal_id);
+    println!("chain{index}_rng_id={}", report.rng_id);
+    println!("chain{index}_stream_id={}", report.stream_id);
+    println!("chain{index}_total_sweeps={}", report.total_sweeps);
+    println!(
+        "chain{index}_metropolis_proposals={}",
+        report.metropolis_proposals
+    );
+    println!(
+        "chain{index}_metropolis_accepts={}",
+        report.metropolis_accepts
+    );
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -89,6 +105,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("chain1_id={}", CHAIN_IDS[1]);
     println!("chain0_derived_seed={:016x}", first.derived_seed);
     println!("chain1_derived_seed={:016x}", second.derived_seed);
+    print_runtime_identity(0, &first);
+    print_runtime_identity(1, &second);
     println!("proposal_angle={PROPOSAL_ANGLE:.17e}");
     println!("thermalization_sweeps={THERMALIZATION_SWEEPS}");
     println!("measurements_per_chain={MEASUREMENTS}");
