@@ -4,42 +4,17 @@ on:
   pull_request:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   published-su3-benchmark:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout PR head
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Rust toolchain
         run: rustup show
-
-      - name: Apply fifth review hardening
-        if: github.event.pull_request.head.ref == 'phase2c2-su3-published-baseline'
-        run: |
-          python3 scripts/run_pr10_review_fixes_round5.py
-          cargo fmt --all
-          git diff --check
-          if ! git diff --quiet; then
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add \
-              contracts/YM-SU3-PLAQUETTE-BASELINE-V1.json \
-              contracts/YM-SU3-PLAQUETTE-BASELINE-V2.json \
-              test-vectors/su3-plaquette-baseline-v1.json \
-              test-vectors/su3-plaquette-baseline-v2.json \
-              scripts/check_su3_baseline_contracts.py \
-              scripts/test_su3_baseline_contract_validation.py \
-              reference/rust/src/su3_benchmark.rs \
-              reference/rust/src/bin/su3_benchmark_reference.rs \
-              reference/rust/src/bin/su3_confirmation_reference.rs
-            git commit -m 'Address fifth PR 10 review hardening pass'
-            git push origin HEAD:${{ github.event.pull_request.head.ref }}
-          fi
 
       - name: Strict Rust format
         run: cargo fmt --all -- --check
