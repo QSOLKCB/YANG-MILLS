@@ -2,22 +2,19 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+#[path = "../glueball_operators.rs"]
+mod glueball_operators;
+#[path = "../path_holonomy.rs"]
+mod path_holonomy;
 #[path = "../su3.rs"]
 mod su3;
 #[path = "../su3_lattice.rs"]
 mod su3_lattice;
-#[path = "../path_holonomy.rs"]
-mod path_holonomy;
-#[path = "../glueball_operators.rs"]
-mod glueball_operators;
 
 use glueball_operators::{
-    scalar_a1pp_operator_basis, GAUGE_INVARIANCE_TOLERANCE, OPERATOR_BASIS_ID,
-    OPERATOR_CONTRACT_ID,
+    scalar_a1pp_operator_basis, GAUGE_INVARIANCE_TOLERANCE, OPERATOR_BASIS_ID, OPERATOR_CONTRACT_ID,
 };
-use su3_lattice::{
-    deterministic_su3_site_gauge, single_traceless_su3_link_lattice, Su3Lattice4,
-};
+use su3_lattice::{deterministic_su3_site_gauge, single_traceless_su3_link_lattice, Su3Lattice4};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let identity = Su3Lattice4::new_identity([3, 3, 3, 3])?;
@@ -44,10 +41,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("contract={OPERATOR_CONTRACT_ID}");
     println!("basis={OPERATOR_BASIS_ID}");
     println!("status=phase-3a-candidate");
-    println!("identity_spatial_plaquette_1x1={:.17e}", identity_basis.spatial_plaquette_1x1);
-    println!("identity_spatial_rectangle_2x1={:.17e}", identity_basis.spatial_rectangle_2x1);
-    println!("identity_plaquette_loop_count={}", identity_basis.plaquette_loop_count);
-    println!("identity_rectangle_loop_count={}", identity_basis.rectangle_loop_count);
+    println!(
+        "identity_spatial_plaquette_1x1={:.17e}",
+        identity_basis.spatial_plaquette_1x1
+    );
+    println!(
+        "identity_spatial_rectangle_2x1={:.17e}",
+        identity_basis.spatial_rectangle_2x1
+    );
+    println!(
+        "identity_plaquette_loop_count={}",
+        identity_basis.plaquette_loop_count
+    );
+    println!(
+        "identity_rectangle_loop_count={}",
+        identity_basis.rectangle_loop_count
+    );
     println!("deterministic_gauge_residual={gauge_residual:.17e}");
     println!("finite_lattice_irrep=A1++");
     println!("continuum_channel_intent=0++");
