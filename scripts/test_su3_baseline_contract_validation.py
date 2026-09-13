@@ -39,6 +39,10 @@ def main() -> None:
     expect_reject(validate_v1_contract, broken, "V1 failure reclassified as frozen success")
 
     broken = copy.deepcopy(v1)
+    broken["clay_solution_proved"] = True
+    expect_reject(validate_v1_contract, broken, "V1 undeclared top-level overclaim field accepted")
+
+    broken = copy.deepcopy(v1)
     broken["scope"] = "continuum construction and Clay Yang-Mills mass-gap solution"
     expect_reject(validate_v1_contract, broken, "V1 scope promoted beyond finite-lattice validation")
 
@@ -73,6 +77,10 @@ def main() -> None:
     broken = copy.deepcopy(v1)
     broken["comparison_rule"]["within_chain_stationarity_required"] = False
     expect_reject(validate_v1_contract, broken, "V1 stationarity comparison rule weakened")
+
+    broken = copy.deepcopy(v1)
+    broken["comparison_rule"]["raw_measurements_retained"] = 1
+    expect_reject(validate_v1_contract, broken, "V1 boolean replaced by integer")
 
     broken = copy.deepcopy(v1)
     broken["predeclaration"]["selected_after_phase2c1_freeze"] = False
@@ -163,6 +171,10 @@ def main() -> None:
     expect_reject(validate_v2_contract, broken, "V2 source envelope retuned")
 
     broken = copy.deepcopy(v2)
+    broken["clay_solution_proved"] = True
+    expect_reject(validate_v2_contract, broken, "V2 undeclared top-level overclaim field accepted")
+
+    broken = copy.deepcopy(v2)
     broken["scope"] = "continuum quantum Yang-Mills construction and positive mass-gap proof"
     expect_reject(validate_v2_contract, broken, "V2 scope promoted beyond finite-lattice validation")
 
@@ -209,6 +221,10 @@ def main() -> None:
     broken = copy.deepcopy(v2)
     broken["comparison_rule"]["raw_measurements_retained"] = False
     expect_reject(validate_v2_contract, broken, "V2 raw-evidence comparison rule weakened")
+
+    broken = copy.deepcopy(v2)
+    broken["comparison_rule"]["raw_measurements_retained"] = 1
+    expect_reject(validate_v2_contract, broken, "V2 boolean replaced by integer")
 
     broken = copy.deepcopy(v2)
     broken["replay_tolerance"]["summary_absolute"] = 1.0

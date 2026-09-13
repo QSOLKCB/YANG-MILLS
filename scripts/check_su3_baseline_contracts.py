@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from check_contracts import load
+from check_contracts import exact_typed_equal, load
 
 V1_CONTRACT_PATH = "contracts/YM-SU3-PLAQUETTE-BASELINE-V1.json"
 V1_VECTOR_PATH = "test-vectors/su3-plaquette-baseline-v1.json"
@@ -151,6 +151,146 @@ V2_CLAIM_BOUNDARY = {
     "benchmark_agreement_implies_continuum_qft": False,
     "benchmark_agreement_implies_positive_mass_gap": False,
     "glueball_analysis_authorization_is_not_a_glueball_result": True,
+}
+EXPECTED_BENCHMARK = {
+    "gauge_group": "SU(3)",
+    "action": "Wilson",
+    "boundary_conditions": "periodic",
+    "extents": [4, 4, 4, 4],
+    "beta": 6.0,
+    "observable": EXPECTED_OBSERVABLE,
+    "source_envelope_min": 0.56,
+    "source_envelope_max": 0.63,
+    "source_envelope_is_paper_error_bar": False,
+}
+V1_REFERENCE_RUN = {
+    **EXPECTED_RUNTIME_IDENTITY,
+    "master_seed": "2c02198105010001",
+    "chain_ids": [0, 1],
+    "derived_seeds": ["2ff3bf48550d1457", "ef7636a56e8ea29a"],
+    "proposal_angle": 0.35,
+    "thermalization_sweeps": 192,
+    "measurements_per_chain": 128,
+    "sweeps_between_measurements": 2,
+    "total_sweeps_per_chain": 448,
+    "autocorrelation_max_lag": 24,
+    "minimum_ess_per_chain": 8.0,
+    "maximum_chain_consistency_z": 5.0,
+    "stationarity_half_measurements": 64,
+    "stationarity_autocorrelation_max_lag": 12,
+    "maximum_stationarity_z": 5.0,
+    "minimum_metropolis_acceptance": 0.1,
+    "maximum_metropolis_acceptance": 0.95,
+    "expected_metropolis_proposals_per_chain": 3670016,
+    "maximum_link_unitarity_residual": 5e-12,
+    "maximum_link_determinant_residual": 5e-12,
+}
+V2_REFERENCE_RUN = {
+    **EXPECTED_RUNTIME_IDENTITY,
+    "master_seed": "2c02198105010002",
+    "chain_ids": [0, 1, 2, 3],
+    "derived_seeds": [
+        "dfcdab179476617a",
+        "151dd841ccef81c6",
+        "9c28ededca3d1ae2",
+        "17dbbf4a00214611",
+    ],
+    "proposal_angle": 0.35,
+    "thermalization_sweeps": 192,
+    "measurements_per_chain": 128,
+    "sweeps_between_measurements": 2,
+    "total_sweeps_per_chain": 448,
+    "autocorrelation_max_lag": 24,
+    "chain_count": 4,
+    "minimum_aggregate_effective_sample_size": 16.0,
+    "aggregate_ess_rationale": "preserves the V1 design's intended total minimum statistical information of two chains times ESS 8 while adding fresh independent streams rather than lowering the failed V1 threshold",
+    "maximum_pairwise_chain_consistency_z": 5.0,
+    "stationarity_half_measurements": 64,
+    "stationarity_autocorrelation_max_lag": 12,
+    "maximum_stationarity_z": 5.0,
+    "minimum_metropolis_acceptance": 0.1,
+    "maximum_metropolis_acceptance": 0.95,
+    "expected_metropolis_proposals_per_chain": 3670016,
+    "maximum_link_unitarity_residual": 5e-12,
+    "maximum_link_determinant_residual": 5e-12,
+}
+V2_OBSERVED_EVIDENCE = {
+    "workflow_run_id": 34761701867,
+    "evidence_head_commit": "f5a221fdad2046779358cc59460fae488626459b",
+    "pooled_mean": 0.5992920042685975,
+    "pooled_standard_error": 0.0008268453534905086,
+    "chain_means": [
+        0.5951228942049566,
+        0.6010578916054883,
+        0.6006811934765629,
+        0.6003060377873822,
+    ],
+    "chain_standard_errors": [
+        0.00073731922680896,
+        0.0017334647942562633,
+        0.0013810304643338124,
+        0.002341577852401104,
+    ],
+    "chain_effective_sample_sizes": [
+        37.108298427827265,
+        12.12458490228564,
+        19.780522239783117,
+        9.930599191453949,
+    ],
+    "aggregate_effective_sample_size": 78.94400476134997,
+    "chain_acceptances": [
+        0.8675000326974052,
+        0.8676090240478516,
+        0.867549078805106,
+        0.867567607334682,
+    ],
+    "stationarity_z": [
+        1.4650733209908853,
+        1.2503134066297152,
+        0.6586970772179463,
+        0.6522302609275793,
+    ],
+    "maximum_pairwise_chain_consistency_z_observed": 3.5504261086461475,
+    "maximum_stationarity_z_observed": 1.4650733209908853,
+    "maximum_link_unitarity_residual_observed": 3.1308289294429414e-14,
+    "maximum_link_determinant_residual_observed": 3.553115420753491e-14,
+    "source_envelope_reproduced": True,
+    "diagnostics_trustworthy": True,
+    "v1_reclassified_as_pass": False,
+    "parameter_retuning_after_v2_result": False,
+}
+EXPECTED_V1_CONTRACT = {
+    "contract_id": "YM-SU3-PLAQUETTE-BASELINE-V1",
+    "status": "phase-2c2-v1-failed",
+    "scope": EXPECTED_SCOPES["YM-SU3-PLAQUETTE-BASELINE-V1"],
+    "depends_on": [{"contract_id": "YM-SU3-ENSEMBLE-V1", "required_status": "phase-2c1-frozen"}],
+    "primary_source": EXPECTED_PRIMARY_SOURCES["YM-SU3-PLAQUETTE-BASELINE-V1"],
+    "benchmark": EXPECTED_BENCHMARK,
+    "reference_run": V1_REFERENCE_RUN,
+    "comparison_rule": V1_COMPARISON_RULE,
+    "predeclaration": V1_PREDECLARATION,
+    "observed_evidence": V1_OBSERVED_EVIDENCE,
+    "phase2c_gate": V1_GATE,
+    "claim_boundary": V1_CLAIM_BOUNDARY,
+    "replay_tolerance": EXPECTED_V1_REPLAY_TOLERANCE,
+}
+EXPECTED_V2_CONTRACT = {
+    "contract_id": "YM-SU3-PLAQUETTE-BASELINE-V2",
+    "status": "phase-2c2-frozen",
+    "scope": EXPECTED_SCOPES["YM-SU3-PLAQUETTE-BASELINE-V2"],
+    "depends_on": [
+        {"contract_id": "YM-SU3-ENSEMBLE-V1", "required_status": "phase-2c1-frozen"},
+        {"contract_id": "YM-SU3-PLAQUETTE-BASELINE-V1", "required_status": "phase-2c2-v1-failed"},
+    ],
+    "primary_source": EXPECTED_PRIMARY_SOURCES["YM-SU3-PLAQUETTE-BASELINE-V2"],
+    "benchmark": EXPECTED_BENCHMARK,
+    "reference_run": V2_REFERENCE_RUN,
+    "comparison_rule": V2_COMPARISON_RULE,
+    "predeclaration": V2_PREDECLARATION,
+    "observed_evidence": V2_OBSERVED_EVIDENCE,
+    "phase2c_gate": V2_GATE,
+    "claim_boundary": V2_CLAIM_BOUNDARY,
+    "replay_tolerance": EXPECTED_V2_REPLAY_TOLERANCE,
 }
 V1_VECTOR_SOURCE = {
     "id": "published-source-envelope",
@@ -346,6 +486,7 @@ def validate_v1_contract(payload: dict[str, Any]) -> None:
     _require(payload["observed_evidence"] == V1_OBSERVED_EVIDENCE, "Phase 2C2 V1 observed evidence drift")
     _require(payload["phase2c_gate"] == V1_GATE, "Phase 2C2 V1 gate drift")
     _require(payload["claim_boundary"] == V1_CLAIM_BOUNDARY, "Phase 2C2 V1 claim boundary drift")
+    _require(exact_typed_equal(payload, EXPECTED_V1_CONTRACT), "Phase 2C2 V1 closed typed-schema drift")
 
 
 def validate_v1_vectors(payload: dict[str, Any]) -> None:
@@ -414,6 +555,7 @@ def validate_v2_contract(payload: dict[str, Any]) -> None:
     _require(observed["maximum_link_determinant_residual_observed"] <= run["maximum_link_determinant_residual"], "Phase 2C2 V2 determinant no longer passes")
     _require(payload["phase2c_gate"] == V2_GATE, "Phase 2C2 V2 frozen gate drift")
     _require(payload["claim_boundary"] == V2_CLAIM_BOUNDARY, "Phase 2C2 V2 claim boundary drift")
+    _require(exact_typed_equal(payload, EXPECTED_V2_CONTRACT), "Phase 2C2 V2 closed typed-schema drift")
 
 
 def validate_v2_vectors(payload: dict[str, Any]) -> None:
