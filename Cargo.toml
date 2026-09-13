@@ -1,6 +1,6 @@
 [package]
 name = "yang-mills-reference"
-version = "0.7.0"
+version = "0.8.0"
 edition = "2021"
 license = "MPL-2.0"
 repository = "https://github.com/QSOLKCB/YANG-MILLS"
@@ -45,6 +45,10 @@ path = "reference/rust/src/bin/su2_benchmark_reference.rs"
 [[bin]]
 name = "ym-su3-ensemble"
 path = "reference/rust/src/bin/su3_ensemble_reference.rs"
+
+[[bin]]
+name = "ym-su3-plaquette-baseline"
+path = "reference/rust/src/bin/su3_benchmark_reference.rs"
 
 [profile.release]
 lto = "thin"
