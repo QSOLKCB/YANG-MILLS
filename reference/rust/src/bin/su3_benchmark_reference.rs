@@ -103,34 +103,91 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("chain0_total_sweeps={}", first.total_sweeps);
     println!("chain1_total_sweeps={}", second.total_sweeps);
     println!("chain0_metropolis_proposals={}", first.metropolis_proposals);
-    println!("chain1_metropolis_proposals={}", second.metropolis_proposals);
+    println!(
+        "chain1_metropolis_proposals={}",
+        second.metropolis_proposals
+    );
     println!("chain0_metropolis_accepts={}", first.metropolis_accepts);
     println!("chain1_metropolis_accepts={}", second.metropolis_accepts);
-    println!("chain0_metropolis_acceptance={:.17e}", summary.chain_acceptances[0]);
-    println!("chain1_metropolis_acceptance={:.17e}", summary.chain_acceptances[1]);
+    println!(
+        "chain0_metropolis_acceptance={:.17e}",
+        summary.chain_acceptances[0]
+    );
+    println!(
+        "chain1_metropolis_acceptance={:.17e}",
+        summary.chain_acceptances[1]
+    );
     println!("chain0_measurements={}", series_text(&first.measurements));
     println!("chain1_measurements={}", series_text(&second.measurements));
     println!("chain0_mean={:.17e}", summary.chain_means[0]);
     println!("chain1_mean={:.17e}", summary.chain_means[1]);
-    println!("chain0_standard_error={:.17e}", summary.chain_standard_errors[0]);
-    println!("chain1_standard_error={:.17e}", summary.chain_standard_errors[1]);
-    println!("chain0_effective_sample_size={:.17e}", summary.chain_effective_sample_sizes[0]);
-    println!("chain1_effective_sample_size={:.17e}", summary.chain_effective_sample_sizes[1]);
-    println!("chain0_tau_int={:.17e}", first.diagnostics.integrated_autocorrelation_time);
-    println!("chain1_tau_int={:.17e}", second.diagnostics.integrated_autocorrelation_time);
-    println!("chain0_stationarity_first_half_mean={:.17e}", summary.stationarity[0].first_half_mean);
-    println!("chain0_stationarity_second_half_mean={:.17e}", summary.stationarity[0].second_half_mean);
-    println!("chain0_stationarity_z={:.17e}", summary.stationarity[0].drift_z);
-    println!("chain1_stationarity_first_half_mean={:.17e}", summary.stationarity[1].first_half_mean);
-    println!("chain1_stationarity_second_half_mean={:.17e}", summary.stationarity[1].second_half_mean);
-    println!("chain1_stationarity_z={:.17e}", summary.stationarity[1].drift_z);
+    println!(
+        "chain0_standard_error={:.17e}",
+        summary.chain_standard_errors[0]
+    );
+    println!(
+        "chain1_standard_error={:.17e}",
+        summary.chain_standard_errors[1]
+    );
+    println!(
+        "chain0_effective_sample_size={:.17e}",
+        summary.chain_effective_sample_sizes[0]
+    );
+    println!(
+        "chain1_effective_sample_size={:.17e}",
+        summary.chain_effective_sample_sizes[1]
+    );
+    println!(
+        "chain0_tau_int={:.17e}",
+        first.diagnostics.integrated_autocorrelation_time
+    );
+    println!(
+        "chain1_tau_int={:.17e}",
+        second.diagnostics.integrated_autocorrelation_time
+    );
+    println!(
+        "chain0_stationarity_first_half_mean={:.17e}",
+        summary.stationarity[0].first_half_mean
+    );
+    println!(
+        "chain0_stationarity_second_half_mean={:.17e}",
+        summary.stationarity[0].second_half_mean
+    );
+    println!(
+        "chain0_stationarity_z={:.17e}",
+        summary.stationarity[0].drift_z
+    );
+    println!(
+        "chain1_stationarity_first_half_mean={:.17e}",
+        summary.stationarity[1].first_half_mean
+    );
+    println!(
+        "chain1_stationarity_second_half_mean={:.17e}",
+        summary.stationarity[1].second_half_mean
+    );
+    println!(
+        "chain1_stationarity_z={:.17e}",
+        summary.stationarity[1].drift_z
+    );
     println!("max_stationarity_z={:.17e}", summary.max_stationarity_z);
     println!("pooled_mean={:.17e}", summary.pooled_mean);
-    println!("pooled_standard_error={:.17e}", summary.pooled_standard_error);
+    println!(
+        "pooled_standard_error={:.17e}",
+        summary.pooled_standard_error
+    );
     println!("chain_consistency_z={:.17e}", summary.chain_consistency_z);
-    println!("min_effective_sample_size={:.17e}", summary.min_effective_sample_size);
-    println!("max_link_unitarity_residual={:.17e}", summary.max_link_unitarity_residual);
-    println!("max_link_determinant_residual={:.17e}", summary.max_link_determinant_residual);
+    println!(
+        "min_effective_sample_size={:.17e}",
+        summary.min_effective_sample_size
+    );
+    println!(
+        "max_link_unitarity_residual={:.17e}",
+        summary.max_link_unitarity_residual
+    );
+    println!(
+        "max_link_determinant_residual={:.17e}",
+        summary.max_link_determinant_residual
+    );
     println!("published_su3_baseline_reproduced=true");
     println!("phase2c_complete=true");
     println!("glueball_analysis_enabled=true");

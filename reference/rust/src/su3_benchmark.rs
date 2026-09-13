@@ -28,10 +28,7 @@ pub const SOURCE_ENVELOPE_MIN: f64 = 0.56;
 pub const SOURCE_ENVELOPE_MAX: f64 = 0.63;
 pub const MASTER_SEED: u64 = 0x2c02_1981_0501_0001;
 pub const CHAIN_IDS: [u64; 2] = [0, 1];
-pub const FROZEN_CHAIN_DERIVED_SEEDS: [u64; 2] = [
-    0x2ff3_bf48_550d_1457,
-    0xef76_36a5_6e8e_a29a,
-];
+pub const FROZEN_CHAIN_DERIVED_SEEDS: [u64; 2] = [0x2ff3_bf48_550d_1457, 0xef76_36a5_6e8e_a29a];
 pub const PROPOSAL_ANGLE: f64 = 0.35;
 pub const THERMALIZATION_SWEEPS: usize = 192;
 pub const MEASUREMENTS: usize = 128;
@@ -47,8 +44,7 @@ pub const MAX_METROPOLIS_ACCEPTANCE: f64 = 0.95;
 pub const MAX_LINK_UNITARITY_RESIDUAL: f64 = LINK_RESIDUAL_LIMIT;
 pub const MAX_LINK_DETERMINANT_RESIDUAL: f64 = LINK_RESIDUAL_LIMIT;
 pub const PLAQUETTE_SAMPLE_TOLERANCE: f64 = 1.0e-12;
-pub const LINKS_PER_SWEEP: u64 =
-    (EXTENTS[0] * EXTENTS[1] * EXTENTS[2] * EXTENTS[3] * 4) as u64;
+pub const LINKS_PER_SWEEP: u64 = (EXTENTS[0] * EXTENTS[1] * EXTENTS[2] * EXTENTS[3] * 4) as u64;
 pub const PROPOSALS_PER_LINK_PER_SWEEP: u64 = 8;
 pub const EXPECTED_TOTAL_SWEEPS: usize =
     THERMALIZATION_SWEEPS + MEASUREMENTS * SWEEPS_BETWEEN_MEASUREMENTS;
@@ -242,13 +238,13 @@ pub fn summarize_two_chains(
     first: &Su3ChainReport,
     second: &Su3ChainReport,
 ) -> Result<BenchmarkSummary, BenchmarkError> {
+    if first.derived_seed == second.derived_seed {
+        return Err(BenchmarkError::DuplicateChainIdentity);
+    }
     if !report_matches_benchmark(first, CHAIN_IDS[0])
         || !report_matches_benchmark(second, CHAIN_IDS[1])
     {
         return Err(BenchmarkError::WrongBenchmarkConfiguration);
-    }
-    if first.derived_seed == second.derived_seed {
-        return Err(BenchmarkError::DuplicateChainIdentity);
     }
     if first.measurements == second.measurements {
         return Err(BenchmarkError::DuplicateMeasurementSeries);
@@ -259,7 +255,10 @@ pub fn summarize_two_chains(
         return Err(BenchmarkError::InvalidPlaquetteSample);
     }
 
-    let chain_acceptances = [acceptance_from_counts(first)?, acceptance_from_counts(second)?];
+    let chain_acceptances = [
+        acceptance_from_counts(first)?,
+        acceptance_from_counts(second)?,
+    ];
     if !first.final_link_unitarity_residual.is_finite()
         || !second.final_link_unitarity_residual.is_finite()
         || !first.final_link_determinant_residual.is_finite()
@@ -298,7 +297,11 @@ pub fn summarize_two_chains(
     let consistency_scale =
         (chain_standard_errors[0].powi(2) + chain_standard_errors[1].powi(2)).sqrt();
     let chain_consistency_z = if consistency_scale == 0.0 {
-        if chain_difference == 0.0 { 0.0 } else { f64::INFINITY }
+        if chain_difference == 0.0 {
+            0.0
+        } else {
+            f64::INFINITY
+        }
     } else {
         chain_difference / consistency_scale
     };
@@ -313,7 +316,9 @@ pub fn summarize_two_chains(
 
     if !chain_means.iter().all(|value| value.is_finite())
         || !chain_standard_errors.iter().all(|value| value.is_finite())
-        || !chain_effective_sample_sizes.iter().all(|value| value.is_finite())
+        || !chain_effective_sample_sizes
+            .iter()
+            .all(|value| value.is_finite())
         || !chain_acceptances.iter().all(|value| value.is_finite())
         || !max_stationarity_z.is_finite()
         || !pooled_mean.is_finite()
@@ -418,8 +423,14 @@ mod tests {
 
     #[test]
     fn frozen_stream_seeds_match_phase2c1_derivation() {
-        assert_eq!(derive_su3_chain_seed(MASTER_SEED, 0), FROZEN_CHAIN_DERIVED_SEEDS[0]);
-        assert_eq!(derive_su3_chain_seed(MASTER_SEED, 1), FROZEN_CHAIN_DERIVED_SEEDS[1]);
+        assert_eq!(
+            derive_su3_chain_seed(MASTER_SEED, 0),
+            FROZEN_CHAIN_DERIVED_SEEDS[0]
+        );
+        assert_eq!(
+            derive_su3_chain_seed(MASTER_SEED, 1),
+            FROZEN_CHAIN_DERIVED_SEEDS[1]
+        );
         assert_ne!(FROZEN_CHAIN_DERIVED_SEEDS[0], FROZEN_CHAIN_DERIVED_SEEDS[1]);
     }
 
@@ -486,7 +497,8 @@ mod tests {
 
         let mut broken = first;
         broken.final_link_unitarity_residual = MAX_LINK_UNITARITY_RESIDUAL * 2.0;
-        let summary = summarize_two_chains(&broken, &second).expect("finite residual is summarized");
+        let summary =
+            summarize_two_chains(&broken, &second).expect("finite residual is summarized");
         assert!(!summary.diagnostics_trustworthy);
         assert!(!summary.published_su3_baseline_reproduced);
     }
