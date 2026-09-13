@@ -40,9 +40,11 @@ The predeclared published source-resolution envelope was `[0.59,0.62]`. Two inde
 
 and chain-consistency `z ~= 0.946`. The minimum chain ESS was about `7.75`, and the maximum final `SU(2)` unit-link residual was `6.66e-16`. Review hardening split each post-thermalisation chain into first/last 24-measurement halves and required autocorrelation-aware drift `z <= 5`; the two chains produced stationarity `z ~= 2.396` and `z ~= 1.138`, respectively. This closes the finite-lattice Phase 2 graduation gate for the declared `SU(2)` regime. It does **not** establish confinement, continuum quantum-field existence, or a positive continuum mass gap.
 
-Phase 2C1 is frozen in PR #9. It introduces the separately versioned `SU(3)` ensemble authority `YM-SU3-ENSEMBLE-V1`, using a correctness-first symmetric single-generator Metropolis kernel over the frozen Gell-Mann basis, a domain-separated `YM-SU3-STREAM-V1` chain identity, an exactly paired finite binary64 proposal-angle grid, allocation-free six-plaquette local action differences, a stress-tested 512-sweep reference bound, complete raw runtime evidence, and literal golden-chain regression vectors. See [`docs/SU3_ENSEMBLES.md`](docs/SU3_ENSEMBLES.md). The external peer-reviewed `SU(3)` benchmark remains deliberately open for Phase 2C2, so `published_su3_baseline_reproduced=false`, `glueball_analysis_enabled=false`, and `phase2c_complete=false`.
+Phase 2C1 was merged in PR #9. It froze the separately versioned `SU(3)` ensemble authority `YM-SU3-ENSEMBLE-V1`, using a correctness-first symmetric single-generator Metropolis kernel over the frozen Gell-Mann basis, a domain-separated `YM-SU3-STREAM-V1` chain identity, an exactly paired finite binary64 proposal-angle grid, allocation-free six-plaquette local action differences, a stress-tested 512-sweep reference bound, complete raw runtime evidence, and literal golden-chain regression vectors. See [`docs/SU3_ENSEMBLES.md`](docs/SU3_ENSEMBLES.md).
 
-No current phase performs glueball extraction, a continuum/infinite-volume limit, construction of the interacting quantum theory, or a mass-gap proof.
+Phase 2C2 is implemented in PR #10. The first predeclared authority, `YM-SU3-PLAQUETTE-BASELINE-V1`, reproduced the peer-reviewed `4^4`, `beta=6.0` plaquette surface but failed its predeclared per-chain ESS floor, so it remains explicitly failed. The separately predeclared `YM-SU3-PLAQUETTE-BASELINE-V2` used four fresh independent streams without changing the external target, sampler, proposal scale, or per-chain schedule. It passed with pooled mean `0.5992920043` inside the frozen `[0.56,0.63]` source envelope, aggregate ESS `78.944`, maximum pairwise chain-consistency `z ~= 3.550`, and maximum stationarity `z ~= 1.465`. The V2 authority is frozen with `published_su3_baseline_reproduced=true`, `phase2c_complete=true`, and `glueball_analysis_enabled=true`. See [`docs/PUBLISHED_SU3_PLAQUETTE_BASELINE.md`](docs/PUBLISHED_SU3_PLAQUETTE_BASELINE.md).
+
+Phase 3 glueball analysis is now authorized but has not yet been implemented. No current phase performs glueball extraction, a continuum/infinite-volume limit, construction of the interacting quantum theory, or a mass-gap proof.
 
 ## The target
 
@@ -245,13 +247,15 @@ Phase 2C1 has its own domain-separated chain-seed derivation, fixed site/directi
 
 A `beta=0` all-accept regression checks the transition kernel but is **not** represented as an exact Haar-equilibrium sample.
 
-The sampler mechanics are frozen before selecting an external `SU(3)` finite-lattice benchmark. Phase 2C2 therefore retains
+The Phase 2C1 sampler contract remains mechanically scoped and therefore retains
 
 ```text
 published_su3_baseline_reproduced = false
 glueball_analysis_enabled         = false
 phase2c_complete                  = false
 ```
+
+External validation is owned by the separately versioned Phase 2C2 V2 authority, which is frozen with all three corresponding graduation flags true. Those validation flags must not be back-propagated into `YM-SU3-ENSEMBLE-V1`.
 
 ## Lattice-to-continuum boundary
 
@@ -273,6 +277,8 @@ cargo run --quiet --locked --bin ym-classical-geometry
 cargo run --quiet --locked --bin ym-su2-ensemble
 cargo run --quiet --locked --bin ym-su2-plaquette-baseline
 cargo run --quiet --locked --bin ym-su3-ensemble
+cargo run --release --quiet --locked --bin ym-su3-plaquette-baseline
+cargo run --release --quiet --locked --bin ym-su3-plaquette-baseline-v2
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
@@ -297,7 +303,7 @@ scripts/               fail-closed contract checks
 
 ## Roadmap
 
-The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 2B closes the published `SU(2)` plaquette validation gate. Phase 2C1 freezes a separately versioned `SU(3)` sampler; Phase 2C2 must independently validate it against a predeclared published `SU(3)` finite-lattice benchmark before Phase 3 may consume `SU(3)` ensemble evidence.
+The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 2B closes the published `SU(2)` plaquette validation gate. Phase 2C1 freezes a separately versioned `SU(3)` sampler, and Phase 2C2 now freezes its independent published finite-lattice validation after preserving the failed V1 attempt and passing the fresh-stream V2 confirmation. Phase 3 may now begin under separately versioned glueball-analysis authorities.
 
 ## Licence
 
