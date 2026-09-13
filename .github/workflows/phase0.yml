@@ -48,6 +48,9 @@ jobs:
       - name: Published SU(2) plaquette baseline
         run: cargo run --quiet --locked --bin ym-su2-plaquette-baseline
 
+      - name: SU(3) ensemble reference vectors
+        run: cargo run --quiet --locked --bin ym-su3-ensemble
+
       - name: All contract checks
         run: python3 scripts/check_all_contracts.py
 

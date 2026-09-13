@@ -17,6 +17,7 @@ cargo run --quiet --locked --bin ym-path-holonomy
 cargo run --quiet --locked --bin ym-classical-geometry
 cargo run --quiet --locked --bin ym-su2-ensemble
 cargo run --quiet --locked --bin ym-su2-plaquette-baseline
+cargo run --quiet --locked --bin ym-su3-ensemble
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
@@ -27,7 +28,7 @@ The unified contract entry points are authoritative. A phase that adds a machine
 
 The reference uses IEEE-754 `f64` arithmetic through Rust. It does not claim bit-identical floating results across every compiler/architecture. Tests use explicit tolerances where operations are not algebraically exact in machine arithmetic.
 
-The integer `SPLITMIX64-V1` pseudorandom stream is exactly versioned; floating transcendental functions used to turn that stream into Haar directions are not advertised as universally bit-identical across platforms.
+The integer `SPLITMIX64-V1` pseudorandom stream is exactly versioned; floating transcendental functions used to turn that stream into group-valued proposals are not advertised as universally bit-identical across platforms.
 
 ## Deterministic Phase 0–1E surfaces
 
@@ -132,21 +133,81 @@ The canonical `ym-su2-plaquette-baseline` runtime emits into the commit-tied Git
 
 Thus the Actions run itself is a source-commit/toolchain-bound evidence record. Any scientific release should additionally preserve those measurements as an explicit artifact or content-addressed dataset rather than relying only on CI retention.
 
-Phase 2B may freeze
+Phase 2B freezes
 
 ```text
 published_plaquette_baseline_reproduced = true
 phase2_graduation_gate_satisfied       = true
-su3_ensemble_enabled                   = false
 ```
 
-only when the external envelope, independent-chain, within-chain stationarity, ESS, acceptance, and group-invariant gates all pass on the exact frozen head.
+only because the external envelope, independent-chain, within-chain stationarity, ESS, acceptance, and group-invariant gates all passed on the frozen head.
 
 This agreement validates the finite-lattice `SU(2)` sampler in the declared regime. It does not imply confinement, continuum QFT existence, or a mass-gap proof.
 
-## Future ensemble campaigns
+## Phase 2C1 `SU(3)` sampler reproducibility
 
-A future `SU(3)` generator requires a separately versioned sampler contract and independent review. Larger scientific campaigns should record multiple independent chains, thermalisation diagnostics, chain lengths, cadence rationale, autocorrelation stability under window changes, uncertainty aggregation across chains, and raw evidence sufficient for independent reanalysis.
+`YM-SU3-ENSEMBLE-V1` and `SU3-ENSEMBLE-PHASE2C1-V1` are frozen as `phase-2c1-frozen`, independently versioned from the Phase 2A sampler. Reusing the `SPLITMIX64-V1` core and Phase 2A diagnostic arithmetic does not reuse the `SU(2)` stream identity or external benchmark authority.
+
+A Phase 2C1 evidence record must preserve:
+
+- sampler ID `YM-SU3-ENSEMBLE-V1`;
+- proposal ID `YM-SU3-GENERATOR-METROPOLIS-V1`;
+- RNG ID `SPLITMIX64-V1`;
+- stream ID `YM-SU3-STREAM-V1` and its domain separator;
+- master seed, chain ID, and derived seed;
+- lattice extents, Wilson `beta`, and proposal angle;
+- cold-start policy;
+- lexicographic site/direction/generator update order;
+- the exact paired finite angle grid identity;
+- exactly two PRNG outputs per generator proposal;
+- discarded thermalisation sweep count and measurement cadence;
+- total Metropolis proposal and accept counts;
+- complete raw normalized `(1/3)ReTr` average-plaquette series;
+- variance, full requested autocorrelation sequence, positive-window lag, `tau_int`, ESS, and standard error;
+- final maximum link unitarity and determinant residuals.
+
+The angle proposal uses bit 63 of one raw `SplitMix64` word for the sign and the low 52 bits for `m`, with
+
+```text
+|theta| = proposal_angle * (2m + 1) / 2^53.
+```
+
+Toggling only bit 63 gives the exact floating inverse proposal; endpoints are excluded and the ignored raw bits have equal multiplicity. A direct half-open `2u-1` mapping is not equivalent to the frozen finite proposal distribution.
+
+The bounded reference requires
+
+```text
+1e-8 <= proposal_angle <= 1
+maximum total sweeps = 512
+maximum measurements = 512.
+```
+
+Positive proposal scales below the floor fail closed as numerically inert. The old exploratory `262144`-sweep bound is not frozen: review found deterministic determinant drift on a much longer accepted trajectory, so the V1 bound was reduced to 512 and the maximum admitted beta-zero schedule with `proposal_angle=1.0` is executed in CI against the `5e-12` group-residual gates.
+
+Candidate-link local action differences are computed allocation-free from the six affected plaquettes. Replacing that path with a full-lattice clone per proposal changes the computational/fail-closed contract and is forbidden under the same identifier.
+
+For master seed `3c00198212230101`, the golden Phase 2C1 derived seeds are
+
+```text
+chain 0 = 94c715630ee8e90a
+chain 1 = 8aba19af6781dc09
+```
+
+The canonical chain additionally freezes literal evidence for `2^4`, beta zero, chain `0`, four discarded sweeps, 16 measurements, stride one, proposal angle `0.35`, and autocorrelation lag four. Its 16 raw plaquettes, proposal/accept counts, mean, variance, autocorrelation sequence, positive-window lag, `tau_int`, ESS, standard error, and final group residuals are executable golden vectors with `1e-12` absolute tolerance. This prevents coordinated deterministic implementation drift from passing merely because two executions still agree with each other.
+
+The `ym-su3-ensemble` runtime emits all of those fields to the commit-tied Actions log, including complete raw and diagnostic evidence rather than aggregate statistics only.
+
+The `beta=0` all-accept vector validates the transition-kernel accounting only. It is not represented as an exact finite-sample Haar-equilibrium result.
+
+Phase 2C1 must retain
+
+```text
+published_su3_baseline_reproduced = false
+glueball_analysis_enabled         = false
+phase2c_complete                  = false
+```
+
+until Phase 2C2 predeclares and reproduces an independent peer-reviewed `SU(3)` finite-lattice benchmark. Scientific campaigns beyond the reference vectors should record multiple independent chains, thermalisation diagnostics, cadence rationale, autocorrelation stability under window changes, uncertainty aggregation across chains, and raw evidence sufficient for independent reanalysis.
 
 ## Future HPC work
 

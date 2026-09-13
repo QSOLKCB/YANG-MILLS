@@ -7,6 +7,7 @@ from check_path_contracts import main as check_path_contracts
 from check_classical_geometry_contracts import main as check_classical_geometry_contracts
 from check_su2_ensemble_contracts import main as check_su2_ensemble_contracts
 from check_su2_baseline_contracts import main as check_su2_baseline_contracts
+from check_su3_ensemble_contracts import main as check_su3_ensemble_contracts
 
 
 def main() -> None:
@@ -16,6 +17,7 @@ def main() -> None:
     check_classical_geometry_contracts()
     check_su2_ensemble_contracts()
     check_su2_baseline_contracts()
+    check_su3_ensemble_contracts()
     print("All YANG-MILLS contract checks: passed")
 
 

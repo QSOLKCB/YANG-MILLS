@@ -188,7 +188,7 @@ Phase 2 separates sampler mechanics from external finite-lattice validation so n
 
 ### Phase 2B — published plaquette baseline and Phase 2 graduation
 
-**Status: implemented, CI-green, and frozen in PR #8 pending merge.**
+**Status: completed, independently reviewed, CI-green, frozen, and merged in PR #8.**
 
 - [x] Select a peer-reviewed pure-`SU(2)` Wilson-action plaquette benchmark before tuning the reference implementation.
 - [x] Match the benchmark action normalization, lattice geometry/volume, coupling regime, observable definition, and source-resolution/statistical treatment explicitly.
@@ -201,14 +201,27 @@ Primary source: Langfeld, Lucini & Rago, *Physical Review Letters* **109**, 1116
 
 **Phase 2 graduation gate:** `YM-SU2-PLAQUETTE-BASELINE-V1` and `SU2-PLAQUETTE-BASELINE-PHASE2B-V1` are sealed as `phase-2b-frozen`; `published_plaquette_baseline_reproduced=true` and `phase2_graduation_gate_satisfied=true`. Literature agreement validates the finite-lattice `SU(2)` sampler in this regime; it does not establish confinement, construct continuum quantum Yang–Mills theory, or prove a positive mass gap.
 
-### Phase 2C — future separately versioned `SU(3)` ensembles
+### Phase 2C1 — separately versioned `SU(3)` sampler mechanics
 
-Phase 2 graduation does **not** silently enable `SU(3)` sampling.
+**Status: completed, independently reviewed, CI-green, and frozen in PR #9 pending merge.**
 
-- [ ] Specify a new `SU(3)` ensemble contract rather than extending `YM-SU2-ENSEMBLE-V1`.
-- [ ] Select and justify an `SU(3)` update algorithm under the frozen `SU(3)` lattice/action conventions.
-- [ ] Version RNG/stream identity, update order, thermalisation, diagnostics, and evidence independently.
-- [ ] Add independent benchmark validation before using `SU(3)` ensembles for later physics analysis.
+- [x] Specify a new `SU(3)` ensemble contract, `YM-SU3-ENSEMBLE-V1`, rather than extending `YM-SU2-ENSEMBLE-V1`.
+- [x] Select and justify a correctness-first symmetric single-generator Metropolis algorithm under the frozen `SU(3)` lattice/action conventions, while explicitly not claiming Cabibbo–Marinari or Kennedy–Pendleton heatbath semantics.
+- [x] Version RNG/stream identity, site/direction/generator update order, thermalisation, diagnostics, raw evidence, proposal/accept accounting, and link-group residuals independently.
+- [x] Add golden domain-separated chain seeds, fixed-chain replay, distinct-chain evidence, exact `beta=0` all-accept accounting, and fail-closed bounds.
+- [x] Require `1e-8 <= proposal_angle <= 1` so numerically inert positive proposal scales fail closed.
+- [x] Compute candidate local action differences allocation-free from exactly the six affected plaquettes and regress them against a complete Wilson-action difference.
+
+**Phase 2C1 freeze gate:** `YM-SU3-ENSEMBLE-V1` and `SU3-ENSEMBLE-PHASE2C1-V1` are sealed as `phase-2c1-frozen`. The boundary flags `published_su3_baseline_reproduced=false`, `glueball_analysis_enabled=false`, and `phase2c_complete=false` remain mandatory; incompatible sampler, proposal, stream, update-order, local-action, diagnostic, or evidence semantics require a new identifier.
+
+### Phase 2C2 — independent published `SU(3)` validation
+
+Phase 2C1 does **not** authorize later `SU(3)` physics analysis by itself.
+
+- [ ] Select a peer-reviewed pure-`SU(3)` Wilson-action finite-lattice benchmark only after the Phase 2C1 sampler mechanics are frozen.
+- [ ] Predeclare its action normalization, lattice geometry/volume, coupling, observable, source treatment, chain identities, thermalisation, cadence, and statistical gates before inspecting the result.
+- [ ] Reproduce the benchmark with independent chains and retained raw evidence under a separately versioned validation authority.
+- [ ] Keep glueball analysis disabled until the independent `SU(3)` benchmark gate passes.
 
 ## Phase 3 — glueball laboratory
 
