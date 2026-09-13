@@ -1,7 +1,7 @@
 {
   "contract_id": "YM-SU3-PLAQUETTE-BASELINE-V1",
-  "status": "phase-2c2-candidate",
-  "scope": "independent published finite-lattice validation of the frozen Phase 2C1 pure-SU(3) sampler",
+  "status": "phase-2c2-v1-failed",
+  "scope": "first predeclared independent published finite-lattice validation attempt of the frozen Phase 2C1 pure-SU(3) sampler",
   "depends_on": [
     {
       "contract_id": "YM-SU3-ENSEMBLE-V1",
@@ -85,14 +85,33 @@
     "benchmark_parameters_frozen_before_reference_result_inspection": true,
     "phase2c1_sampler_contract_mutated": false
   },
+  "observed_evidence": {
+    "workflow_run_id": 34760576995,
+    "evidence_head_commit": "0b669e9d517353fa21f7fe34f96ff630b59d8ad7",
+    "pooled_mean": 0.6018083560823128,
+    "source_envelope_reproduced": true,
+    "minimum_effective_sample_size": 4.51005377363487,
+    "minimum_effective_sample_size_required": 8.0,
+    "chain_consistency_z": 0.4307895037511404,
+    "maximum_chain_consistency_z": 5.0,
+    "maximum_stationarity_z_observed": 3.7834285113688733,
+    "maximum_stationarity_z_allowed": 5.0,
+    "chain_acceptances": [
+      0.867445537022182,
+      0.8678583417619977
+    ],
+    "known_failed_gate": "minimum_effective_sample_size_per_chain",
+    "parameter_retuning_after_result": false
+  },
   "phase2c_gate": {
     "published_su3_baseline_reproduced": false,
     "phase2c_complete": false,
     "glueball_analysis_enabled": false,
-    "result_status": "pending-executable-evidence"
+    "result_status": "failed-predeclared-effective-sample-size-gate"
   },
   "claim_boundary": {
     "benchmark_agreement_is_finite_lattice_validation": true,
+    "failed_statistical_gate_is_not_validation_success": true,
     "benchmark_agreement_implies_confinement": false,
     "benchmark_agreement_implies_continuum_qft": false,
     "benchmark_agreement_implies_positive_mass_gap": false,
