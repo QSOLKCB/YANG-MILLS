@@ -1,0 +1,76 @@
+name: Phase 2C2 source maintenance
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  maintain:
+    if: github.event.pull_request.head.ref == 'phase2c2-su3-published-baseline'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Rust toolchain
+        run: rustup show
+
+      - name: Fix duplicate stream guard ordering
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('reference/rust/src/su3_benchmark.rs')
+          text = path.read_text()
+          old = '''pub fn summarize_two_chains(
+              first: &Su3ChainReport,
+              second: &Su3ChainReport,
+          ) -> Result<BenchmarkSummary, BenchmarkError> {
+              if !report_matches_benchmark(first, CHAIN_IDS[0])
+                  || !report_matches_benchmark(second, CHAIN_IDS[1])
+              {
+                  return Err(BenchmarkError::WrongBenchmarkConfiguration);
+              }
+              if first.derived_seed == second.derived_seed {
+                  return Err(BenchmarkError::DuplicateChainIdentity);
+              }
+          '''
+          new = '''pub fn summarize_two_chains(
+              first: &Su3ChainReport,
+              second: &Su3ChainReport,
+          ) -> Result<BenchmarkSummary, BenchmarkError> {
+              if first.derived_seed == second.derived_seed {
+                  return Err(BenchmarkError::DuplicateChainIdentity);
+              }
+              if !report_matches_benchmark(first, CHAIN_IDS[0])
+                  || !report_matches_benchmark(second, CHAIN_IDS[1])
+              {
+                  return Err(BenchmarkError::WrongBenchmarkConfiguration);
+              }
+          '''
+          if old not in text:
+              if new not in text:
+                  raise SystemExit('expected duplicate-stream guard block not found')
+          else:
+              path.write_text(text.replace(old, new, 1))
+          PY
+
+      - name: Format Rust sources
+        run: cargo fmt --all
+
+      - name: Commit maintenance changes
+        run: |
+          if git diff --quiet; then
+            echo 'No maintenance changes required.'
+            exit 0
+          fi
+          git diff --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add reference/rust/src/su3_benchmark.rs reference/rust/src/bin/su3_benchmark_reference.rs
+          git commit -m 'Format Phase 2C2 Rust sources and fix duplicate stream guard'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
