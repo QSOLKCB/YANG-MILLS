@@ -4,48 +4,17 @@ on:
   pull_request:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   published-su3-benchmark:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout PR head
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Rust toolchain
         run: rustup show
-
-      - name: Finish shared acceptance verifier refactor
-        if: github.event.pull_request.head.ref == 'phase2c2-su3-published-baseline'
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          path = Path('reference/rust/src/su3_confirmation.rs')
-          text = path.read_text()
-          start_marker = 'fn acceptance_from_counts(report: &Su3ChainReport) -> Result<f64, BenchmarkError> {'
-          end_marker = 'fn validate_residuals(report: &Su3ChainReport) -> Result<(), BenchmarkError> {'
-          if start_marker in text:
-              start = text.index(start_marker)
-              end = text.index(end_marker, start)
-              text = text[:start] + text[end:]
-          text = text.replace(
-              '    AUTOCORRELATION_MAX_LAG, BETA, EXPECTED_PROPOSALS, EXPECTED_TOTAL_SWEEPS, EXTENTS,\n    MAX_LINK_DETERMINANT_RESIDUAL, MAX_LINK_UNITARITY_RESIDUAL, MAX_METROPOLIS_ACCEPTANCE,\n    MAX_STATIONARITY_Z, MEASUREMENTS, MIN_METROPOLIS_ACCEPTANCE, PLAQUETTE_SAMPLE_TOLERANCE,\n',
-              '    AUTOCORRELATION_MAX_LAG, BETA, EXPECTED_PROPOSALS, EXPECTED_TOTAL_SWEEPS, EXTENTS,\n    MAX_LINK_DETERMINANT_RESIDUAL, MAX_LINK_UNITARITY_RESIDUAL, MAX_STATIONARITY_Z, MEASUREMENTS,\n    PLAQUETTE_SAMPLE_TOLERANCE,\n'
-          )
-          path.write_text(text)
-          PY
-          cargo fmt --all
-          git diff --check
-          if ! git diff --quiet; then
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add reference/rust/src/su3_confirmation.rs
-            git commit -m 'Finish shared acceptance verifier refactor'
-            git push origin HEAD:${{ github.event.pull_request.head.ref }}
-          fi
 
       - name: Strict Rust format
         run: cargo fmt --all -- --check
