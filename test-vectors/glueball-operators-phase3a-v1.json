@@ -1,0 +1,67 @@
+{
+  "contract_id": "YM-GLUEBALL-OPERATORS-V1",
+  "vector_set": "GLUEBALL-OPERATORS-PHASE3A-V1",
+  "status": "phase-3a-candidate",
+  "vectors": [
+    {
+      "id": "identity-3cubed-spatial-slice",
+      "extents": [3, 3, 3, 3],
+      "time_slice": 0,
+      "configuration": "all links identity",
+      "basis_id": "YM-GLUEBALL-SPATIAL-A1PP-V1",
+      "expected": {
+        "spatial_plaquette_1x1": 1.0,
+        "spatial_rectangle_2x1": 1.0,
+        "plaquette_loop_count": 81,
+        "rectangle_loop_count": 162
+      },
+      "tolerance": 0.0,
+      "claim_class": "C1"
+    },
+    {
+      "id": "all-time-slices-identity",
+      "extents": [3, 3, 3, 3],
+      "configuration": "all links identity",
+      "time_slices": [0, 1, 2],
+      "expected_each_basis_element": 1.0,
+      "tolerance": 0.0,
+      "claim_class": "C1"
+    },
+    {
+      "id": "deterministic-gauge-invariance",
+      "extents": [3, 3, 3, 3],
+      "time_slice": 0,
+      "configuration": "single traceless SU(3) cycle link",
+      "gauge_field": "deterministic_su3_site_gauge",
+      "observable": "max absolute basis-element difference before/after local gauge transform",
+      "expected_max": 2e-11,
+      "claim_class": "C2"
+    },
+    {
+      "id": "time-slice-out-of-range-rejected",
+      "extents": [3, 3, 3, 3],
+      "time_slice": 3,
+      "expected": "TimeSliceOutOfRange",
+      "claim_class": "C0"
+    },
+    {
+      "id": "wrapped-2x1-basis-not-admitted-on-spatial-extent-2",
+      "extents": [2, 3, 3, 3],
+      "time_slice": 0,
+      "expected": "SpatialExtentTooSmall",
+      "claim_class": "C0"
+    },
+    {
+      "id": "claim-boundary",
+      "finite_lattice_irrep": "A1++",
+      "continuum_channel_intent": "0++",
+      "smearing_or_blocking_applied": false,
+      "connected_correlator_constructed": false,
+      "effective_mass_extracted": false,
+      "finite_volume_mass_gap_established": false,
+      "positive_continuum_mass_gap_proved": false,
+      "clay_solution_claimed": false,
+      "claim_class": "C0"
+    }
+  ]
+}
