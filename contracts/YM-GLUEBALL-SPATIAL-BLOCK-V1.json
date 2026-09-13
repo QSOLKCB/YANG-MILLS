@@ -1,0 +1,79 @@
+{
+  "contract_id": "YM-GLUEBALL-SPATIAL-BLOCK-V1",
+  "status": "phase-3b2-candidate",
+  "scope": "deterministic stride-2 spatial coarse-link blocking for finite periodic SU(3) lattices compatible with the frozen Phase 3A scalar operator surface",
+  "depends_on": [
+    {
+      "contract_id": "YM-SU3-LATTICE-V1",
+      "required_status": "phase-1b-frozen"
+    },
+    {
+      "contract_id": "YM-GLUEBALL-OPERATORS-V1",
+      "required_status": "phase-3a-frozen"
+    }
+  ],
+  "method_origin": {
+    "classification": "project-defined correctness-first reference coarse-link map",
+    "published_blocking_scheme_claimed": false,
+    "improved_action_or_variational_optimality_claimed": false
+  },
+  "geometry": {
+    "euclidean_time_direction": 3,
+    "spatial_directions": [0, 1, 2],
+    "block_factor": 2,
+    "minimum_fine_spatial_extent": 6,
+    "fine_spatial_extents_equal": true,
+    "fine_spatial_extents_even": true,
+    "periodic_boundary_conditions": true,
+    "coarse_extent_rule": "[Lx/2, Ly/2, Lz/2, Nt]",
+    "temporal_extent_unchanged": true,
+    "phase3a_compatibility_rule": "coarse spatial extent is at least 3"
+  },
+  "algorithm": {
+    "coarse_site_embedding": "y -> x=(2*y0,2*y1,2*y2,y3)",
+    "spatial_link_rule": "V_mu(y)=U_mu(x) U_mu(x+mu) for mu in {0,1,2}",
+    "temporal_link_rule": "V_3(y)=U_3(x) sampled exactly at the embedded fine site",
+    "update_semantics": "all coarse links are computed only from the immutable fine lattice",
+    "projection_step_used": false,
+    "smearing_step_used": false,
+    "averaging_step_used": false,
+    "allocation_failure_rule": "propagate through Su3Lattice4::new_identity Result"
+  },
+  "gauge_covariance": {
+    "fine_gauge_rule": "U_mu(x)^G=G(x)U_mu(x)G(x+mu)^dagger",
+    "coarse_gauge_restriction": "G_c(y)=G_f(2*y0,2*y1,2*y2,y3)",
+    "expected_blocking_relation": "block(U^G)=block(U)^{G_c}"
+  },
+  "validation": {
+    "identity_configuration_blocks_exactly_to_identity": true,
+    "identity_tolerance": 0.0,
+    "temporal_sampling_tolerance": 0.0,
+    "gauge_covariance_residual_max": 5e-11,
+    "su3_unitarity_residual_max": 5e-12,
+    "su3_determinant_residual_max": 5e-12,
+    "frozen_output_abs_tolerance": 1e-12,
+    "frozen_coarse_plaquette_1x1": 0.9506172839506173,
+    "frozen_coarse_rectangle_2x1": 0.9259259259259259
+  },
+  "composition_boundary": {
+    "stout_smearing_required": false,
+    "stout_smearing_may_precede_blocking_under_future_analysis_contract": true,
+    "combined_smear_block_tuning_validated": false
+  },
+  "future_surfaces": {
+    "connected_correlator_constructed": false,
+    "vacuum_subtraction_defined": false,
+    "effective_mass_extracted": false,
+    "fit_window_selected": false,
+    "glueball_spectrum_extracted": false
+  },
+  "claim_boundary": {
+    "blocking_improves_ground_state_overlap_established": false,
+    "blocking_is_glueball_mass_measurement": false,
+    "finite_volume_mass_gap_established": false,
+    "confinement_established": false,
+    "continuum_qft_constructed": false,
+    "positive_continuum_mass_gap_proved": false,
+    "clay_solution_claimed": false
+  }
+}
