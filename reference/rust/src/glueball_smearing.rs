@@ -365,32 +365,32 @@ mod tests {
     fn invalid_parameter_and_geometry_surfaces_fail_closed() {
         let lattice = Su3Lattice4::new_identity([3, 3, 3, 3]).unwrap();
         assert_eq!(
-            spatial_stout_smear(&lattice, f64::NAN, 1),
-            Err(GlueballSmearingError::NonFiniteRho)
+            spatial_stout_smear(&lattice, f64::NAN, 1).unwrap_err(),
+            GlueballSmearingError::NonFiniteRho
         );
         assert_eq!(
-            spatial_stout_smear(&lattice, 0.0, 1),
-            Err(GlueballSmearingError::RhoOutOfRange)
+            spatial_stout_smear(&lattice, 0.0, 1).unwrap_err(),
+            GlueballSmearingError::RhoOutOfRange
         );
         assert_eq!(
-            spatial_stout_smear(&lattice, MAX_RHO + 1.0e-6, 1),
-            Err(GlueballSmearingError::RhoOutOfRange)
+            spatial_stout_smear(&lattice, MAX_RHO + 1.0e-6, 1).unwrap_err(),
+            GlueballSmearingError::RhoOutOfRange
         );
         assert_eq!(
-            spatial_stout_smear(&lattice, CANONICAL_RHO, MAX_LEVELS + 1),
-            Err(GlueballSmearingError::TooManyLevels)
+            spatial_stout_smear(&lattice, CANONICAL_RHO, MAX_LEVELS + 1).unwrap_err(),
+            GlueballSmearingError::TooManyLevels
         );
 
         let too_small = Su3Lattice4::new_identity([2, 3, 3, 3]).unwrap();
         assert_eq!(
-            spatial_stout_smear(&too_small, CANONICAL_RHO, 1),
-            Err(GlueballSmearingError::SpatialExtentTooSmall)
+            spatial_stout_smear(&too_small, CANONICAL_RHO, 1).unwrap_err(),
+            GlueballSmearingError::SpatialExtentTooSmall
         );
 
         let anisotropic = Su3Lattice4::new_identity([3, 4, 5, 3]).unwrap();
         assert_eq!(
-            spatial_stout_smear(&anisotropic, CANONICAL_RHO, 1),
-            Err(GlueballSmearingError::SpatialExtentsNotCubic)
+            spatial_stout_smear(&anisotropic, CANONICAL_RHO, 1).unwrap_err(),
+            GlueballSmearingError::SpatialExtentsNotCubic
         );
     }
 }
