@@ -21,14 +21,8 @@ pub const MINIMUM_SPATIAL_EXTENT: usize = 3;
 pub const GAUGE_INVARIANCE_TOLERANCE: f64 = 2.0e-11;
 
 const PLAQUETTE_ORIENTATIONS: [(usize, usize); 3] = [(0, 1), (0, 2), (1, 2)];
-const RECTANGLE_ORIENTATIONS: [(usize, usize); 6] = [
-    (0, 1),
-    (0, 2),
-    (1, 0),
-    (1, 2),
-    (2, 0),
-    (2, 1),
-];
+const RECTANGLE_ORIENTATIONS: [(usize, usize); 6] =
+    [(0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1)];
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct ScalarOperatorBasis {
@@ -70,7 +64,10 @@ impl From<PathHolonomyError> for GlueballOperatorError {
     }
 }
 
-fn validate_geometry(lattice: &Su3Lattice4, time_slice: usize) -> Result<(), GlueballOperatorError> {
+fn validate_geometry(
+    lattice: &Su3Lattice4,
+    time_slice: usize,
+) -> Result<(), GlueballOperatorError> {
     let extents = lattice.extents();
     debug_assert_eq!(DIM, 4);
     if time_slice >= extents[EUCLIDEAN_TIME_DIRECTION] {
