@@ -11,6 +11,7 @@ from check_su3_ensemble_contracts import main as check_su3_ensemble_contracts
 from check_su3_baseline_contracts import main as check_su3_baseline_contracts
 from check_glueball_operator_contracts import main as check_glueball_operator_contracts
 from check_glueball_smearing_contracts import main as check_glueball_smearing_contracts
+from check_glueball_blocking_contracts import main as check_glueball_blocking_contracts
 
 
 def main() -> None:
@@ -24,6 +25,7 @@ def main() -> None:
     check_su3_baseline_contracts()
     check_glueball_operator_contracts()
     check_glueball_smearing_contracts()
+    check_glueball_blocking_contracts()
     print("All YANG-MILLS contract checks: passed")
 
 
