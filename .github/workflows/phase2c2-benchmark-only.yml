@@ -4,32 +4,17 @@ on:
   pull_request:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   published-su3-benchmark:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout PR head
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: phase2c2-su3-published-baseline
 
       - name: Rust toolchain
         run: rustup show
-
-      - name: Apply vector hardening
-        run: |
-          python3 scripts/apply_pr10_vector_hardening.py
-          cargo fmt --all
-          git diff --check
-          if ! git diff --quiet; then
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add scripts/check_su3_baseline_contracts.py scripts/test_su3_baseline_contract_validation.py reference/rust/src/bin/su3_benchmark_reference.rs
-            git commit -m 'Pin complete Phase 2C2 vector evidence'
-            git push origin HEAD:phase2c2-su3-published-baseline
-          fi
 
       - name: Strict Rust format
         run: cargo fmt --all -- --check
