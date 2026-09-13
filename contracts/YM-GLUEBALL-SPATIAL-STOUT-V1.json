@@ -1,0 +1,82 @@
+{
+  "contract_id": "YM-GLUEBALL-SPATIAL-STOUT-V1",
+  "status": "phase-3b1-candidate",
+  "scope": "deterministic synchronous spatial stout-link smearing for the frozen Phase 3A finite-lattice SU(3) glueball operator surface only",
+  "depends_on": [
+    {
+      "contract_id": "YM-SU3-ALGEBRA-V1",
+      "required_status": "phase-1b-algebra-frozen"
+    },
+    {
+      "contract_id": "YM-SU3-LATTICE-V1",
+      "required_status": "phase-1b-frozen"
+    },
+    {
+      "contract_id": "YM-GLUEBALL-OPERATORS-V1",
+      "required_status": "phase-3a-frozen"
+    }
+  ],
+  "primary_source": {
+    "title": "Analytic smearing of SU(3) link variables in lattice QCD",
+    "authors": ["Colin Morningstar", "Mike Peardon"],
+    "journal": "Physical Review D 69, 054501 (2004)",
+    "doi": "10.1103/PhysRevD.69.054501",
+    "method": "stout-link smearing",
+    "project_specialization": "spatial links only; the temporal direction is excluded from both staples and updates"
+  },
+  "geometry": {
+    "euclidean_time_direction": 3,
+    "spatial_directions": [0, 1, 2],
+    "minimum_spatial_extent": 3,
+    "spatial_extents_equal": true,
+    "periodic_boundary_conditions": true,
+    "temporal_links_modified": false
+  },
+  "parameters": {
+    "canonical_rho": 0.1,
+    "rho_rule": "finite and 0 < rho <= 0.25",
+    "maximum_rho": 0.25,
+    "canonical_levels": 1,
+    "maximum_levels": 8,
+    "zero_levels_is_exact_noop": true
+  },
+  "algorithm": {
+    "level_semantics": "synchronous: every updated spatial link in level n+1 is computed only from level n",
+    "spatial_staple": "C_mu(x)=rho*sum_{nu in {0,1,2},nu!=mu}[U_nu(x)U_mu(x+nu)U_nu(x+mu)^dagger + U_nu(x-nu)^dagger U_mu(x-nu) U_nu(x-nu+mu)]",
+    "omega": "Omega_mu(x)=C_mu(x) U_mu(x)^dagger",
+    "hermitian_traceless_generator": "Q=(i/2)(Omega^dagger-Omega)-(i/6)Tr(Omega^dagger-Omega)I",
+    "generator_coefficients": "q_a=Tr(Q lambda_a) under the frozen Gell-Mann normalization",
+    "link_update": "U'_mu(x)=exp(i sum_a q_a T^a) U_mu(x) for spatial mu only",
+    "temporal_link_rule": "U'_3(x)=U_3(x) exactly",
+    "projection_step_used": false,
+    "blocking_step_used": false
+  },
+  "validation": {
+    "identity_configuration_is_exact_fixed_point": true,
+    "zero_level_noop_tolerance": 0.0,
+    "algebra_hermitian_traceless_residual_max": 2e-12,
+    "gauge_covariance_residual_max": 5e-11,
+    "su3_unitarity_residual_max": 5e-12,
+    "su3_determinant_residual_max": 5e-12,
+    "canonical_nontrivial_fixture_must_change_spatial_links": true,
+    "non_finite_intermediate_rule": "reject"
+  },
+  "future_surfaces": {
+    "spatial_blocking_defined": false,
+    "connected_correlator_constructed": false,
+    "vacuum_subtraction_defined": false,
+    "effective_mass_extracted": false,
+    "fit_window_selected": false,
+    "glueball_spectrum_extracted": false
+  },
+  "claim_boundary": {
+    "smearing_improves_ground_state_overlap_established": false,
+    "smearing_parameter_is_physical_parameter": false,
+    "smearing_is_glueball_mass_measurement": false,
+    "finite_volume_mass_gap_established": false,
+    "confinement_established": false,
+    "continuum_qft_constructed": false,
+    "positive_continuum_mass_gap_proved": false,
+    "clay_solution_claimed": false
+  }
+}
