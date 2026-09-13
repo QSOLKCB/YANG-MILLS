@@ -21,6 +21,7 @@
     "spatial_directions": [0, 1, 2],
     "operator_support": "closed spatial loops on one fixed Euclidean time slice",
     "minimum_spatial_extent": 3,
+    "spatial_extents_equal": true,
     "time_slice_rule": "0 <= t < extent[3]",
     "periodic_boundary_conditions": true
   },

@@ -223,6 +223,12 @@ because external validation does not belong to the sampler contract. Phase 2C2 i
 
 Do not import triadic ontology, Q/K/V-to-colour semantics, or other cross-domain interpretations into these authorities.
 
+### Phase 3A glueball-operator candidate authority
+
+Phase 3A introduces the candidate `YM-GLUEBALL-OPERATORS-V1`. It defines unsmeared closed spatial Wilson-loop operators only. The reference uses Euclidean time direction `3`, spatial directions `[0,1,2]`, requires every spatial extent to be at least `3`, and requires equal spatial extents before using the cubic-lattice `A1++` label. Its continuum channel intent is `0++`; that is not an exact finite-spacing spin assignment.
+
+The candidate does not authorize smearing/blocking, connected correlators, effective masses, a glueball spectrum, a finite-volume mass-gap claim, confinement, continuum QFT construction, or a Clay solution. Those require separately versioned later Phase 3 authorities.
+
 ## Donor boundary
 
 GLUBALL `v1.0.0` is an engineering donor only. The recorded tag target is:
@@ -261,6 +267,7 @@ cargo run --quiet --locked --bin ym-su2-plaquette-baseline
 cargo run --quiet --locked --bin ym-su3-ensemble
 cargo run --release --quiet --locked --bin ym-su3-plaquette-baseline
 cargo run --release --quiet --locked --bin ym-su3-plaquette-baseline-v2
+cargo run --quiet --locked --bin ym-glueball-operators
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```

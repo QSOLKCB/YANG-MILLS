@@ -36,6 +36,7 @@ pub struct ScalarOperatorBasis {
 pub enum GlueballOperatorError {
     TimeSliceOutOfRange,
     SpatialExtentTooSmall,
+    SpatialExtentsNotCubic,
     CountOverflow,
     NonFiniteObservable,
     Path(PathHolonomyError),
@@ -47,6 +48,9 @@ impl fmt::Display for GlueballOperatorError {
             Self::TimeSliceOutOfRange => "Phase 3A Euclidean time slice is outside the lattice",
             Self::SpatialExtentTooSmall => {
                 "Phase 3A 2x1 spatial operator basis requires every spatial extent to be at least 3"
+            }
+            Self::SpatialExtentsNotCubic => {
+                "Phase 3A A1++ operator basis requires equal spatial lattice extents"
             }
             Self::CountOverflow => "Phase 3A spatial loop count overflowed",
             Self::NonFiniteObservable => "Phase 3A spatial loop observable became non-finite",
@@ -78,6 +82,9 @@ fn validate_geometry(
         .any(|&direction| extents[direction] < MINIMUM_SPATIAL_EXTENT)
     {
         return Err(GlueballOperatorError::SpatialExtentTooSmall);
+    }
+    if extents[0] != extents[1] || extents[1] != extents[2] {
+        return Err(GlueballOperatorError::SpatialExtentsNotCubic);
     }
     Ok(())
 }
@@ -225,6 +232,15 @@ mod tests {
         assert_eq!(
             scalar_a1pp_operator_basis(&lattice, 0),
             Err(GlueballOperatorError::SpatialExtentTooSmall)
+        );
+    }
+
+    #[test]
+    fn anisotropic_spatial_lattice_is_not_labeled_a1pp() {
+        let lattice = Su3Lattice4::new_identity([3, 4, 5, 3]).unwrap();
+        assert_eq!(
+            scalar_a1pp_operator_basis(&lattice, 0),
+            Err(GlueballOperatorError::SpatialExtentsNotCubic)
         );
     }
 }

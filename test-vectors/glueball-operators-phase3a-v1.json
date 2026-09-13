@@ -52,6 +52,13 @@
       "claim_class": "C0"
     },
     {
+      "id": "anisotropic-spatial-lattice-rejected",
+      "extents": [3, 4, 5, 3],
+      "time_slice": 0,
+      "expected": "SpatialExtentsNotCubic",
+      "claim_class": "C0"
+    },
+    {
       "id": "claim-boundary",
       "finite_lattice_irrep": "A1++",
       "continuum_channel_intent": "0++",

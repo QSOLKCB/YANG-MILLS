@@ -234,7 +234,9 @@ The successful V2 confirmation (Actions run `34761701867`, evidence head `f5a221
 
 ## Phase 3 — glueball laboratory
 
-- [ ] Define gauge-invariant spatial loop operator bases.
+Phase 3A is implemented as a candidate in PR #11; review/freeze is still pending and the later spectroscopy stages remain unopened.
+
+- [x] Define gauge-invariant spatial loop operator bases (`YM-GLUEBALL-OPERATORS-V1`, candidate).
 - [ ] Add smearing/blocking as separately versioned transformations.
 - [ ] Construct connected Euclidean correlators.
 - [ ] Add effective-mass analysis with uncertainty propagation.

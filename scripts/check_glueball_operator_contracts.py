@@ -21,6 +21,7 @@ EXPECTED_CONTRACT: dict[str, Any] = {
         "spatial_directions": [0, 1, 2],
         "operator_support": "closed spatial loops on one fixed Euclidean time slice",
         "minimum_spatial_extent": 3,
+        "spatial_extents_equal": True,
         "time_slice_rule": "0 <= t < extent[3]",
         "periodic_boundary_conditions": True,
     },
@@ -134,6 +135,13 @@ EXPECTED_VECTORS: dict[str, Any] = {
             "claim_class": "C0",
         },
         {
+            "id": "anisotropic-spatial-lattice-rejected",
+            "extents": [3, 4, 5, 3],
+            "time_slice": 0,
+            "expected": "SpatialExtentsNotCubic",
+            "claim_class": "C0",
+        },
+        {
             "id": "claim-boundary",
             "finite_lattice_irrep": "A1++",
             "continuum_channel_intent": "0++",
@@ -149,17 +157,25 @@ EXPECTED_VECTORS: dict[str, Any] = {
 }
 
 
-def main() -> None:
+def validate_contract(payload: dict[str, Any]) -> None:
     validate_exact(
         "contracts/YM-GLUEBALL-OPERATORS-V1.json",
-        load("contracts/YM-GLUEBALL-OPERATORS-V1.json"),
+        payload,
         EXPECTED_CONTRACT,
     )
+
+
+def validate_vectors(payload: dict[str, Any]) -> None:
     validate_exact(
         "test-vectors/glueball-operators-phase3a-v1.json",
-        load("test-vectors/glueball-operators-phase3a-v1.json"),
+        payload,
         EXPECTED_VECTORS,
     )
+
+
+def main() -> None:
+    validate_contract(load("contracts/YM-GLUEBALL-OPERATORS-V1.json"))
+    validate_vectors(load("test-vectors/glueball-operators-phase3a-v1.json"))
     print("Phase 3A glueball operator contract checks: passed")
 
 

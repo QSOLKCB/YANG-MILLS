@@ -21,7 +21,7 @@ Euclidean time direction = 3
 spatial directions       = 0,1,2
 ```
 
-Every operator is built entirely from closed spatial loops on one fixed Euclidean time slice. The reference basis requires every spatial extent to be at least 3 so the `2x1` rectangle is not admitted only through immediate periodic wrapping.
+Every operator is built entirely from closed spatial loops on one fixed Euclidean time slice. The reference basis requires every spatial extent to be at least 3 so the `2x1` rectangle is not admitted only through immediate periodic wrapping. It also requires `Lx = Ly = Lz`; the `A1++` label is only used on a cubic periodic spatial lattice where axis permutations belong to the spatial symmetry group.
 
 The underlying link/path orientation is inherited unchanged from `YM-SU3-LATTICE-V1` and `YM-PATH-HOLONOMY-V1`.
 
