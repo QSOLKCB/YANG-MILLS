@@ -51,8 +51,11 @@ jobs:
       - name: SU(3) ensemble reference vectors
         run: cargo run --quiet --locked --bin ym-su3-ensemble
 
-      - name: Published SU(3) plaquette baseline
+      - name: Reproduce archived Phase 2C2 V1 failure boundary
         run: cargo run --release --quiet --locked --bin ym-su3-plaquette-baseline
+
+      - name: Fresh Phase 2C2 V2 four-chain confirmation
+        run: cargo run --release --quiet --locked --bin ym-su3-plaquette-baseline-v2
 
       - name: All contract checks
         run: python3 scripts/check_all_contracts.py
