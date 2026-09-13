@@ -14,10 +14,9 @@ use crate::su2_ensemble::diagnostics;
 use crate::su3_benchmark::{
     acceptance_from_counts, stationarity_diagnostic, BenchmarkError, StationarityDiagnostic,
     AUTOCORRELATION_MAX_LAG, BETA, EXPECTED_PROPOSALS, EXPECTED_TOTAL_SWEEPS, EXTENTS,
-    MAX_LINK_DETERMINANT_RESIDUAL, MAX_LINK_UNITARITY_RESIDUAL, MAX_METROPOLIS_ACCEPTANCE,
-    MAX_STATIONARITY_Z, MEASUREMENTS, MIN_METROPOLIS_ACCEPTANCE, PLAQUETTE_SAMPLE_TOLERANCE,
-    PROPOSAL_ANGLE, SOURCE_ENVELOPE_MAX, SOURCE_ENVELOPE_MIN, SWEEPS_BETWEEN_MEASUREMENTS,
-    THERMALIZATION_SWEEPS,
+    MAX_LINK_DETERMINANT_RESIDUAL, MAX_LINK_UNITARITY_RESIDUAL, MAX_STATIONARITY_Z, MEASUREMENTS,
+    PLAQUETTE_SAMPLE_TOLERANCE, PROPOSAL_ANGLE, SOURCE_ENVELOPE_MAX, SOURCE_ENVELOPE_MIN,
+    SWEEPS_BETWEEN_MEASUREMENTS, THERMALIZATION_SWEEPS,
 };
 use crate::su3_ensemble::{
     derive_su3_chain_seed, Su3ChainReport, PROPOSAL_ID, RNG_ID, SAMPLER_ID, STREAM_ID,
@@ -90,23 +89,6 @@ fn measurements_are_physical(values: &[f64]) -> bool {
     values
         .iter()
         .all(|value| value.is_finite() && (lower..=upper).contains(value))
-}
-
-fn acceptance_from_counts(report: &Su3ChainReport) -> Result<f64, BenchmarkError> {
-    if report.metropolis_proposals != EXPECTED_PROPOSALS
-        || report.metropolis_accepts == 0
-        || report.metropolis_accepts > report.metropolis_proposals
-    {
-        return Err(BenchmarkError::InvalidMetropolisAccounting);
-    }
-    let acceptance = report.metropolis_accepts as f64 / report.metropolis_proposals as f64;
-    if !acceptance.is_finite()
-        || report.mean_metropolis_acceptance != acceptance
-        || !(MIN_METROPOLIS_ACCEPTANCE..=MAX_METROPOLIS_ACCEPTANCE).contains(&acceptance)
-    {
-        return Err(BenchmarkError::InvalidAcceptanceEvidence);
-    }
-    Ok(acceptance)
 }
 
 fn validate_residuals(report: &Su3ChainReport) -> Result<(), BenchmarkError> {
