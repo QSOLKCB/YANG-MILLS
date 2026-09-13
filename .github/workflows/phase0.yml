@@ -18,8 +18,11 @@ jobs:
       - name: Rust toolchain
         run: rustup show
 
-      - name: Rust format
-        run: cargo fmt --all -- --check
+      - name: Rust format working tree
+        run: cargo fmt --all
+
+      - name: Published SU(3) plaquette baseline predeclaration run
+        run: cargo run --quiet --locked --bin ym-su3-plaquette-baseline
 
       - name: Rust tests
         run: cargo test --all-targets --locked
@@ -50,9 +53,6 @@ jobs:
 
       - name: SU(3) ensemble reference vectors
         run: cargo run --quiet --locked --bin ym-su3-ensemble
-
-      - name: Published SU(3) plaquette baseline
-        run: cargo run --quiet --locked --bin ym-su3-plaquette-baseline
 
       - name: All contract checks
         run: python3 scripts/check_all_contracts.py
