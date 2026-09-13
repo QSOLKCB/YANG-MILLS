@@ -6,16 +6,29 @@
     {
       "id": "unchanged-published-source-envelope",
       "doi": "10.1088/0305-4616/7/5/001",
-      "source_lattice": [4, 4, 4, 4],
+      "source_lattice": [
+        4,
+        4,
+        4,
+        4
+      ],
       "beta": 6.0,
-      "expected_interval": [0.56, 0.63],
+      "expected_interval": [
+        0.56,
+        0.63
+      ],
       "source_envelope_changed_after_v1": false,
       "claim_class": "C0"
     },
     {
       "id": "four-fresh-chain-confirmation",
       "master_seed": "2c02198105010002",
-      "chain_ids": [0, 1, 2, 3],
+      "chain_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
       "derived_seeds": [
         "dfcdab179476617a",
         "151dd841ccef81c6",
@@ -36,7 +49,12 @@
       "maximum_link_unitarity_residual": 5e-12,
       "maximum_link_determinant_residual": 5e-12,
       "expected": "all four fresh chains pass accounting, group-residual, acceptance, stationarity and pairwise consistency gates; aggregate ESS is at least 16; pooled mean lies inside the unchanged published envelope",
-      "claim_class": "C2"
+      "claim_class": "C2",
+      "replay_tolerance": {
+        "summary_absolute": 1e-12,
+        "summary_relative": 1e-10,
+        "residual_absolute": 1e-13
+      }
     },
     {
       "id": "v1-failure-preservation",

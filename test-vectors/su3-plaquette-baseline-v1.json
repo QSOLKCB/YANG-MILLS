@@ -6,19 +6,33 @@
     {
       "id": "published-source-envelope",
       "doi": "10.1088/0305-4616/7/5/001",
-      "source_lattice": [4, 4, 4, 4],
+      "source_lattice": [
+        4,
+        4,
+        4,
+        4
+      ],
       "source_iterations": 400,
       "beta": 6.0,
       "observable": "average plaquette=(1/(6V))*sum_x,sum_mu<nu (1/3)ReTr P_mu_nu(x)",
-      "expected_interval": [0.56, 0.63],
+      "expected_interval": [
+        0.56,
+        0.63
+      ],
       "interval_semantics": "conservative graphical source-resolution envelope for the equivalent normalized plaquette, not a quoted paper error bar",
       "claim_class": "C0"
     },
     {
       "id": "two-independent-chain-predeclaration",
       "master_seed": "2c02198105010001",
-      "chain_ids": [0, 1],
-      "derived_seeds": ["2ff3bf48550d1457", "ef7636a56e8ea29a"],
+      "chain_ids": [
+        0,
+        1
+      ],
+      "derived_seeds": [
+        "2ff3bf48550d1457",
+        "ef7636a56e8ea29a"
+      ],
       "proposal_angle": 0.35,
       "thermalization_sweeps": 192,
       "measurements_per_chain": 128,
@@ -43,11 +57,18 @@
       "minimum_effective_sample_size_required": 8.0,
       "chain_consistency_z": 0.4307895037511404,
       "maximum_stationarity_z_observed": 3.7834285113688733,
-      "chain_acceptances": [0.867445537022182, 0.8678583417619977],
+      "chain_acceptances": [
+        0.867445537022182,
+        0.8678583417619977
+      ],
       "failed_gate": "minimum_effective_sample_size_per_chain",
       "parameter_retuning_after_result": false,
       "v1_reclassified_as_pass": false,
-      "claim_class": "C2"
+      "claim_class": "C2",
+      "replay_tolerance": {
+        "summary_absolute": 1e-12,
+        "summary_relative": 1e-10
+      }
     },
     {
       "id": "phase2c-v1-failure-boundary",

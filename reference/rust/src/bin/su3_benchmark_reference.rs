@@ -25,6 +25,34 @@ use su3_benchmark::{
 };
 use su3_ensemble::{run_chain, Su3ChainReport, Su3EnsembleConfig};
 
+const FROZEN_SUMMARY_ABS_TOLERANCE: f64 = 1.0e-12;
+const FROZEN_SUMMARY_REL_TOLERANCE: f64 = 1.0e-10;
+const FROZEN_POOLED_MEAN: f64 = 0.6018083560823128;
+const FROZEN_MIN_EFFECTIVE_SAMPLE_SIZE: f64 = 4.51005377363487;
+const FROZEN_CHAIN_CONSISTENCY_Z: f64 = 0.4307895037511404;
+const FROZEN_MAX_STATIONARITY_Z: f64 = 3.7834285113688733;
+const FROZEN_CHAIN_ACCEPTANCES: [f64; 2] = [0.867445537022182, 0.8678583417619977];
+
+fn evidence_close(actual: f64, expected: f64) -> bool {
+    (actual - expected).abs()
+        <= FROZEN_SUMMARY_ABS_TOLERANCE + FROZEN_SUMMARY_REL_TOLERANCE * expected.abs()
+}
+
+fn archived_v1_evidence_matches(summary: &su3_benchmark::BenchmarkSummary) -> bool {
+    evidence_close(summary.pooled_mean, FROZEN_POOLED_MEAN)
+        && evidence_close(
+            summary.min_effective_sample_size,
+            FROZEN_MIN_EFFECTIVE_SAMPLE_SIZE,
+        )
+        && evidence_close(summary.chain_consistency_z, FROZEN_CHAIN_CONSISTENCY_Z)
+        && evidence_close(summary.max_stationarity_z, FROZEN_MAX_STATIONARITY_Z)
+        && summary
+            .chain_acceptances
+            .iter()
+            .zip(FROZEN_CHAIN_ACCEPTANCES)
+            .all(|(actual, expected)| evidence_close(*actual, expected))
+}
+
 fn config(chain_id: u64) -> Su3EnsembleConfig {
     Su3EnsembleConfig {
         extents: EXTENTS,
@@ -77,7 +105,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         && summary.chain_consistency_z <= MAX_CHAIN_CONSISTENCY_Z
         && summary.max_stationarity_z <= MAX_STATIONARITY_Z
         && summary.max_link_unitarity_residual <= MAX_LINK_UNITARITY_RESIDUAL
-        && summary.max_link_determinant_residual <= MAX_LINK_DETERMINANT_RESIDUAL;
+        && summary.max_link_determinant_residual <= MAX_LINK_DETERMINANT_RESIDUAL
+        && archived_v1_evidence_matches(&summary);
     if !sole_predeclared_failure_reproduced {
         return Err(format!(
             "Phase 2C2 V1 archived boundary drift: pooled_mean={:.17e}, envelope=[{:.17e},{:.17e}], min_ess={:.17e}, required_ess={:.17e}, chain_z={:.17e}, stationarity_z={:.17e}",
@@ -95,6 +124,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("contract={BENCHMARK_ID}");
     println!("primary_doi={PRIMARY_DOI}");
     println!("result_role=archived_v1_failed_attempt");
+    println!("archived_evidence_reproduced=true");
+    println!("frozen_summary_abs_tolerance={FROZEN_SUMMARY_ABS_TOLERANCE:.17e}");
+    println!("frozen_summary_rel_tolerance={FROZEN_SUMMARY_REL_TOLERANCE:.17e}");
     println!("lattice=4,4,4,4");
     println!("beta={BETA:.17e}");
     println!("source_envelope_min={SOURCE_ENVELOPE_MIN:.17e}");
@@ -241,4 +273,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("positive_mass_gap_proved=false");
     println!("status=archived_failed_gate_reproduced");
     Ok(())
+}
+
+#[cfg(test)]
+mod replay_tolerance_tests {
+    use super::*;
+
+    #[test]
+    fn archived_v1_replay_tolerances_are_frozen() {
+        assert_eq!(FROZEN_SUMMARY_ABS_TOLERANCE, 1.0e-12);
+        assert_eq!(FROZEN_SUMMARY_REL_TOLERANCE, 1.0e-10);
+    }
 }

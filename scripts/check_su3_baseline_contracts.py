@@ -13,11 +13,24 @@ V2_CONTRACT_PATH = "contracts/YM-SU3-PLAQUETTE-BASELINE-V2.json"
 V2_VECTOR_PATH = "test-vectors/su3-plaquette-baseline-v2.json"
 
 EXPECTED_OBSERVABLE = "average plaquette=(1/(6V))*sum_x,sum_mu<nu (1/3)ReTr P_mu_nu(x)"
+EXPECTED_NUMERIC_EXTRACTION = {
+    "YM-SU3-PLAQUETTE-BASELINE-V1": "conservative graphical source-resolution envelope for the equivalent normalized average plaquette; not a quoted tabulated statistical error",
+    "YM-SU3-PLAQUETTE-BASELINE-V2": "the same conservative graphical source-resolution envelope frozen before the V1 result was inspected",
+}
 EXPECTED_RUNTIME_IDENTITY = {
     "sampler_id": "YM-SU3-ENSEMBLE-V1",
     "proposal_id": "YM-SU3-GENERATOR-METROPOLIS-V1",
     "rng_id": "SPLITMIX64-V1",
     "stream_id": "YM-SU3-STREAM-V1",
+}
+EXPECTED_V1_REPLAY_TOLERANCE = {
+    "summary_absolute": 1e-12,
+    "summary_relative": 1e-10,
+}
+EXPECTED_V2_REPLAY_TOLERANCE = {
+    "summary_absolute": 1e-12,
+    "summary_relative": 1e-10,
+    "residual_absolute": 1e-13,
 }
 EXPECTED_DIAGNOSTIC_PARAMETERS = {
     "autocorrelation_max_lag": 24,
@@ -126,6 +139,8 @@ def _validate_common_source_and_benchmark(payload: dict[str, Any]) -> None:
     _require(source["doi"] == "10.1088/0305-4616/7/5/001", "Phase 2C2 source DOI drift")
     _require(source["peer_reviewed"] is True, "Phase 2C2 source must remain peer reviewed")
     _require(source["selected_surface"] == "4^4 lattice at beta=6.0", "Phase 2C2 source surface drift")
+    expected_extraction = EXPECTED_NUMERIC_EXTRACTION[payload["contract_id"]]
+    _require(source["numeric_extraction"] == expected_extraction, "Phase 2C2 source numeric-extraction semantics drift")
     benchmark = payload["benchmark"]
     _require(benchmark["gauge_group"] == "SU(3)" and benchmark["action"] == "Wilson", "Phase 2C2 theory surface drift")
     _require(benchmark["boundary_conditions"] == "periodic", "Phase 2C2 boundary-condition drift")
@@ -161,6 +176,7 @@ def validate_v1_contract(payload: dict[str, Any]) -> None:
     _require(run["minimum_ess_per_chain"] == 8.0, "Phase 2C2 V1 ESS gate drift")
     _require(run["maximum_chain_consistency_z"] == 5.0 and run["maximum_stationarity_z"] == 5.0, "Phase 2C2 V1 z-gate drift")
     _require(payload["comparison_rule"] == V1_COMPARISON_RULE, "Phase 2C2 V1 comparison-rule drift")
+    _require(payload["replay_tolerance"] == EXPECTED_V1_REPLAY_TOLERANCE, "Phase 2C2 V1 replay-tolerance drift")
     _require(payload["predeclaration"] == V1_PREDECLARATION, "Phase 2C2 V1 predeclaration drift")
     _require(payload["observed_evidence"] == V1_OBSERVED_EVIDENCE, "Phase 2C2 V1 observed evidence drift")
     _require(payload["phase2c_gate"] == V1_GATE, "Phase 2C2 V1 gate drift")
@@ -172,14 +188,22 @@ def validate_v1_vectors(payload: dict[str, Any]) -> None:
     _require(payload["vector_set"] == "SU3-PLAQUETTE-BASELINE-PHASE2C2-V1", "Phase 2C2 V1 vector-set drift")
     _require(payload["status"] == "phase-2c2-v1-failed", "Phase 2C2 V1 vector failed status drift")
     by_id = {vector["id"]: vector for vector in payload["vectors"]}
-    _require(by_id["published-source-envelope"]["expected_interval"] == [0.56, 0.63], "Phase 2C2 V1 vector source envelope drift")
+    source = by_id["published-source-envelope"]
+    _require(source["expected_interval"] == [0.56, 0.63], "Phase 2C2 V1 vector source envelope drift")
+    _require(source["interval_semantics"] == "conservative graphical source-resolution envelope for the equivalent normalized plaquette, not a quoted paper error bar", "Phase 2C2 V1 vector interval semantics drift")
+    _require(source["claim_class"] == "C0", "Phase 2C2 V1 source claim class drift")
+    predeclared = by_id["two-independent-chain-predeclaration"]
+    _require(predeclared["claim_class"] == "C0", "Phase 2C2 V1 predeclaration claim class drift")
     failure = by_id["observed-v1-failure"]
     _require(failure["source_envelope_reproduced"] is True, "Phase 2C2 V1 vector source agreement erased")
     _require(failure["minimum_effective_sample_size_observed"] == 4.51005377363487, "Phase 2C2 V1 vector ESS drift")
     _require(failure["minimum_effective_sample_size_required"] == 8.0, "Phase 2C2 V1 vector ESS threshold drift")
     _require(failure["v1_reclassified_as_pass"] is False and failure["parameter_retuning_after_result"] is False, "Phase 2C2 V1 vector failure rewritten")
+    _require(failure["claim_class"] == "C2", "Phase 2C2 V1 observed-evidence claim class drift")
+    _require(failure["replay_tolerance"] == EXPECTED_V1_REPLAY_TOLERANCE, "Phase 2C2 V1 vector replay-tolerance drift")
     boundary = by_id["phase2c-v1-failure-boundary"]
     _require(boundary["published_su3_baseline_reproduced"] is False and boundary["phase2c_complete"] is False and boundary["glueball_analysis_enabled"] is False, "Phase 2C2 V1 vector boundary weakened")
+    _require(boundary["claim_class"] == "C0", "Phase 2C2 V1 boundary claim class drift")
 
 
 def validate_v2_contract(payload: dict[str, Any]) -> None:
@@ -202,6 +226,7 @@ def validate_v2_contract(payload: dict[str, Any]) -> None:
     _require(run["minimum_aggregate_effective_sample_size"] == 16.0, "Phase 2C2 V2 aggregate ESS gate drift")
     _require(run["maximum_pairwise_chain_consistency_z"] == 5.0 and run["maximum_stationarity_z"] == 5.0, "Phase 2C2 V2 z-gate drift")
     _require(payload["comparison_rule"] == V2_COMPARISON_RULE, "Phase 2C2 V2 comparison-rule drift")
+    _require(payload["replay_tolerance"] == EXPECTED_V2_REPLAY_TOLERANCE, "Phase 2C2 V2 replay-tolerance drift")
     _require(payload["predeclaration"] == V2_PREDECLARATION, "Phase 2C2 V2 predeclaration drift")
     observed = payload["observed_evidence"]
     _require(observed["workflow_run_id"] == 34761701867, "Phase 2C2 V2 workflow evidence drift")
@@ -239,21 +264,28 @@ def validate_v2_vectors(payload: dict[str, Any]) -> None:
     _require(payload["vector_set"] == "SU3-PLAQUETTE-BASELINE-PHASE2C2-V2", "Phase 2C2 V2 vector-set drift")
     _require(payload["status"] == "phase-2c2-frozen", "Phase 2C2 V2 vector frozen status drift")
     by_id = {vector["id"]: vector for vector in payload["vectors"]}
-    _require(by_id["unchanged-published-source-envelope"]["expected_interval"] == [0.56, 0.63], "Phase 2C2 V2 vector source envelope drift")
+    source = by_id["unchanged-published-source-envelope"]
+    _require(source["expected_interval"] == [0.56, 0.63], "Phase 2C2 V2 vector source envelope drift")
+    _require(source["claim_class"] == "C0", "Phase 2C2 V2 source claim class drift")
     run = by_id["four-fresh-chain-confirmation"]
     _require(run["chain_ids"] == [0, 1, 2, 3], "Phase 2C2 V2 vector chain identities drift")
     _require(run["minimum_aggregate_effective_sample_size"] == 16.0, "Phase 2C2 V2 vector aggregate ESS drift")
+    _require(run["claim_class"] == "C2", "Phase 2C2 V2 confirmation claim class drift")
+    _require(run["replay_tolerance"] == EXPECTED_V2_REPLAY_TOLERANCE, "Phase 2C2 V2 vector replay-tolerance drift")
     failure = by_id["v1-failure-preservation"]
     _require(failure["v1_result_status"] == "failed-predeclared-effective-sample-size-gate", "Phase 2C2 V2 vector V1 failure status drift")
     _require(failure["v1_reclassified_as_pass"] is False and failure["v2_uses_fresh_streams"] is True, "Phase 2C2 V2 vector independence boundary weakened")
+    _require(failure["claim_class"] == "C0", "Phase 2C2 V2 V1-preservation claim class drift")
     observed = by_id["observed-v2-confirmation"]
     _require(observed["workflow_run_id"] == 34761701867, "Phase 2C2 V2 vector workflow evidence drift")
     _require(observed["aggregate_effective_sample_size"] == 78.94400476134997, "Phase 2C2 V2 vector aggregate ESS evidence drift")
     _require(observed["published_su3_baseline_reproduced"] is True and observed["phase2c_complete"] is True, "Phase 2C2 V2 vector success evidence weakened")
     _require(observed["v1_reclassified_as_pass"] is False and observed["parameter_retuning_after_v2_result"] is False, "Phase 2C2 V2 vector provenance rewritten")
+    _require(observed["claim_class"] == "C2", "Phase 2C2 V2 observed-evidence claim class drift")
     boundary = by_id["phase2c-frozen-boundary"]
     _require(boundary["published_su3_baseline_reproduced"] is True and boundary["phase2c_complete"] is True and boundary["glueball_analysis_enabled"] is True, "Phase 2C2 frozen vector boundary weakened")
     _require(boundary["benchmark_agreement_implies_positive_mass_gap"] is False, "Phase 2C2 frozen vector mass-gap overclaim")
+    _require(boundary["claim_class"] == "C0", "Phase 2C2 frozen boundary claim class drift")
 
 
 def main() -> None:

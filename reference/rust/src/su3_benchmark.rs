@@ -174,6 +174,7 @@ pub(crate) fn acceptance_from_counts(report: &Su3ChainReport) -> Result<f64, Ben
     }
     let acceptance = report.metropolis_accepts as f64 / report.metropolis_proposals as f64;
     if !acceptance.is_finite()
+        || !report.mean_metropolis_acceptance.is_finite()
         || (report.mean_metropolis_acceptance - acceptance).abs() > ACCEPTANCE_EVIDENCE_TOLERANCE
         || !(MIN_METROPOLIS_ACCEPTANCE..=MAX_METROPOLIS_ACCEPTANCE).contains(&acceptance)
     {
@@ -491,6 +492,13 @@ mod tests {
         let mut rounded = first.clone();
         rounded.mean_metropolis_acceptance += ACCEPTANCE_EVIDENCE_TOLERANCE * 0.5;
         assert!(summarize_two_chains(&rounded, &second).is_ok());
+
+        let mut non_finite = first.clone();
+        non_finite.mean_metropolis_acceptance = f64::NAN;
+        assert_eq!(
+            summarize_two_chains(&non_finite, &second),
+            Err(BenchmarkError::InvalidAcceptanceEvidence)
+        );
 
         let mut broken = first.clone();
         broken.mean_metropolis_acceptance += ACCEPTANCE_EVIDENCE_TOLERANCE * 2.0;

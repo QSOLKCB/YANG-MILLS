@@ -308,3 +308,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("status=passed");
     Ok(())
 }
+
+#[cfg(test)]
+mod replay_tolerance_tests {
+    use super::*;
+
+    #[test]
+    fn frozen_v2_replay_tolerances_are_frozen() {
+        assert_eq!(FROZEN_SUMMARY_ABS_TOLERANCE, 1.0e-12);
+        assert_eq!(FROZEN_SUMMARY_REL_TOLERANCE, 1.0e-10);
+        assert_eq!(FROZEN_RESIDUAL_ABS_TOLERANCE, 1.0e-13);
+    }
+}

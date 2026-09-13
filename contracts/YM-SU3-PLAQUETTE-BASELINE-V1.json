@@ -116,5 +116,9 @@
     "benchmark_agreement_implies_continuum_qft": false,
     "benchmark_agreement_implies_positive_mass_gap": false,
     "glueball_analysis_authorization_is_not_a_glueball_result": true
+  },
+  "replay_tolerance": {
+    "summary_absolute": 1e-12,
+    "summary_relative": 1e-10
   }
 }

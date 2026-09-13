@@ -43,6 +43,10 @@ def main() -> None:
     expect_reject(validate_v1_contract, broken, "V1 observable normalization drift")
 
     broken = copy.deepcopy(v1)
+    broken["primary_source"]["numeric_extraction"] = "quoted paper statistical error bar"
+    expect_reject(validate_v1_contract, broken, "V1 graphical source extraction rewritten")
+
+    broken = copy.deepcopy(v1)
     broken["reference_run"]["sampler_id"] = "YM-SU3-ENSEMBLE-V2"
     expect_reject(validate_v1_contract, broken, "V1 sampler identity drift")
 
@@ -69,6 +73,10 @@ def main() -> None:
     broken = copy.deepcopy(v1)
     broken["observed_evidence"]["minimum_effective_sample_size"] = 8.1
     expect_reject(validate_v1_contract, broken, "V1 failed ESS evidence rewritten")
+
+    broken = copy.deepcopy(v1)
+    broken["replay_tolerance"]["summary_relative"] = 1.0
+    expect_reject(validate_v1_contract, broken, "V1 replay tolerance weakened")
 
     broken = copy.deepcopy(v1)
     broken["observed_evidence"]["pooled_mean"] += 0.01
@@ -102,9 +110,17 @@ def main() -> None:
     broken["vectors"][2]["v1_reclassified_as_pass"] = True
     expect_reject(validate_v1_vectors, broken, "V1 vector failure reclassified")
 
+    broken = copy.deepcopy(v1_vectors)
+    broken["vectors"][2]["claim_class"] = "C5"
+    expect_reject(validate_v1_vectors, broken, "V1 observed evidence promoted to C5")
+
     broken = copy.deepcopy(v2)
     broken["benchmark"]["source_envelope_max"] = 0.75
     expect_reject(validate_v2_contract, broken, "V2 source envelope retuned")
+
+    broken = copy.deepcopy(v2)
+    broken["primary_source"]["numeric_extraction"] = "quoted paper statistical error bar"
+    expect_reject(validate_v2_contract, broken, "V2 graphical source extraction rewritten")
 
     broken = copy.deepcopy(v2)
     broken["reference_run"]["stream_id"] = "YM-SU3-STREAM-V2"
@@ -133,6 +149,10 @@ def main() -> None:
     broken = copy.deepcopy(v2)
     broken["comparison_rule"]["raw_measurements_retained"] = False
     expect_reject(validate_v2_contract, broken, "V2 raw-evidence comparison rule weakened")
+
+    broken = copy.deepcopy(v2)
+    broken["replay_tolerance"]["summary_absolute"] = 1.0
+    expect_reject(validate_v2_contract, broken, "V2 replay tolerance weakened")
 
     broken = copy.deepcopy(v2)
     broken["predeclaration"]["proposal_angle_changed_after_v1"] = True
@@ -173,6 +193,10 @@ def main() -> None:
     broken = copy.deepcopy(v2_vectors)
     broken["vectors"][3]["aggregate_effective_sample_size"] = 15.0
     expect_reject(validate_v2_vectors, broken, "V2 vector passing evidence weakened")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][3]["claim_class"] = "C5"
+    expect_reject(validate_v2_vectors, broken, "V2 observed evidence promoted to C5")
 
     broken = copy.deepcopy(v2_vectors)
     broken["vectors"][4]["phase2c_complete"] = False
