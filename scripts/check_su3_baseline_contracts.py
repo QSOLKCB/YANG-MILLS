@@ -127,6 +127,35 @@ V2_CLAIM_BOUNDARY = {
     "benchmark_agreement_implies_positive_mass_gap": False,
     "glueball_analysis_authorization_is_not_a_glueball_result": True,
 }
+V2_VECTOR_OBSERVED_EVIDENCE = {
+    "id": "observed-v2-confirmation",
+    "workflow_run_id": 34761701867,
+    "evidence_head_commit": "f5a221fdad2046779358cc59460fae488626459b",
+    "pooled_mean": 0.5992920042685975,
+    "pooled_standard_error": 0.0008268453534905086,
+    "chain_means": [
+        0.5951228942049566,
+        0.6010578916054883,
+        0.6006811934765629,
+        0.6003060377873822,
+    ],
+    "chain_effective_sample_sizes": [
+        37.108298427827265,
+        12.12458490228564,
+        19.780522239783117,
+        9.930599191453949,
+    ],
+    "aggregate_effective_sample_size": 78.94400476134997,
+    "maximum_pairwise_chain_consistency_z_observed": 3.5504261086461475,
+    "maximum_stationarity_z_observed": 1.4650733209908853,
+    "source_envelope_reproduced": True,
+    "diagnostics_trustworthy": True,
+    "published_su3_baseline_reproduced": True,
+    "phase2c_complete": True,
+    "v1_reclassified_as_pass": False,
+    "parameter_retuning_after_v2_result": False,
+    "claim_class": "C2",
+}
 
 
 def _require(condition: bool, message: str) -> None:
@@ -277,11 +306,7 @@ def validate_v2_vectors(payload: dict[str, Any]) -> None:
     _require(failure["v1_reclassified_as_pass"] is False and failure["v2_uses_fresh_streams"] is True, "Phase 2C2 V2 vector independence boundary weakened")
     _require(failure["claim_class"] == "C0", "Phase 2C2 V2 V1-preservation claim class drift")
     observed = by_id["observed-v2-confirmation"]
-    _require(observed["workflow_run_id"] == 34761701867, "Phase 2C2 V2 vector workflow evidence drift")
-    _require(observed["aggregate_effective_sample_size"] == 78.94400476134997, "Phase 2C2 V2 vector aggregate ESS evidence drift")
-    _require(observed["published_su3_baseline_reproduced"] is True and observed["phase2c_complete"] is True, "Phase 2C2 V2 vector success evidence weakened")
-    _require(observed["v1_reclassified_as_pass"] is False and observed["parameter_retuning_after_v2_result"] is False, "Phase 2C2 V2 vector provenance rewritten")
-    _require(observed["claim_class"] == "C2", "Phase 2C2 V2 observed-evidence claim class drift")
+    _require(observed == V2_VECTOR_OBSERVED_EVIDENCE, "Phase 2C2 V2 complete observed-evidence vector drift")
     boundary = by_id["phase2c-frozen-boundary"]
     _require(boundary["published_su3_baseline_reproduced"] is True and boundary["phase2c_complete"] is True and boundary["glueball_analysis_enabled"] is True, "Phase 2C2 frozen vector boundary weakened")
     _require(boundary["benchmark_agreement_implies_positive_mass_gap"] is False, "Phase 2C2 frozen vector mass-gap overclaim")
