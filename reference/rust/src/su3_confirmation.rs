@@ -335,7 +335,9 @@ mod tests {
 
     #[test]
     fn v2_preserves_v1_target_and_sampler_schedule() {
+        assert_eq!(MIN_AGGREGATE_ESS, 16.0);
         assert_eq!(MIN_AGGREGATE_ESS, 2.0 * crate::su3_benchmark::MIN_CHAIN_ESS);
+        assert_eq!(MAX_PAIRWISE_CHAIN_CONSISTENCY_Z, 5.0);
         assert_eq!(EXPECTED_TOTAL_SWEEPS, 448);
         assert!(EXPECTED_TOTAL_SWEEPS <= crate::su3_ensemble::MAX_REFERENCE_SWEEPS);
         assert_eq!(PROPOSAL_ANGLE, crate::su3_benchmark::PROPOSAL_ANGLE);
