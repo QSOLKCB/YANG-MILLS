@@ -2,26 +2,24 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-#[path = "../su3.rs"]
-mod su3;
-#[path = "../su3_lattice.rs"]
-mod su3_lattice;
-#[path = "../path_holonomy.rs"]
-mod path_holonomy;
 #[path = "../glueball_operators.rs"]
 mod glueball_operators;
 #[path = "../glueball_smearing.rs"]
 mod glueball_smearing;
+#[path = "../path_holonomy.rs"]
+mod path_holonomy;
+#[path = "../su3.rs"]
+mod su3;
+#[path = "../su3_lattice.rs"]
+mod su3_lattice;
 
 use glueball_operators::scalar_a1pp_operator_basis;
 use glueball_smearing::{
-    max_link_residual, spatial_stout_smear, CANONICAL_RHO, GAUGE_COVARIANCE_TOLERANCE,
-    MAX_LEVELS, SMEARING_CONTRACT_ID, TRANSFORMATION_ID,
+    max_link_residual, spatial_stout_smear, CANONICAL_RHO, GAUGE_COVARIANCE_TOLERANCE, MAX_LEVELS,
+    SMEARING_CONTRACT_ID, TRANSFORMATION_ID,
 };
 use su3::SU3_ACCEPTANCE_TOLERANCE;
-use su3_lattice::{
-    deterministic_su3_site_gauge, single_traceless_su3_link_lattice, Su3Lattice4,
-};
+use su3_lattice::{deterministic_su3_site_gauge, single_traceless_su3_link_lattice, Su3Lattice4};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let identity = Su3Lattice4::new_identity([3, 3, 3, 3])?;

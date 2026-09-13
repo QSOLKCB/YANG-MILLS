@@ -13,7 +13,9 @@ use core::fmt;
 use crate::glueball_operators::{
     EUCLIDEAN_TIME_DIRECTION, MINIMUM_SPATIAL_EXTENT, SPATIAL_DIRECTIONS,
 };
-use crate::su3::{gell_mann, Complex64, Mat3, Su3, Su3Error, SU3_ACCEPTANCE_TOLERANCE, SU3_GENERATORS};
+use crate::su3::{
+    gell_mann, Complex64, Mat3, Su3, Su3Error, SU3_ACCEPTANCE_TOLERANCE, SU3_GENERATORS,
+};
 use crate::su3_lattice::{Su3Lattice4, Su3LatticeError, DIM};
 
 pub const SMEARING_CONTRACT_ID: &str = "YM-GLUEBALL-SPATIAL-STOUT-V1";
@@ -74,7 +76,11 @@ impl From<Su3LatticeError> for GlueballSmearingError {
     }
 }
 
-fn validate_parameters(lattice: &Su3Lattice4, rho: f64, levels: usize) -> Result<(), GlueballSmearingError> {
+fn validate_parameters(
+    lattice: &Su3Lattice4,
+    rho: f64,
+    levels: usize,
+) -> Result<(), GlueballSmearingError> {
     if !rho.is_finite() {
         return Err(GlueballSmearingError::NonFiniteRho);
     }
@@ -108,7 +114,10 @@ fn neighbor_minus(
         ));
     }
     let extents = lattice.extents();
-    if x.iter().zip(extents).any(|(&value, extent)| value >= extent) {
+    if x.iter()
+        .zip(extents)
+        .any(|(&value, extent)| value >= extent)
+    {
         return Err(GlueballSmearingError::Lattice(
             Su3LatticeError::CoordinateOutOfRange,
         ));
@@ -335,11 +344,13 @@ mod tests {
             .unwrap()
             .gauge_transform(deterministic_su3_site_gauge)
             .unwrap();
-        let transformed_then_smeared =
-            spatial_stout_smear(&transformed, CANONICAL_RHO, 1).unwrap();
-        let residual = max_link_residual(&smeared_then_transformed, &transformed_then_smeared)
-            .unwrap();
-        assert!(residual <= GAUGE_COVARIANCE_TOLERANCE, "residual={residual:.17e}");
+        let transformed_then_smeared = spatial_stout_smear(&transformed, CANONICAL_RHO, 1).unwrap();
+        let residual =
+            max_link_residual(&smeared_then_transformed, &transformed_then_smeared).unwrap();
+        assert!(
+            residual <= GAUGE_COVARIANCE_TOLERANCE,
+            "residual={residual:.17e}"
+        );
     }
 
     #[test]

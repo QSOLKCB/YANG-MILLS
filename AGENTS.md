@@ -223,11 +223,17 @@ because external validation does not belong to the sampler contract. Phase 2C2 i
 
 Do not import triadic ontology, Q/K/V-to-colour semantics, or other cross-domain interpretations into these authorities.
 
-### Phase 3A glueball-operator candidate authority
+### Phase 3A frozen glueball-operator authority
 
-Phase 3A introduces the candidate `YM-GLUEBALL-OPERATORS-V1`. It defines unsmeared closed spatial Wilson-loop operators only. The reference uses Euclidean time direction `3`, spatial directions `[0,1,2]`, requires every spatial extent to be at least `3`, and requires equal spatial extents before using the cubic-lattice `A1++` label. Its continuum channel intent is `0++`; that is not an exact finite-spacing spin assignment.
+Phase 3A freezes `YM-GLUEBALL-OPERATORS-V1` after PR #11 merged. It defines unsmeared closed spatial Wilson-loop operators only. The reference uses Euclidean time direction `3`, spatial directions `[0,1,2]`, requires every spatial extent to be at least `3`, and requires equal spatial extents before using the cubic-lattice `A1++` label. Its continuum channel intent is `0++`; that is not an exact finite-spacing spin assignment.
 
-The candidate does not authorize smearing/blocking, connected correlators, effective masses, a glueball spectrum, a finite-volume mass-gap claim, confinement, continuum QFT construction, or a Clay solution. Those require separately versioned later Phase 3 authorities.
+Phase 3A itself does not authorize connected correlators, effective masses, a glueball spectrum, a finite-volume mass-gap claim, confinement, continuum QFT construction, or a Clay solution. Later surfaces require separate contract identifiers.
+
+### Phase 3B1 spatial stout-smearing candidate authority
+
+Phase 3B1 introduces `YM-GLUEBALL-SPATIAL-STOUT-V1` as a deterministic transformation of the frozen Phase 3A operator input. It follows the stout-link construction with a project-specific spatial-only specialization: directions `[0,1,2]` are smeared synchronously, direction `3` is copied exactly, spatial extents must be equal and at least `3`, `0 < rho <= 0.25`, and at most `8` levels are admitted. The canonical regression uses `rho=0.10` and one level.
+
+The stout parameter is an analysis/transformation parameter, not a physical observable. Phase 3B1 does not establish improved overlap, define spatial blocking, construct connected correlators, extract an effective mass or spectrum, establish confinement, construct continuum QFT, or prove a mass gap.
 
 ## Donor boundary
 
@@ -268,6 +274,7 @@ cargo run --quiet --locked --bin ym-su3-ensemble
 cargo run --release --quiet --locked --bin ym-su3-plaquette-baseline
 cargo run --release --quiet --locked --bin ym-su3-plaquette-baseline-v2
 cargo run --quiet --locked --bin ym-glueball-operators
+cargo run --quiet --locked --bin ym-glueball-smearing
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
