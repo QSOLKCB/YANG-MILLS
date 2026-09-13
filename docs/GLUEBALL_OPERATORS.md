@@ -1,20 +1,20 @@
 # Phase 3A — gauge-invariant spatial glueball operators
 
-Phase 3A begins the glueball laboratory only after the separately versioned Phase 2C2 `SU(3)` validation gate has passed.
+Phase 3A begins the glueball laboratory only after the separately versioned Phase 2C2 `SU(3)` validation gate has passed. PR #11 merged after independent review and CI, so the operator authority is now sealed.
 
-The authority introduced here is:
+The frozen authority is:
 
 ```text
 YM-GLUEBALL-OPERATORS-V1
-status = phase-3a-candidate
+status = phase-3a-frozen
 basis  = YM-GLUEBALL-SPATIAL-A1PP-V1
 ```
 
-It defines an **unsmeared finite-lattice spatial Wilson-loop operator basis**. It does not yet define smearing, blocking, connected correlators, vacuum subtraction, effective masses, fit windows, continuum extrapolations, or a glueball spectrum.
+It defines an **unsmeared finite-lattice spatial Wilson-loop operator basis**. Smearing, blocking, connected correlators, vacuum subtraction, effective masses, fit windows, continuum extrapolations, and glueball spectra remain separately versioned later surfaces.
 
 ## Geometry
 
-The frozen candidate convention is
+The frozen convention is
 
 ```text
 Euclidean time direction = 3
@@ -27,7 +27,7 @@ The underlying link/path orientation is inherited unchanged from `YM-SU3-LATTICE
 
 ## Minimal scalar basis
 
-The candidate basis contains two unsmeared elements:
+The frozen unsmeared basis contains two elements:
 
 1. `spatial-plaquette-1x1`
    - planar `1x1` spatial Wilson loops;
@@ -49,7 +49,7 @@ The translation/orientation average is a finite-lattice scalar construction. Tak
 
 ## `A1++` versus continuum `0++`
 
-The finite cubic lattice does not have exact continuum rotational symmetry. The candidate is therefore labelled
+The finite cubic lattice does not have exact continuum rotational symmetry. The frozen surface is therefore labelled
 
 ```text
 finite-lattice irrep      = A1++
@@ -75,7 +75,7 @@ For one spatial `3^3` slice:
 2x1 rectangle count = 27 spatial sites * 6 orientations = 162
 ```
 
-The candidate also checks the complete basis before and after the deterministic local `SU(3)` gauge transformation already used by the frozen lattice/path regression surface. The maximum basis-element difference must be at most `2e-11`.
+The frozen authority also checks the complete basis before and after the deterministic local `SU(3)` gauge transformation already used by the lattice/path regression surface. The maximum basis-element difference must be at most `2e-11`.
 
 ## What Phase 3A does not claim
 
@@ -93,11 +93,10 @@ Phase 3A does **not** claim any of the following:
 
 ## Next slices
 
-The next scientific steps are deliberately separate authorities:
+Phase 3B1 introduces spatial stout smearing as a separate candidate authority. Spatial blocking remains separately versioned and unimplemented. After transformation surfaces are stable, later phases may add:
 
-1. versioned smearing/blocking transformations;
-2. connected Euclidean correlators and vacuum subtraction;
-3. uncertainty-aware effective-mass analysis for the scalar channel;
-4. only after validation, additional `2++` and `0-+` channels.
+1. connected Euclidean correlators and vacuum subtraction;
+2. uncertainty-aware effective-mass analysis for the scalar channel;
+3. only after validation, additional `2++` and `0-+` channels.
 
 Separating these surfaces prevents an implementation fact about gauge-invariant operators from being silently promoted into a spectroscopy result.
