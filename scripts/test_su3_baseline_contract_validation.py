@@ -39,7 +39,7 @@ def main() -> None:
     expect_reject(validate_v1_contract, broken, "V1 failure reclassified as frozen success")
 
     broken = copy.deepcopy(v1)
-    broken["observed_evidence"]["minimum_effective_sample_size_observed"] = 8.1
+    broken["observed_evidence"]["minimum_effective_sample_size"] = 8.1
     expect_reject(validate_v1_contract, broken, "V1 failed ESS evidence rewritten")
 
     broken = copy.deepcopy(v1)
@@ -67,8 +67,12 @@ def main() -> None:
     expect_reject(validate_v2_contract, broken, "V2 proposal retuning admitted")
 
     broken = copy.deepcopy(v2)
-    broken["phase2c_gate"]["published_su3_baseline_reproduced"] = True
-    expect_reject(validate_v2_contract, broken, "V2 benchmark claimed before run")
+    broken["observed_evidence"]["aggregate_effective_sample_size"] = 15.0
+    expect_reject(validate_v2_contract, broken, "V2 passing ESS evidence rewritten below gate")
+
+    broken = copy.deepcopy(v2)
+    broken["phase2c_gate"]["published_su3_baseline_reproduced"] = False
+    expect_reject(validate_v2_contract, broken, "V2 frozen success gate downgraded")
 
     broken = copy.deepcopy(v2_vectors)
     broken["vectors"][1]["chain_ids"] = [0, 1, 2, 2]
@@ -79,8 +83,12 @@ def main() -> None:
     expect_reject(validate_v2_vectors, broken, "V2 vector rewrote V1 failure")
 
     broken = copy.deepcopy(v2_vectors)
-    broken["vectors"][3]["phase2c_complete"] = True
-    expect_reject(validate_v2_vectors, broken, "V2 vector completed prematurely")
+    broken["vectors"][3]["aggregate_effective_sample_size"] = 15.0
+    expect_reject(validate_v2_vectors, broken, "V2 vector passing evidence weakened")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][4]["phase2c_complete"] = False
+    expect_reject(validate_v2_vectors, broken, "V2 frozen boundary downgraded")
 
     print("Negative Phase 2C2 SU(3) V1/V2 contract regressions: passed")
 
