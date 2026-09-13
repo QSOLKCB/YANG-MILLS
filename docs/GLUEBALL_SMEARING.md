@@ -2,6 +2,14 @@
 
 Phase 3B1 adds one separately versioned deterministic transformation surface for the Phase 3A glueball operators: **spatial stout-link smearing**.
 
+After PR #12 merged, the authority is frozen as:
+
+```text
+YM-GLUEBALL-SPATIAL-STOUT-V1
+status         = phase-3b1-frozen
+transformation = YM-SPATIAL-STOUT-SMEAR-V1
+```
+
 It is intentionally narrower than a spectroscopy pipeline. This phase does **not** define spatial blocking, connected correlators, vacuum subtraction, effective masses, fit windows, a glueball spectrum, confinement, a continuum quantum theory, or a positive continuum mass gap.
 
 ## Source and specialization
@@ -18,7 +26,7 @@ The repository freezes a project-specific spatial specialization:
 
 This spatial-only restriction is a YANG-MILLS implementation choice. It is not represented as a claim that the cited paper uniquely requires this specialization.
 
-## Frozen candidate formulas
+## Frozen formulas
 
 For spatial `mu`, define the spatial staple sum
 
@@ -56,7 +64,7 @@ exactly.
 
 ## Bounded reference parameters
 
-The candidate reference surface freezes:
+The frozen reference surface is:
 
 ```text
 canonical rho = 0.10
@@ -97,4 +105,4 @@ Phase 3B1 therefore does **not** establish:
 - a positive continuum mass gap;
 - a Clay solution.
 
-Spatial blocking remains a separately versioned future transformation.
+Spatial blocking is defined separately by the Phase 3B2 candidate `YM-GLUEBALL-SPATIAL-BLOCK-V1`; Phase 3B1 itself remains a smearing-only authority.

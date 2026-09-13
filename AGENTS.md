@@ -229,11 +229,17 @@ Phase 3A freezes `YM-GLUEBALL-OPERATORS-V1` after PR #11 merged. It defines unsm
 
 Phase 3A itself does not authorize connected correlators, effective masses, a glueball spectrum, a finite-volume mass-gap claim, confinement, continuum QFT construction, or a Clay solution. Later surfaces require separate contract identifiers.
 
-### Phase 3B1 spatial stout-smearing candidate authority
+### Phase 3B1 frozen spatial stout-smearing authority
 
-Phase 3B1 introduces `YM-GLUEBALL-SPATIAL-STOUT-V1` as a deterministic transformation of the frozen Phase 3A operator input. It follows the stout-link construction with a project-specific spatial-only specialization: directions `[0,1,2]` are smeared synchronously, direction `3` is copied exactly, spatial extents must be equal and at least `3`, `0 < rho <= 0.25`, and at most `8` levels are admitted. The canonical regression uses `rho=0.10` and one level.
+Phase 3B1 freezes `YM-GLUEBALL-SPATIAL-STOUT-V1` after PR #12 merged. It is a deterministic transformation of the frozen Phase 3A operator input. Directions `[0,1,2]` are smeared synchronously, direction `3` is copied exactly, spatial extents must be equal and at least `3`, `0 < rho <= 0.25`, and at most `8` levels are admitted. The canonical regression uses `rho=0.10` and one level.
 
-The stout parameter is an analysis/transformation parameter, not a physical observable. Phase 3B1 does not establish improved overlap, define spatial blocking, construct connected correlators, extract an effective mass or spectrum, establish confinement, construct continuum QFT, or prove a mass gap.
+The stout parameter is an analysis/transformation parameter, not a physical observable. Phase 3B1 does not establish improved overlap, construct connected correlators, extract an effective mass or spectrum, establish confinement, construct continuum QFT, or prove a mass gap.
+
+### Phase 3B2 spatial blocking candidate authority
+
+Phase 3B2 introduces `YM-GLUEBALL-SPATIAL-BLOCK-V1` as a deterministic parameter-free stride-2 spatial coarse-link map. Fine spatial extents must be equal, even, and at least `6`; the output extents are `[Lx/2,Ly/2,Lz/2,Nt]`. A coarse site `y` embeds as `(2y0,2y1,2y2,y3)`. Spatial coarse links are the ordered product of the two fine spatial links along the blocked edge; temporal links are sampled exactly at the embedded fine site. No projection, averaging, or smearing is part of this blocking authority.
+
+The gauge-covariance regression uses the restricted coarse gauge field `G_c(y)=G_f(2y0,2y1,2y2,y3)`. Phase 3B2 does not establish improved overlap, validate combined smear/block tuning, construct connected correlators, extract an effective mass or spectrum, establish confinement, construct continuum QFT, or prove a mass gap.
 
 ## Donor boundary
 
@@ -275,6 +281,7 @@ cargo run --release --quiet --locked --bin ym-su3-plaquette-baseline
 cargo run --release --quiet --locked --bin ym-su3-plaquette-baseline-v2
 cargo run --quiet --locked --bin ym-glueball-operators
 cargo run --quiet --locked --bin ym-glueball-smearing
+cargo run --quiet --locked --bin ym-glueball-blocking
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```

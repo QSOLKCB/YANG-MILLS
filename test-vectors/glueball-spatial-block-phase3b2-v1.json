@@ -1,0 +1,87 @@
+{
+  "contract_id": "YM-GLUEBALL-SPATIAL-BLOCK-V1",
+  "vector_set": "GLUEBALL-SPATIAL-BLOCK-PHASE3B2-V1",
+  "status": "phase-3b2-candidate",
+  "vectors": [
+    {
+      "id": "identity-6cubed-to-3cubed",
+      "fine_extents": [6, 6, 6, 3],
+      "configuration": "all links identity",
+      "observable": "maximum coarse-link residual from an all-identity 3x3x3x3 lattice",
+      "expected": 0.0,
+      "tolerance": 0.0,
+      "claim_class": "C1"
+    },
+    {
+      "id": "canonical-coarse-operator-output",
+      "fine_extents": [6, 6, 6, 3],
+      "coarse_extents": [3, 3, 3, 3],
+      "configuration": "single traceless SU(3) cycle spatial link at fine origin",
+      "observable": "frozen Phase 3A scalar operator output after one stride-2 block",
+      "expected": {
+        "spatial_plaquette_1x1": 0.9506172839506173,
+        "spatial_rectangle_2x1": 0.9259259259259259
+      },
+      "absolute_tolerance": 1e-12,
+      "claim_class": "C2"
+    },
+    {
+      "id": "temporal-link-sampled-exactly",
+      "fine_extents": [6, 6, 6, 3],
+      "configuration": "single traceless SU(3) cycle temporal link at fine origin",
+      "observable": "matrix residual between fine temporal link at the embedded site and the corresponding coarse temporal link",
+      "expected": 0.0,
+      "tolerance": 0.0,
+      "claim_class": "C1"
+    },
+    {
+      "id": "deterministic-gauge-covariance",
+      "fine_extents": [6, 6, 6, 3],
+      "configuration": "single traceless SU(3) cycle spatial link at fine origin",
+      "gauge_field": "deterministic_su3_site_gauge",
+      "coarse_gauge_field": "deterministic_su3_site_gauge restricted by y -> (2y0,2y1,2y2,y3)",
+      "observable": "maximum link residual between block(gauge(U)) and gauge_restricted(block(U))",
+      "expected_max": 5e-11,
+      "claim_class": "C2"
+    },
+    {
+      "id": "blocked-link-group-residuals",
+      "fine_extents": [6, 6, 6, 3],
+      "configuration": "single traceless SU(3) cycle spatial link at fine origin",
+      "unitarity_residual_max": 5e-12,
+      "determinant_residual_max": 5e-12,
+      "claim_class": "C2"
+    },
+    {
+      "id": "too-small-spatial-lattice-rejected",
+      "fine_extents": [4, 4, 4, 3],
+      "expected": "SpatialExtentTooSmall",
+      "claim_class": "C0"
+    },
+    {
+      "id": "odd-spatial-lattice-rejected",
+      "fine_extents": [7, 7, 7, 3],
+      "expected": "SpatialExtentNotEven",
+      "claim_class": "C0"
+    },
+    {
+      "id": "anisotropic-spatial-lattice-rejected",
+      "fine_extents": [6, 8, 6, 3],
+      "expected": "SpatialExtentsNotCubic",
+      "claim_class": "C0"
+    },
+    {
+      "id": "claim-boundary",
+      "transformation": "YM-SPATIAL-STRIDE2-BLOCK-V1",
+      "stout_smearing_required": false,
+      "combined_smear_block_tuning_validated": false,
+      "connected_correlator_constructed": false,
+      "effective_mass_extracted": false,
+      "glueball_spectrum_extracted": false,
+      "finite_volume_mass_gap_established": false,
+      "positive_continuum_mass_gap_proved": false,
+      "clay_solution_claimed": false,
+      "claim_class": "C0"
+    }
+  ]
+}

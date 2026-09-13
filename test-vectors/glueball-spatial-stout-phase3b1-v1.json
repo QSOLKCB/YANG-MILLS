@@ -1,7 +1,7 @@
 {
   "contract_id": "YM-GLUEBALL-SPATIAL-STOUT-V1",
   "vector_set": "GLUEBALL-SPATIAL-STOUT-PHASE3B1-V1",
-  "status": "phase-3b1-candidate",
+  "status": "phase-3b1-frozen",
   "vectors": [
     {
       "id": "identity-fixed-point",
