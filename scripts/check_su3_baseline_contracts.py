@@ -127,6 +127,109 @@ V2_CLAIM_BOUNDARY = {
     "benchmark_agreement_implies_positive_mass_gap": False,
     "glueball_analysis_authorization_is_not_a_glueball_result": True,
 }
+V1_VECTOR_SOURCE = {
+    "id": "published-source-envelope",
+    "doi": "10.1088/0305-4616/7/5/001",
+    "source_lattice": [4, 4, 4, 4],
+    "source_iterations": 400,
+    "beta": 6.0,
+    "observable": EXPECTED_OBSERVABLE,
+    "expected_interval": [0.56, 0.63],
+    "interval_semantics": "conservative graphical source-resolution envelope for the equivalent normalized plaquette, not a quoted paper error bar",
+    "claim_class": "C0",
+}
+V1_VECTOR_PREDECLARATION = {
+    "id": "two-independent-chain-predeclaration",
+    "master_seed": "2c02198105010001",
+    "chain_ids": [0, 1],
+    "derived_seeds": ["2ff3bf48550d1457", "ef7636a56e8ea29a"],
+    "proposal_angle": 0.35,
+    "thermalization_sweeps": 192,
+    "measurements_per_chain": 128,
+    "sweeps_between_measurements": 2,
+    "total_sweeps_per_chain": 448,
+    "expected_metropolis_proposals_per_chain": 3670016,
+    "minimum_ess_per_chain": 8.0,
+    "maximum_chain_consistency_z": 5.0,
+    "minimum_metropolis_acceptance": 0.1,
+    "maximum_metropolis_acceptance": 0.95,
+    "maximum_link_unitarity_residual": 5e-12,
+    "maximum_link_determinant_residual": 5e-12,
+    "claim_class": "C0",
+}
+V1_VECTOR_OBSERVED_EVIDENCE = {
+    "id": "observed-v1-failure",
+    "workflow_run_id": 34760576995,
+    "evidence_head_commit": "0b669e9d517353fa21f7fe34f96ff630b59d8ad7",
+    "pooled_mean": 0.6018083560823128,
+    "source_envelope_reproduced": True,
+    "minimum_effective_sample_size_observed": 4.51005377363487,
+    "minimum_effective_sample_size_required": 8.0,
+    "chain_consistency_z": 0.4307895037511404,
+    "maximum_stationarity_z_observed": 3.7834285113688733,
+    "chain_acceptances": [0.867445537022182, 0.8678583417619977],
+    "failed_gate": "minimum_effective_sample_size_per_chain",
+    "parameter_retuning_after_result": False,
+    "v1_reclassified_as_pass": False,
+    "claim_class": "C2",
+    "replay_tolerance": EXPECTED_V1_REPLAY_TOLERANCE,
+}
+V1_VECTOR_BOUNDARY = {
+    "id": "phase2c-v1-failure-boundary",
+    "published_su3_baseline_reproduced": False,
+    "phase2c_complete": False,
+    "glueball_analysis_enabled": False,
+    "benchmark_agreement_implies_confinement": False,
+    "benchmark_agreement_implies_continuum_qft": False,
+    "benchmark_agreement_implies_positive_mass_gap": False,
+    "claim_class": "C0",
+}
+V2_VECTOR_SOURCE = {
+    "id": "unchanged-published-source-envelope",
+    "doi": "10.1088/0305-4616/7/5/001",
+    "source_lattice": [4, 4, 4, 4],
+    "beta": 6.0,
+    "expected_interval": [0.56, 0.63],
+    "source_envelope_changed_after_v1": False,
+    "claim_class": "C0",
+}
+V2_VECTOR_CONFIRMATION = {
+    "id": "four-fresh-chain-confirmation",
+    "master_seed": "2c02198105010002",
+    "chain_ids": [0, 1, 2, 3],
+    "derived_seeds": [
+        "dfcdab179476617a",
+        "151dd841ccef81c6",
+        "9c28ededca3d1ae2",
+        "17dbbf4a00214611",
+    ],
+    "proposal_angle": 0.35,
+    "thermalization_sweeps": 192,
+    "measurements_per_chain": 128,
+    "sweeps_between_measurements": 2,
+    "total_sweeps_per_chain": 448,
+    "expected_metropolis_proposals_per_chain": 3670016,
+    "minimum_aggregate_effective_sample_size": 16.0,
+    "maximum_pairwise_chain_consistency_z": 5.0,
+    "maximum_stationarity_z": 5.0,
+    "minimum_metropolis_acceptance": 0.1,
+    "maximum_metropolis_acceptance": 0.95,
+    "maximum_link_unitarity_residual": 5e-12,
+    "maximum_link_determinant_residual": 5e-12,
+    "expected": "all four fresh chains pass accounting, group-residual, acceptance, stationarity and pairwise consistency gates; aggregate ESS is at least 16; pooled mean lies inside the unchanged published envelope",
+    "claim_class": "C2",
+    "replay_tolerance": EXPECTED_V2_REPLAY_TOLERANCE,
+}
+V2_VECTOR_V1_PRESERVATION = {
+    "id": "v1-failure-preservation",
+    "v1_result_status": "failed-predeclared-effective-sample-size-gate",
+    "v1_minimum_effective_sample_size_observed": 4.51005377363487,
+    "v1_minimum_effective_sample_size_required": 8.0,
+    "v1_reclassified_as_pass": False,
+    "v2_uses_fresh_streams": True,
+    "v2_preserves_original_intended_total_ess_target": 16.0,
+    "claim_class": "C0",
+}
 V2_VECTOR_OBSERVED_EVIDENCE = {
     "id": "observed-v2-confirmation",
     "workflow_run_id": 34761701867,
@@ -155,6 +258,16 @@ V2_VECTOR_OBSERVED_EVIDENCE = {
     "v1_reclassified_as_pass": False,
     "parameter_retuning_after_v2_result": False,
     "claim_class": "C2",
+}
+V2_VECTOR_BOUNDARY = {
+    "id": "phase2c-frozen-boundary",
+    "published_su3_baseline_reproduced": True,
+    "phase2c_complete": True,
+    "glueball_analysis_enabled": True,
+    "benchmark_agreement_implies_confinement": False,
+    "benchmark_agreement_implies_continuum_qft": False,
+    "benchmark_agreement_implies_positive_mass_gap": False,
+    "claim_class": "C0",
 }
 
 
@@ -216,23 +329,14 @@ def validate_v1_vectors(payload: dict[str, Any]) -> None:
     _require(payload["contract_id"] == "YM-SU3-PLAQUETTE-BASELINE-V1", "Phase 2C2 V1 vector contract drift")
     _require(payload["vector_set"] == "SU3-PLAQUETTE-BASELINE-PHASE2C2-V1", "Phase 2C2 V1 vector-set drift")
     _require(payload["status"] == "phase-2c2-v1-failed", "Phase 2C2 V1 vector failed status drift")
-    by_id = {vector["id"]: vector for vector in payload["vectors"]}
-    source = by_id["published-source-envelope"]
-    _require(source["expected_interval"] == [0.56, 0.63], "Phase 2C2 V1 vector source envelope drift")
-    _require(source["interval_semantics"] == "conservative graphical source-resolution envelope for the equivalent normalized plaquette, not a quoted paper error bar", "Phase 2C2 V1 vector interval semantics drift")
-    _require(source["claim_class"] == "C0", "Phase 2C2 V1 source claim class drift")
-    predeclared = by_id["two-independent-chain-predeclaration"]
-    _require(predeclared["claim_class"] == "C0", "Phase 2C2 V1 predeclaration claim class drift")
-    failure = by_id["observed-v1-failure"]
-    _require(failure["source_envelope_reproduced"] is True, "Phase 2C2 V1 vector source agreement erased")
-    _require(failure["minimum_effective_sample_size_observed"] == 4.51005377363487, "Phase 2C2 V1 vector ESS drift")
-    _require(failure["minimum_effective_sample_size_required"] == 8.0, "Phase 2C2 V1 vector ESS threshold drift")
-    _require(failure["v1_reclassified_as_pass"] is False and failure["parameter_retuning_after_result"] is False, "Phase 2C2 V1 vector failure rewritten")
-    _require(failure["claim_class"] == "C2", "Phase 2C2 V1 observed-evidence claim class drift")
-    _require(failure["replay_tolerance"] == EXPECTED_V1_REPLAY_TOLERANCE, "Phase 2C2 V1 vector replay-tolerance drift")
-    boundary = by_id["phase2c-v1-failure-boundary"]
-    _require(boundary["published_su3_baseline_reproduced"] is False and boundary["phase2c_complete"] is False and boundary["glueball_analysis_enabled"] is False, "Phase 2C2 V1 vector boundary weakened")
-    _require(boundary["claim_class"] == "C0", "Phase 2C2 V1 boundary claim class drift")
+    vectors = payload["vectors"]
+    by_id = {vector["id"]: vector for vector in vectors}
+    _require(len(vectors) == 4 and len(by_id) == 4, "Phase 2C2 V1 vector cardinality/identity drift")
+    _require(set(by_id) == {"published-source-envelope", "two-independent-chain-predeclaration", "observed-v1-failure", "phase2c-v1-failure-boundary"}, "Phase 2C2 V1 vector IDs drift")
+    _require(by_id["published-source-envelope"] == V1_VECTOR_SOURCE, "Phase 2C2 V1 source vector drift")
+    _require(by_id["two-independent-chain-predeclaration"] == V1_VECTOR_PREDECLARATION, "Phase 2C2 V1 predeclaration vector drift")
+    _require(by_id["observed-v1-failure"] == V1_VECTOR_OBSERVED_EVIDENCE, "Phase 2C2 V1 complete observed-evidence vector drift")
+    _require(by_id["phase2c-v1-failure-boundary"] == V1_VECTOR_BOUNDARY, "Phase 2C2 V1 claim-boundary vector drift")
 
 
 def validate_v2_contract(payload: dict[str, Any]) -> None:
@@ -292,25 +396,15 @@ def validate_v2_vectors(payload: dict[str, Any]) -> None:
     _require(payload["contract_id"] == "YM-SU3-PLAQUETTE-BASELINE-V2", "Phase 2C2 V2 vector contract drift")
     _require(payload["vector_set"] == "SU3-PLAQUETTE-BASELINE-PHASE2C2-V2", "Phase 2C2 V2 vector-set drift")
     _require(payload["status"] == "phase-2c2-frozen", "Phase 2C2 V2 vector frozen status drift")
-    by_id = {vector["id"]: vector for vector in payload["vectors"]}
-    source = by_id["unchanged-published-source-envelope"]
-    _require(source["expected_interval"] == [0.56, 0.63], "Phase 2C2 V2 vector source envelope drift")
-    _require(source["claim_class"] == "C0", "Phase 2C2 V2 source claim class drift")
-    run = by_id["four-fresh-chain-confirmation"]
-    _require(run["chain_ids"] == [0, 1, 2, 3], "Phase 2C2 V2 vector chain identities drift")
-    _require(run["minimum_aggregate_effective_sample_size"] == 16.0, "Phase 2C2 V2 vector aggregate ESS drift")
-    _require(run["claim_class"] == "C2", "Phase 2C2 V2 confirmation claim class drift")
-    _require(run["replay_tolerance"] == EXPECTED_V2_REPLAY_TOLERANCE, "Phase 2C2 V2 vector replay-tolerance drift")
-    failure = by_id["v1-failure-preservation"]
-    _require(failure["v1_result_status"] == "failed-predeclared-effective-sample-size-gate", "Phase 2C2 V2 vector V1 failure status drift")
-    _require(failure["v1_reclassified_as_pass"] is False and failure["v2_uses_fresh_streams"] is True, "Phase 2C2 V2 vector independence boundary weakened")
-    _require(failure["claim_class"] == "C0", "Phase 2C2 V2 V1-preservation claim class drift")
-    observed = by_id["observed-v2-confirmation"]
-    _require(observed == V2_VECTOR_OBSERVED_EVIDENCE, "Phase 2C2 V2 complete observed-evidence vector drift")
-    boundary = by_id["phase2c-frozen-boundary"]
-    _require(boundary["published_su3_baseline_reproduced"] is True and boundary["phase2c_complete"] is True and boundary["glueball_analysis_enabled"] is True, "Phase 2C2 frozen vector boundary weakened")
-    _require(boundary["benchmark_agreement_implies_positive_mass_gap"] is False, "Phase 2C2 frozen vector mass-gap overclaim")
-    _require(boundary["claim_class"] == "C0", "Phase 2C2 frozen boundary claim class drift")
+    vectors = payload["vectors"]
+    by_id = {vector["id"]: vector for vector in vectors}
+    _require(len(vectors) == 5 and len(by_id) == 5, "Phase 2C2 V2 vector cardinality/identity drift")
+    _require(set(by_id) == {"unchanged-published-source-envelope", "four-fresh-chain-confirmation", "v1-failure-preservation", "observed-v2-confirmation", "phase2c-frozen-boundary"}, "Phase 2C2 V2 vector IDs drift")
+    _require(by_id["unchanged-published-source-envelope"] == V2_VECTOR_SOURCE, "Phase 2C2 V2 source vector drift")
+    _require(by_id["four-fresh-chain-confirmation"] == V2_VECTOR_CONFIRMATION, "Phase 2C2 V2 complete confirmation vector drift")
+    _require(by_id["v1-failure-preservation"] == V2_VECTOR_V1_PRESERVATION, "Phase 2C2 V2 V1-preservation vector drift")
+    _require(by_id["observed-v2-confirmation"] == V2_VECTOR_OBSERVED_EVIDENCE, "Phase 2C2 V2 complete observed-evidence vector drift")
+    _require(by_id["phase2c-frozen-boundary"] == V2_VECTOR_BOUNDARY, "Phase 2C2 V2 claim-boundary vector drift")
 
 
 def main() -> None:

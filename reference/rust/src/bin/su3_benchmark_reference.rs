@@ -255,6 +255,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         summary.chain_acceptances[1]
     );
     println!(
+        "chain0_final_link_unitarity_residual={:.17e}",
+        first.final_link_unitarity_residual
+    );
+    println!(
+        "chain0_final_link_determinant_residual={:.17e}",
+        first.final_link_determinant_residual
+    );
+    println!(
+        "chain1_final_link_unitarity_residual={:.17e}",
+        second.final_link_unitarity_residual
+    );
+    println!(
+        "chain1_final_link_determinant_residual={:.17e}",
+        second.final_link_determinant_residual
+    );
+    println!(
         "max_link_unitarity_residual={:.17e}",
         summary.max_link_unitarity_residual
     );

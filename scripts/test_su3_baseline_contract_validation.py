@@ -114,6 +114,38 @@ def main() -> None:
     broken["vectors"][2]["claim_class"] = "C5"
     expect_reject(validate_v1_vectors, broken, "V1 observed evidence promoted to C5")
 
+    broken = copy.deepcopy(v1_vectors)
+    broken["vectors"][2]["workflow_run_id"] = 0
+    expect_reject(validate_v1_vectors, broken, "V1 vector workflow evidence corrupted")
+
+    broken = copy.deepcopy(v1_vectors)
+    broken["vectors"][2]["evidence_head_commit"] = "0000000000000000000000000000000000000000"
+    expect_reject(validate_v1_vectors, broken, "V1 vector evidence commit corrupted")
+
+    broken = copy.deepcopy(v1_vectors)
+    broken["vectors"][2]["pooled_mean"] = 0.0
+    expect_reject(validate_v1_vectors, broken, "V1 vector pooled mean corrupted")
+
+    broken = copy.deepcopy(v1_vectors)
+    broken["vectors"][2]["chain_acceptances"][0] = 0.5
+    expect_reject(validate_v1_vectors, broken, "V1 vector acceptance evidence corrupted")
+
+    broken = copy.deepcopy(v1_vectors)
+    broken["vectors"][2]["failed_gate"] = "none"
+    expect_reject(validate_v1_vectors, broken, "V1 vector failed-gate label corrupted")
+
+    broken = copy.deepcopy(v1_vectors)
+    broken["vectors"][3]["benchmark_agreement_implies_confinement"] = True
+    expect_reject(validate_v1_vectors, broken, "V1 vector confinement overclaim")
+
+    broken = copy.deepcopy(v1_vectors)
+    broken["vectors"][3]["benchmark_agreement_implies_continuum_qft"] = True
+    expect_reject(validate_v1_vectors, broken, "V1 vector continuum-QFT overclaim")
+
+    broken = copy.deepcopy(v1_vectors)
+    broken["vectors"][3]["benchmark_agreement_implies_positive_mass_gap"] = True
+    expect_reject(validate_v1_vectors, broken, "V1 vector mass-gap overclaim")
+
     broken = copy.deepcopy(v2)
     broken["benchmark"]["source_envelope_max"] = 0.75
     expect_reject(validate_v2_contract, broken, "V2 source envelope retuned")
@@ -187,6 +219,38 @@ def main() -> None:
     expect_reject(validate_v2_vectors, broken, "V2 vector independent streams collapsed")
 
     broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][1]["master_seed"] = "2c02198105010001"
+    expect_reject(validate_v2_vectors, broken, "V2 confirmation vector master seed drift")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][1]["derived_seeds"][0] = "0000000000000000"
+    expect_reject(validate_v2_vectors, broken, "V2 confirmation vector derived seed drift")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][1]["proposal_angle"] = 0.5
+    expect_reject(validate_v2_vectors, broken, "V2 confirmation vector proposal drift")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][1]["thermalization_sweeps"] = 191
+    expect_reject(validate_v2_vectors, broken, "V2 confirmation vector schedule drift")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][1]["expected_metropolis_proposals_per_chain"] -= 1
+    expect_reject(validate_v2_vectors, broken, "V2 confirmation vector proposal accounting drift")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][1]["minimum_metropolis_acceptance"] = 0.0
+    expect_reject(validate_v2_vectors, broken, "V2 confirmation vector acceptance gate weakened")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][1]["maximum_pairwise_chain_consistency_z"] = 50.0
+    expect_reject(validate_v2_vectors, broken, "V2 confirmation vector consistency gate weakened")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][1]["maximum_link_unitarity_residual"] = 1.0
+    expect_reject(validate_v2_vectors, broken, "V2 confirmation vector residual gate weakened")
+
+    broken = copy.deepcopy(v2_vectors)
     broken["vectors"][2]["v1_reclassified_as_pass"] = True
     expect_reject(validate_v2_vectors, broken, "V2 vector rewrote V1 failure")
 
@@ -237,6 +301,18 @@ def main() -> None:
     broken = copy.deepcopy(v2_vectors)
     broken["vectors"][4]["phase2c_complete"] = False
     expect_reject(validate_v2_vectors, broken, "V2 frozen boundary downgraded")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][4]["benchmark_agreement_implies_confinement"] = True
+    expect_reject(validate_v2_vectors, broken, "V2 vector confinement overclaim")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][4]["benchmark_agreement_implies_continuum_qft"] = True
+    expect_reject(validate_v2_vectors, broken, "V2 vector continuum-QFT overclaim")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][4]["benchmark_agreement_implies_positive_mass_gap"] = True
+    expect_reject(validate_v2_vectors, broken, "V2 vector mass-gap overclaim")
 
     print("Negative Phase 2C2 SU(3) V1/V2 contract regressions: passed")
 
