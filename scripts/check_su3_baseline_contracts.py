@@ -434,6 +434,29 @@ V2_VECTOR_BOUNDARY = {
     "benchmark_agreement_implies_positive_mass_gap": False,
     "claim_class": "C0",
 }
+EXPECTED_V1_VECTOR_PAYLOAD = {
+    "contract_id": "YM-SU3-PLAQUETTE-BASELINE-V1",
+    "vector_set": "SU3-PLAQUETTE-BASELINE-PHASE2C2-V1",
+    "status": "phase-2c2-v1-failed",
+    "vectors": [
+        V1_VECTOR_SOURCE,
+        V1_VECTOR_PREDECLARATION,
+        V1_VECTOR_OBSERVED_EVIDENCE,
+        V1_VECTOR_BOUNDARY,
+    ],
+}
+EXPECTED_V2_VECTOR_PAYLOAD = {
+    "contract_id": "YM-SU3-PLAQUETTE-BASELINE-V2",
+    "vector_set": "SU3-PLAQUETTE-BASELINE-PHASE2C2-V2",
+    "status": "phase-2c2-frozen",
+    "vectors": [
+        V2_VECTOR_SOURCE,
+        V2_VECTOR_CONFIRMATION,
+        V2_VECTOR_V1_PRESERVATION,
+        V2_VECTOR_OBSERVED_EVIDENCE,
+        V2_VECTOR_BOUNDARY,
+    ],
+}
 
 
 def _require(condition: bool, message: str) -> None:
@@ -501,6 +524,7 @@ def validate_v1_vectors(payload: dict[str, Any]) -> None:
     _require(by_id["two-independent-chain-predeclaration"] == V1_VECTOR_PREDECLARATION, "Phase 2C2 V1 predeclaration vector drift")
     _require(by_id["observed-v1-failure"] == V1_VECTOR_OBSERVED_EVIDENCE, "Phase 2C2 V1 complete observed-evidence vector drift")
     _require(by_id["phase2c-v1-failure-boundary"] == V1_VECTOR_BOUNDARY, "Phase 2C2 V1 claim-boundary vector drift")
+    _require(exact_typed_equal(payload, EXPECTED_V1_VECTOR_PAYLOAD), "Phase 2C2 V1 vector closed typed-schema drift")
 
 
 def validate_v2_contract(payload: dict[str, Any]) -> None:
@@ -571,6 +595,7 @@ def validate_v2_vectors(payload: dict[str, Any]) -> None:
     _require(by_id["v1-failure-preservation"] == V2_VECTOR_V1_PRESERVATION, "Phase 2C2 V2 V1-preservation vector drift")
     _require(by_id["observed-v2-confirmation"] == V2_VECTOR_OBSERVED_EVIDENCE, "Phase 2C2 V2 complete observed-evidence vector drift")
     _require(by_id["phase2c-frozen-boundary"] == V2_VECTOR_BOUNDARY, "Phase 2C2 V2 claim-boundary vector drift")
+    _require(exact_typed_equal(payload, EXPECTED_V2_VECTOR_PAYLOAD), "Phase 2C2 V2 vector closed typed-schema drift")
 
 
 def main() -> None:

@@ -127,6 +127,14 @@ def main() -> None:
     expect_reject(validate_v1_contract, broken, "V1 confinement claim boundary weakened")
 
     broken = copy.deepcopy(v1_vectors)
+    broken["clay_solution_proved"] = True
+    expect_reject(validate_v1_vectors, broken, "V1 vector undeclared top-level overclaim field accepted")
+
+    broken = copy.deepcopy(v1_vectors)
+    broken["vectors"][3]["published_su3_baseline_reproduced"] = 0
+    expect_reject(validate_v1_vectors, broken, "V1 vector boolean replaced by integer")
+
+    broken = copy.deepcopy(v1_vectors)
     broken["vectors"][2]["v1_reclassified_as_pass"] = True
     expect_reject(validate_v1_vectors, broken, "V1 vector failure reclassified")
 
@@ -257,6 +265,14 @@ def main() -> None:
     broken = copy.deepcopy(v2)
     broken["claim_boundary"]["benchmark_agreement_implies_continuum_qft"] = True
     expect_reject(validate_v2_contract, broken, "V2 continuum claim boundary weakened")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["clay_solution_proved"] = True
+    expect_reject(validate_v2_vectors, broken, "V2 vector undeclared top-level overclaim field accepted")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][4]["published_su3_baseline_reproduced"] = 1
+    expect_reject(validate_v2_vectors, broken, "V2 vector boolean replaced by integer")
 
     broken = copy.deepcopy(v2_vectors)
     broken["vectors"][1]["chain_ids"] = [0, 1, 2, 2]
