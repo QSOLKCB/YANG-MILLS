@@ -47,16 +47,56 @@ def main() -> None:
     expect_reject(validate_v1_contract, broken, "V1 sampler identity drift")
 
     broken = copy.deepcopy(v1)
+    broken["reference_run"]["autocorrelation_max_lag"] = 0
+    expect_reject(validate_v1_contract, broken, "V1 autocorrelation gate weakened")
+
+    broken = copy.deepcopy(v1)
+    broken["reference_run"]["maximum_link_unitarity_residual"] = 1.0
+    expect_reject(validate_v1_contract, broken, "V1 residual gate weakened")
+
+    broken = copy.deepcopy(v1)
     broken["comparison_rule"]["within_chain_stationarity_required"] = False
     expect_reject(validate_v1_contract, broken, "V1 stationarity comparison rule weakened")
+
+    broken = copy.deepcopy(v1)
+    broken["predeclaration"]["selected_after_phase2c1_freeze"] = False
+    expect_reject(validate_v1_contract, broken, "V1 predeclaration ordering weakened")
+
+    broken = copy.deepcopy(v1)
+    broken["predeclaration"]["phase2c1_sampler_contract_mutated"] = True
+    expect_reject(validate_v1_contract, broken, "V1 sampler-mutation boundary weakened")
 
     broken = copy.deepcopy(v1)
     broken["observed_evidence"]["minimum_effective_sample_size"] = 8.1
     expect_reject(validate_v1_contract, broken, "V1 failed ESS evidence rewritten")
 
     broken = copy.deepcopy(v1)
+    broken["observed_evidence"]["pooled_mean"] += 0.01
+    expect_reject(validate_v1_contract, broken, "V1 pooled mean evidence corrupted")
+
+    broken = copy.deepcopy(v1)
+    broken["observed_evidence"]["chain_consistency_z"] += 1.0
+    expect_reject(validate_v1_contract, broken, "V1 chain consistency evidence corrupted")
+
+    broken = copy.deepcopy(v1)
+    broken["observed_evidence"]["maximum_stationarity_z_observed"] += 1.0
+    expect_reject(validate_v1_contract, broken, "V1 stationarity evidence corrupted")
+
+    broken = copy.deepcopy(v1)
+    broken["observed_evidence"]["chain_acceptances"][0] = 0.5
+    expect_reject(validate_v1_contract, broken, "V1 acceptance evidence corrupted")
+
+    broken = copy.deepcopy(v1)
     broken["phase2c_gate"]["glueball_analysis_enabled"] = True
     expect_reject(validate_v1_contract, broken, "V1 failure enabled glueball analysis")
+
+    broken = copy.deepcopy(v1)
+    broken["claim_boundary"]["benchmark_agreement_implies_positive_mass_gap"] = True
+    expect_reject(validate_v1_contract, broken, "V1 mass-gap claim boundary weakened")
+
+    broken = copy.deepcopy(v1)
+    broken["claim_boundary"]["benchmark_agreement_implies_confinement"] = True
+    expect_reject(validate_v1_contract, broken, "V1 confinement claim boundary weakened")
 
     broken = copy.deepcopy(v1_vectors)
     broken["vectors"][2]["v1_reclassified_as_pass"] = True
@@ -79,12 +119,28 @@ def main() -> None:
     expect_reject(validate_v2_contract, broken, "V2 aggregate ESS target weakened")
 
     broken = copy.deepcopy(v2)
+    broken["reference_run"]["stationarity_half_measurements"] = 32
+    expect_reject(validate_v2_contract, broken, "V2 stationarity sizing weakened")
+
+    broken = copy.deepcopy(v2)
+    broken["reference_run"]["minimum_metropolis_acceptance"] = 0.0
+    expect_reject(validate_v2_contract, broken, "V2 acceptance gate weakened")
+
+    broken = copy.deepcopy(v2)
+    broken["reference_run"]["maximum_link_determinant_residual"] = 1.0
+    expect_reject(validate_v2_contract, broken, "V2 determinant residual gate weakened")
+
+    broken = copy.deepcopy(v2)
     broken["comparison_rule"]["raw_measurements_retained"] = False
     expect_reject(validate_v2_contract, broken, "V2 raw-evidence comparison rule weakened")
 
     broken = copy.deepcopy(v2)
     broken["predeclaration"]["proposal_angle_changed_after_v1"] = True
     expect_reject(validate_v2_contract, broken, "V2 proposal retuning admitted")
+
+    broken = copy.deepcopy(v2)
+    broken["predeclaration"]["phase2c1_sampler_contract_mutated"] = True
+    expect_reject(validate_v2_contract, broken, "V2 sampler-mutation boundary weakened")
 
     broken = copy.deepcopy(v2)
     broken["observed_evidence"]["aggregate_effective_sample_size"] = 15.0
@@ -101,6 +157,10 @@ def main() -> None:
     broken = copy.deepcopy(v2)
     broken["phase2c_gate"]["published_su3_baseline_reproduced"] = False
     expect_reject(validate_v2_contract, broken, "V2 frozen success gate downgraded")
+
+    broken = copy.deepcopy(v2)
+    broken["claim_boundary"]["benchmark_agreement_implies_continuum_qft"] = True
+    expect_reject(validate_v2_contract, broken, "V2 continuum claim boundary weakened")
 
     broken = copy.deepcopy(v2_vectors)
     broken["vectors"][1]["chain_ids"] = [0, 1, 2, 2]
