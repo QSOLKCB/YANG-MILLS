@@ -29,6 +29,47 @@ use su3_confirmation::{
 };
 use su3_ensemble::{run_chain, Su3ChainReport, Su3EnsembleConfig};
 
+const FROZEN_SUMMARY_ABS_TOLERANCE: f64 = 1.0e-12;
+const FROZEN_SUMMARY_REL_TOLERANCE: f64 = 1.0e-10;
+const FROZEN_RESIDUAL_ABS_TOLERANCE: f64 = 1.0e-13;
+const FROZEN_CHAIN_MEANS: [f64; 4] = [
+    0.5951228942049566,
+    0.6010578916054883,
+    0.6006811934765629,
+    0.6003060377873822,
+];
+const FROZEN_CHAIN_STANDARD_ERRORS: [f64; 4] = [
+    0.00073731922680896,
+    0.0017334647942562633,
+    0.0013810304643338124,
+    0.0023415778524011042,
+];
+const FROZEN_CHAIN_EFFECTIVE_SAMPLE_SIZES: [f64; 4] = [
+    37.108298427827265,
+    12.12458490228564,
+    19.780522239783117,
+    9.930599191453949,
+];
+const FROZEN_CHAIN_ACCEPTANCES: [f64; 4] = [
+    0.8675000326974052,
+    0.8676090240478516,
+    0.867549078805106,
+    0.867567607334682,
+];
+const FROZEN_STATIONARITY_Z: [f64; 4] = [
+    1.4650733209908853,
+    1.2503134066297152,
+    0.6586970772179463,
+    0.6522302609275793,
+];
+const FROZEN_POOLED_MEAN: f64 = 0.5992920042685975;
+const FROZEN_POOLED_STANDARD_ERROR: f64 = 0.0008268453534905086;
+const FROZEN_AGGREGATE_ESS: f64 = 78.94400476134997;
+const FROZEN_MAX_PAIRWISE_CHAIN_Z: f64 = 3.5504261086461475;
+const FROZEN_MAX_STATIONARITY_Z: f64 = 1.4650733209908853;
+const FROZEN_MAX_UNITARITY_RESIDUAL: f64 = 3.1308289294429414e-14;
+const FROZEN_MAX_DETERMINANT_RESIDUAL: f64 = 3.553115420753491e-14;
+
 fn config(chain_id: u64) -> Su3EnsembleConfig {
     Su3EnsembleConfig {
         extents: EXTENTS,
@@ -51,6 +92,57 @@ fn series_text(values: &[f64]) -> String {
         .join(",")
 }
 
+fn evidence_close(actual: f64, expected: f64) -> bool {
+    (actual - expected).abs()
+        <= FROZEN_SUMMARY_ABS_TOLERANCE + FROZEN_SUMMARY_REL_TOLERANCE * expected.abs()
+}
+
+fn evidence_array_close<const N: usize>(actual: &[f64; N], expected: &[f64; N]) -> bool {
+    actual
+        .iter()
+        .zip(expected)
+        .all(|(actual, expected)| evidence_close(*actual, *expected))
+}
+
+fn validate_frozen_v2_replay(
+    summary: &su3_confirmation::ConfirmationSummary,
+) -> Result<(), String> {
+    let stationarity_z = summary.stationarity.map(|entry| entry.drift_z);
+    let summaries_match = evidence_array_close(&summary.chain_means, &FROZEN_CHAIN_MEANS)
+        && evidence_array_close(
+            &summary.chain_standard_errors,
+            &FROZEN_CHAIN_STANDARD_ERRORS,
+        )
+        && evidence_array_close(
+            &summary.chain_effective_sample_sizes,
+            &FROZEN_CHAIN_EFFECTIVE_SAMPLE_SIZES,
+        )
+        && evidence_array_close(&summary.chain_acceptances, &FROZEN_CHAIN_ACCEPTANCES)
+        && evidence_array_close(&stationarity_z, &FROZEN_STATIONARITY_Z)
+        && evidence_close(summary.pooled_mean, FROZEN_POOLED_MEAN)
+        && evidence_close(
+            summary.pooled_standard_error,
+            FROZEN_POOLED_STANDARD_ERROR,
+        )
+        && evidence_close(summary.aggregate_effective_sample_size, FROZEN_AGGREGATE_ESS)
+        && evidence_close(
+            summary.max_pairwise_chain_consistency_z,
+            FROZEN_MAX_PAIRWISE_CHAIN_Z,
+        )
+        && evidence_close(summary.max_stationarity_z, FROZEN_MAX_STATIONARITY_Z)
+        && (summary.max_link_unitarity_residual - FROZEN_MAX_UNITARITY_RESIDUAL).abs()
+            <= FROZEN_RESIDUAL_ABS_TOLERANCE
+        && (summary.max_link_determinant_residual - FROZEN_MAX_DETERMINANT_RESIDUAL).abs()
+            <= FROZEN_RESIDUAL_ABS_TOLERANCE;
+
+    if !summaries_match {
+        return Err(format!(
+            "frozen Phase 2C2 V2 evidence drift: summary={summary:?}, stationarity_z={stationarity_z:?}"
+        ));
+    }
+    Ok(())
+}
+
 fn print_chain(
     index: usize,
     report: &Su3ChainReport,
@@ -58,6 +150,11 @@ fn print_chain(
 ) {
     println!("chain{index}_id={}", report.config.chain_id);
     println!("chain{index}_derived_seed={:016x}", report.derived_seed);
+    println!("chain{index}_sampler_id={}", report.sampler_id);
+    println!("chain{index}_proposal_id={}", report.proposal_id);
+    println!("chain{index}_rng_id={}", report.rng_id);
+    println!("chain{index}_stream_id={}", report.stream_id);
+    println!("chain{index}_total_sweeps={}", report.total_sweeps);
     println!(
         "chain{index}_metropolis_proposals={}",
         report.metropolis_proposals
@@ -147,10 +244,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .into());
     }
+    validate_frozen_v2_replay(&summary)?;
 
     println!("contract={CONFIRMATION_ID}");
     println!("primary_doi=10.1088/0305-4616/7/5/001");
     println!("confirmation_role=fresh_four_chain_v2");
+    println!("frozen_evidence_reproduced=true");
+    println!("frozen_summary_abs_tolerance={FROZEN_SUMMARY_ABS_TOLERANCE:.17e}");
+    println!("frozen_summary_rel_tolerance={FROZEN_SUMMARY_REL_TOLERANCE:.17e}");
+    println!("frozen_residual_abs_tolerance={FROZEN_RESIDUAL_ABS_TOLERANCE:.17e}");
     println!("lattice=4,4,4,4");
     println!("beta={BETA:.17e}");
     println!("source_envelope_min={SOURCE_ENVELOPE_MIN:.17e}");
