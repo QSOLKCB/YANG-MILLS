@@ -13,6 +13,7 @@ mod su3_lattice;
 
 use glueball_operators::{
     scalar_a1pp_operator_basis, GAUGE_INVARIANCE_TOLERANCE, OPERATOR_BASIS_ID, OPERATOR_CONTRACT_ID,
+    OPERATOR_STATUS,
 };
 use su3_lattice::{deterministic_su3_site_gauge, single_traceless_su3_link_lattice, Su3Lattice4};
 
@@ -40,7 +41,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("contract={OPERATOR_CONTRACT_ID}");
     println!("basis={OPERATOR_BASIS_ID}");
-    println!("status=phase-3a-candidate");
+    println!("status={OPERATOR_STATUS}");
     println!(
         "identity_spatial_plaquette_1x1={:.17e}",
         identity_basis.spatial_plaquette_1x1
