@@ -195,6 +195,42 @@ def main() -> None:
     expect_reject(validate_v2_vectors, broken, "V2 vector passing evidence weakened")
 
     broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][3]["evidence_head_commit"] = "0000000000000000000000000000000000000000"
+    expect_reject(validate_v2_vectors, broken, "V2 vector evidence commit corrupted")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][3]["pooled_mean"] = 0.0
+    expect_reject(validate_v2_vectors, broken, "V2 vector pooled mean corrupted")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][3]["pooled_standard_error"] = 1.0
+    expect_reject(validate_v2_vectors, broken, "V2 vector pooled standard error corrupted")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][3]["chain_means"][0] = 0.0
+    expect_reject(validate_v2_vectors, broken, "V2 vector per-chain mean corrupted")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][3]["chain_effective_sample_sizes"][0] = 1.0
+    expect_reject(validate_v2_vectors, broken, "V2 vector per-chain ESS corrupted")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][3]["maximum_pairwise_chain_consistency_z_observed"] = 0.0
+    expect_reject(validate_v2_vectors, broken, "V2 vector pairwise-z evidence corrupted")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][3]["maximum_stationarity_z_observed"] = 0.0
+    expect_reject(validate_v2_vectors, broken, "V2 vector stationarity evidence corrupted")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][3]["source_envelope_reproduced"] = False
+    expect_reject(validate_v2_vectors, broken, "V2 vector source agreement erased")
+
+    broken = copy.deepcopy(v2_vectors)
+    broken["vectors"][3]["diagnostics_trustworthy"] = False
+    expect_reject(validate_v2_vectors, broken, "V2 vector diagnostic trust erased")
+
+    broken = copy.deepcopy(v2_vectors)
     broken["vectors"][3]["claim_class"] = "C5"
     expect_reject(validate_v2_vectors, broken, "V2 observed evidence promoted to C5")
 
