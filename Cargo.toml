@@ -50,6 +50,10 @@ path = "reference/rust/src/bin/su3_ensemble_reference.rs"
 name = "ym-su3-plaquette-baseline"
 path = "reference/rust/src/bin/su3_benchmark_reference.rs"
 
+[[bin]]
+name = "ym-su3-plaquette-baseline-v2"
+path = "reference/rust/src/bin/su3_confirmation_reference.rs"
+
 [profile.release]
 lto = "thin"
 codegen-units = 1
