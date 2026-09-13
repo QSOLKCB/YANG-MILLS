@@ -1,6 +1,6 @@
 {
   "contract_id": "YM-GLUEBALL-SPATIAL-STOUT-V1",
-  "status": "phase-3b1-candidate",
+  "status": "phase-3b1-frozen",
   "scope": "deterministic synchronous spatial stout-link smearing for the frozen Phase 3A finite-lattice SU(3) glueball operator surface only",
   "depends_on": [
     {
