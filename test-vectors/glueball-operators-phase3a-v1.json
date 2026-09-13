@@ -1,7 +1,7 @@
 {
   "contract_id": "YM-GLUEBALL-OPERATORS-V1",
   "vector_set": "GLUEBALL-OPERATORS-PHASE3A-V1",
-  "status": "phase-3a-candidate",
+  "status": "phase-3a-frozen",
   "vectors": [
     {
       "id": "identity-3cubed-spatial-slice",

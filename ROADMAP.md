@@ -234,10 +234,12 @@ The successful V2 confirmation (Actions run `34761701867`, evidence head `f5a221
 
 ## Phase 3 — glueball laboratory
 
-Phase 3A is implemented as a candidate in PR #11; review/freeze is still pending and the later spectroscopy stages remain unopened.
+Phase 3A was merged in PR #11 and is frozen. Phase 3B1 begins the transformation layer with a separately versioned spatial stout-smearing candidate; spatial blocking and the spectroscopy stages remain unopened.
 
-- [x] Define gauge-invariant spatial loop operator bases (`YM-GLUEBALL-OPERATORS-V1`, candidate).
+- [x] Define gauge-invariant spatial loop operator bases (`YM-GLUEBALL-OPERATORS-V1`, frozen).
 - [ ] Add smearing/blocking as separately versioned transformations.
+  - [x] Phase 3B1 spatial stout smearing (`YM-GLUEBALL-SPATIAL-STOUT-V1`, candidate).
+  - [ ] Spatial blocking remains separately versioned and unimplemented.
 - [ ] Construct connected Euclidean correlators.
 - [ ] Add effective-mass analysis with uncertainty propagation.
 - [ ] Start with the scalar `0++` channel.

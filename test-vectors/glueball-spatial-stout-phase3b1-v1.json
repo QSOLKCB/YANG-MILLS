@@ -1,0 +1,111 @@
+{
+  "contract_id": "YM-GLUEBALL-SPATIAL-STOUT-V1",
+  "vector_set": "GLUEBALL-SPATIAL-STOUT-PHASE3B1-V1",
+  "status": "phase-3b1-candidate",
+  "vectors": [
+    {
+      "id": "identity-fixed-point",
+      "extents": [3, 3, 3, 3],
+      "rho": 0.1,
+      "levels": 3,
+      "configuration": "all links identity",
+      "observable": "maximum link-matrix residual before/after smearing",
+      "expected": 0.0,
+      "tolerance": 0.0,
+      "claim_class": "C1"
+    },
+    {
+      "id": "zero-level-exact-noop",
+      "extents": [3, 3, 3, 3],
+      "rho": 0.1,
+      "levels": 0,
+      "configuration": "single traceless SU(3) cycle link",
+      "observable": "maximum link-matrix residual before/after smearing",
+      "expected": 0.0,
+      "tolerance": 0.0,
+      "claim_class": "C1"
+    },
+    {
+      "id": "temporal-links-unchanged",
+      "extents": [3, 3, 3, 3],
+      "rho": 0.1,
+      "levels": 1,
+      "configuration": "single traceless SU(3) cycle link",
+      "observable": "maximum temporal-link residual before/after smearing",
+      "expected": 0.0,
+      "tolerance": 0.0,
+      "claim_class": "C1"
+    },
+    {
+      "id": "deterministic-gauge-covariance",
+      "extents": [3, 3, 3, 3],
+      "rho": 0.1,
+      "levels": 1,
+      "configuration": "single traceless SU(3) cycle link",
+      "gauge_field": "deterministic_su3_site_gauge",
+      "observable": "maximum link residual between smear(gauge(U)) and gauge(smear(U))",
+      "expected_max": 5e-11,
+      "claim_class": "C2"
+    },
+    {
+      "id": "bounded-level-group-residuals",
+      "extents": [3, 3, 3, 3],
+      "rho": 0.1,
+      "levels": 8,
+      "configuration": "single traceless SU(3) cycle link",
+      "unitarity_residual_max": 5e-12,
+      "determinant_residual_max": 5e-12,
+      "claim_class": "C2"
+    },
+    {
+      "id": "canonical-nontrivial-fixture-changes-spatial-links",
+      "extents": [3, 3, 3, 3],
+      "rho": 0.1,
+      "levels": 1,
+      "configuration": "single traceless SU(3) cycle link",
+      "observable": "canonical one-level stout output on the deterministic nontrivial fixture",
+      "expected": {
+        "maximum_all_link_residual": 0.2158247298307305,
+        "spatial_plaquette_1x1": 0.9693015447000209,
+        "spatial_rectangle_2x1": 0.9511047606560571
+      },
+      "absolute_tolerance": 1e-12,
+      "claim_class": "C2"
+    },
+    {
+      "id": "invalid-rho-rejected",
+      "extents": [3, 3, 3, 3],
+      "rho_cases": [0.0, 0.250001],
+      "expected": "RhoOutOfRange",
+      "claim_class": "C0"
+    },
+    {
+      "id": "excess-levels-rejected",
+      "extents": [3, 3, 3, 3],
+      "rho": 0.1,
+      "levels": 9,
+      "expected": "TooManyLevels",
+      "claim_class": "C0"
+    },
+    {
+      "id": "anisotropic-spatial-lattice-rejected",
+      "extents": [3, 4, 5, 3],
+      "rho": 0.1,
+      "levels": 1,
+      "expected": "SpatialExtentsNotCubic",
+      "claim_class": "C0"
+    },
+    {
+      "id": "claim-boundary",
+      "transformation": "YM-SPATIAL-STOUT-SMEAR-V1",
+      "spatial_blocking_defined": false,
+      "connected_correlator_constructed": false,
+      "effective_mass_extracted": false,
+      "glueball_spectrum_extracted": false,
+      "finite_volume_mass_gap_established": false,
+      "positive_continuum_mass_gap_proved": false,
+      "clay_solution_claimed": false,
+      "claim_class": "C0"
+    }
+  ]
+}

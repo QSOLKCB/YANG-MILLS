@@ -15,6 +15,7 @@ use crate::su3_lattice::{Su3Lattice4, DIM};
 
 pub const OPERATOR_CONTRACT_ID: &str = "YM-GLUEBALL-OPERATORS-V1";
 pub const OPERATOR_BASIS_ID: &str = "YM-GLUEBALL-SPATIAL-A1PP-V1";
+pub const OPERATOR_STATUS: &str = "phase-3a-frozen";
 pub const EUCLIDEAN_TIME_DIRECTION: usize = 3;
 pub const SPATIAL_DIRECTIONS: [usize; 3] = [0, 1, 2];
 pub const MINIMUM_SPATIAL_EXTENT: usize = 3;
@@ -177,6 +178,7 @@ mod tests {
     fn phase3a_identity_and_geometry_are_frozen() {
         assert_eq!(OPERATOR_CONTRACT_ID, "YM-GLUEBALL-OPERATORS-V1");
         assert_eq!(OPERATOR_BASIS_ID, "YM-GLUEBALL-SPATIAL-A1PP-V1");
+        assert_eq!(OPERATOR_STATUS, "phase-3a-frozen");
         assert_eq!(EUCLIDEAN_TIME_DIRECTION, 3);
         assert_eq!(SPATIAL_DIRECTIONS, [0, 1, 2]);
         assert_eq!(MINIMUM_SPATIAL_EXTENT, 3);

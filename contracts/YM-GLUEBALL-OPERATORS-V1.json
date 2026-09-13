@@ -1,6 +1,6 @@
 {
   "contract_id": "YM-GLUEBALL-OPERATORS-V1",
-  "status": "phase-3a-candidate",
+  "status": "phase-3a-frozen",
   "scope": "unsmeared gauge-invariant spatial Wilson-loop operator basis for finite periodic SU(3) lattices only",
   "depends_on": [
     {

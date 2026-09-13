@@ -60,6 +60,9 @@ jobs:
       - name: Phase 3A glueball operator reference vectors
         run: cargo run --quiet --locked --bin ym-glueball-operators
 
+      - name: Phase 3B1 spatial stout-smearing reference vectors
+        run: cargo run --quiet --locked --bin ym-glueball-smearing
+
       - name: All contract checks
         run: python3 scripts/check_all_contracts.py
 
