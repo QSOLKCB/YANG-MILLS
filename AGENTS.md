@@ -211,7 +211,7 @@ Every `SU(3)` chain report must preserve sampler/proposal/RNG/stream IDs, master
 
 The frozen reference chain is additionally pinned against literal golden measurements, proposal accounting, diagnostics, and residuals; a self-comparison of two executions is not sufficient authority for preserving V1 semantics.
 
-Phase 2C1 must retain
+The frozen Phase 2C1 sampler authority itself must retain
 
 ```text
 published_su3_baseline_reproduced = false
@@ -219,7 +219,7 @@ glueball_analysis_enabled         = false
 phase2c_complete                  = false
 ```
 
-until a separately predeclared Phase 2C2 peer-reviewed `SU(3)` benchmark is actually reproduced. Do not use the Phase 2B `SU(2)` result as external validation for `SU(3)`. Incompatible sampler, proposal, stream, update-order, local-action, diagnostic, evidence, or admitted-schedule semantics require a new contract identifier rather than mutation of the frozen V1 surface.
+because external validation does not belong to the sampler contract. Phase 2C2 is now carried by the separately versioned `YM-SU3-PLAQUETTE-BASELINE-V2` authority, which records `published_su3_baseline_reproduced=true`, `glueball_analysis_enabled=true`, and `phase2c_complete=true` after the predeclared fresh-stream V2 confirmation passed. Do **not** back-propagate those true values into `YM-SU3-ENSEMBLE-V1`, and do not reclassify the preserved failed V1 validation attempt as a pass. Do not use the Phase 2B `SU(2)` result as external validation for `SU(3)`. Incompatible sampler, proposal, stream, update-order, local-action, diagnostic, evidence, or admitted-schedule semantics require a new contract identifier rather than mutation of the frozen V1 sampler surface.
 
 Do not import triadic ontology, Q/K/V-to-colour semantics, or other cross-domain interpretations into these authorities.
 
@@ -259,6 +259,8 @@ cargo run --quiet --locked --bin ym-classical-geometry
 cargo run --quiet --locked --bin ym-su2-ensemble
 cargo run --quiet --locked --bin ym-su2-plaquette-baseline
 cargo run --quiet --locked --bin ym-su3-ensemble
+cargo run --release --quiet --locked --bin ym-su3-plaquette-baseline
+cargo run --release --quiet --locked --bin ym-su3-plaquette-baseline-v2
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```

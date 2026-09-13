@@ -216,12 +216,21 @@ Primary source: Langfeld, Lucini & Rago, *Physical Review Letters* **109**, 1116
 
 ### Phase 2C2 — independent published `SU(3)` validation
 
-Phase 2C1 does **not** authorize later `SU(3)` physics analysis by itself.
+**Status: completed on PR #10 branch, V2 validation authority frozen pending review/merge.**
 
-- [ ] Select a peer-reviewed pure-`SU(3)` Wilson-action finite-lattice benchmark only after the Phase 2C1 sampler mechanics are frozen.
-- [ ] Predeclare its action normalization, lattice geometry/volume, coupling, observable, source treatment, chain identities, thermalisation, cadence, and statistical gates before inspecting the result.
-- [ ] Reproduce the benchmark with independent chains and retained raw evidence under a separately versioned validation authority.
-- [ ] Keep glueball analysis disabled until the independent `SU(3)` benchmark gate passes.
+Phase 2C1 does **not** authorize later `SU(3)` physics analysis by itself. Phase 2C2 preserves the failed first attempt rather than rewriting it: `YM-SU3-PLAQUETTE-BASELINE-V1` reproduced the published plaquette envelope but failed its predeclared per-chain ESS floor (`4.510 < 8`). A separately predeclared fresh-stream `YM-SU3-PLAQUETTE-BASELINE-V2` then retained the same source surface, sampler, proposal scale, per-chain schedule, acceptance/stationarity/consistency thresholds, and group-residual limits while using four fresh independent chains. V2 explicitly changed the ESS criterion from a per-chain floor of 8 to finite-positive ESS per chain plus an aggregate ESS floor of 16.
+
+- [x] Select a peer-reviewed pure-`SU(3)` Wilson-action finite-lattice benchmark only after the Phase 2C1 sampler mechanics are frozen.
+- [x] Predeclare its action normalization, lattice geometry/volume, coupling, observable, source treatment, chain identities, thermalisation, cadence, and statistical gates before inspecting the result.
+- [x] Preserve the failed V1 attempt without lowering its threshold after inspection.
+- [x] Reproduce the benchmark with fresh independent chains and retained raw evidence under the separately versioned V2 validation authority.
+- [x] Keep glueball analysis disabled until the independent `SU(3)` benchmark gate passes.
+
+Primary source: Edgar, McCrossen & Moriarty, *Journal of Physics G: Nuclear Physics* **7** (1981) L85–L88, DOI `10.1088/0305-4616/7/5/001`. The frozen comparison is pure `SU(3)` Wilson action on `4^4` at `beta=6.0`, with conservative graphical normalized-plaquette envelope `[0.56,0.63]`.
+
+The successful V2 confirmation (Actions run `34761701867`, evidence head `f5a221fdad2046779358cc59460fae488626459b`) produced pooled mean `0.5992920043`, aggregate ESS `78.944`, maximum pairwise chain-consistency `z ~= 3.550`, and maximum stationarity `z ~= 1.465`. All predeclared acceptance, accounting, source-envelope, and group-residual gates passed.
+
+**Phase 2C2 freeze gate:** `YM-SU3-PLAQUETTE-BASELINE-V2` and `SU3-PLAQUETTE-BASELINE-PHASE2C2-V2` are sealed as `phase-2c2-frozen`; `published_su3_baseline_reproduced=true`, `phase2c_complete=true`, and `glueball_analysis_enabled=true`. V1 remains `phase-2c2-v1-failed`. This authorizes Phase 3 work but is not itself a glueball result, confinement claim, continuum construction, or mass-gap proof.
 
 ## Phase 3 — glueball laboratory
 

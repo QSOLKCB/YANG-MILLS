@@ -1,0 +1,38 @@
+name: Phase 2C2 published SU(3) benchmark
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  published-su3-benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Rust toolchain
+        run: rustup show
+
+      - name: Strict Rust format
+        run: cargo fmt --all -- --check
+
+      - name: Phase 2C2 V1 archive unit tests
+        run: cargo test --locked --bin ym-su3-plaquette-baseline
+
+      - name: Phase 2C2 V2 confirmation unit tests
+        run: cargo test --locked --bin ym-su3-plaquette-baseline-v2
+
+      - name: Reproduce archived Phase 2C2 V1 failure boundary
+        run: cargo run --release --quiet --locked --bin ym-su3-plaquette-baseline
+
+      - name: Run fresh Phase 2C2 V2 four-chain confirmation
+        run: cargo run --release --quiet --locked --bin ym-su3-plaquette-baseline-v2
+
+      - name: Phase 2C2 contract checks
+        run: python3 scripts/check_su3_baseline_contracts.py
+
+      - name: Phase 2C2 negative contract regressions
+        run: python3 scripts/test_su3_baseline_contract_validation.py
