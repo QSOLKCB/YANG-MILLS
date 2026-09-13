@@ -22,6 +22,8 @@ use glueball_smearing::{
 use su3::SU3_ACCEPTANCE_TOLERANCE;
 use su3_lattice::{deterministic_su3_site_gauge, single_traceless_su3_link_lattice, Su3Lattice4};
 
+const SMEARING_STATUS: &str = "phase-3b1-frozen";
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let identity = Su3Lattice4::new_identity([3, 3, 3, 3])?;
     let identity_smeared = spatial_stout_smear(&identity, CANONICAL_RHO, 3)?;
@@ -73,7 +75,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("contract={SMEARING_CONTRACT_ID}");
     println!("transformation={TRANSFORMATION_ID}");
-    println!("status=phase-3b1-candidate");
+    println!("status={SMEARING_STATUS}");
     println!("rho={CANONICAL_RHO:.17e}");
     println!("canonical_levels=1");
     println!("identity_fixed_point_residual={identity_residual:.17e}");
@@ -106,4 +108,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("positive_continuum_mass_gap_proved=false");
     println!("result=passed");
     Ok(())
+}
+
+#[cfg(test)]
+mod runtime_status_tests {
+    use super::SMEARING_STATUS;
+
+    #[test]
+    fn phase3b1_runtime_status_is_frozen() {
+        assert_eq!(SMEARING_STATUS, "phase-3b1-frozen");
+    }
 }
