@@ -12,6 +12,39 @@ V1_VECTOR_PATH = "test-vectors/su3-plaquette-baseline-v1.json"
 V2_CONTRACT_PATH = "contracts/YM-SU3-PLAQUETTE-BASELINE-V2.json"
 V2_VECTOR_PATH = "test-vectors/su3-plaquette-baseline-v2.json"
 
+EXPECTED_OBSERVABLE = "average plaquette=(1/(6V))*sum_x,sum_mu<nu (1/3)ReTr P_mu_nu(x)"
+EXPECTED_RUNTIME_IDENTITY = {
+    "sampler_id": "YM-SU3-ENSEMBLE-V1",
+    "proposal_id": "YM-SU3-GENERATOR-METROPOLIS-V1",
+    "rng_id": "SPLITMIX64-V1",
+    "stream_id": "YM-SU3-STREAM-V1",
+}
+V1_COMPARISON_RULE = {
+    "pooled_mean_must_lie_inside_source_envelope": True,
+    "independent_chain_identities_required": True,
+    "raw_measurements_retained": True,
+    "diagnostics_recomputed_from_raw_measurements": True,
+    "within_chain_stationarity_required": True,
+    "stationarity_rule": "for each chain compare the first 64 and last 64 post-thermalization measurements using the frozen Phase 2A diagnostic arithmetic with max_lag=12; require |mean_first-mean_second|/sqrt(SE_first^2+SE_second^2) <= 5; reject a constant half or zero combined SE scale",
+    "metropolis_accounting_must_match_frozen_schedule": True,
+    "acceptance_window_is_diagnostic_not_source_claim": True,
+    "source_envelope_is_paper_error_bar": False,
+}
+V2_COMPARISON_RULE = {
+    "pooled_mean_must_lie_inside_source_envelope": True,
+    "all_four_chain_identities_must_be_distinct": True,
+    "all_raw_measurement_series_must_be_distinct": True,
+    "raw_measurements_retained": True,
+    "diagnostics_recomputed_from_raw_measurements": True,
+    "each_chain_ess_must_be_finite_and_positive": True,
+    "aggregate_ess_must_meet_frozen_minimum": True,
+    "all_pairwise_chain_consistency_z_must_meet_frozen_maximum": True,
+    "within_chain_stationarity_required": True,
+    "metropolis_accounting_must_match_frozen_schedule": True,
+    "acceptance_window_is_diagnostic_not_source_claim": True,
+    "source_envelope_is_paper_error_bar": False,
+}
+
 
 def _require(condition: bool, message: str) -> None:
     if not condition:
@@ -27,8 +60,14 @@ def _validate_common_source_and_benchmark(payload: dict[str, Any]) -> None:
     _require(benchmark["gauge_group"] == "SU(3)" and benchmark["action"] == "Wilson", "Phase 2C2 theory surface drift")
     _require(benchmark["boundary_conditions"] == "periodic", "Phase 2C2 boundary-condition drift")
     _require(benchmark["extents"] == [4, 4, 4, 4] and benchmark["beta"] == 6.0, "Phase 2C2 geometry/coupling drift")
+    _require(benchmark["observable"] == EXPECTED_OBSERVABLE, "Phase 2C2 observable/normalization drift")
     _require(benchmark["source_envelope_min"] == 0.56 and benchmark["source_envelope_max"] == 0.63, "Phase 2C2 source envelope drift")
     _require(benchmark["source_envelope_is_paper_error_bar"] is False, "Phase 2C2 graphical envelope misrepresented")
+
+
+def _validate_runtime_identity(run: dict[str, Any], label: str) -> None:
+    for field, expected in EXPECTED_RUNTIME_IDENTITY.items():
+        _require(run[field] == expected, f"{label} {field} drift")
 
 
 def validate_v1_contract(payload: dict[str, Any]) -> None:
@@ -37,6 +76,7 @@ def validate_v1_contract(payload: dict[str, Any]) -> None:
     _require(payload["depends_on"] == [{"contract_id": "YM-SU3-ENSEMBLE-V1", "required_status": "phase-2c1-frozen"}], "Phase 2C2 V1 dependency drift")
     _validate_common_source_and_benchmark(payload)
     run = payload["reference_run"]
+    _validate_runtime_identity(run, "Phase 2C2 V1 runtime")
     _require(run["master_seed"] == "2c02198105010001", "Phase 2C2 V1 master seed drift")
     _require(run["chain_ids"] == [0, 1], "Phase 2C2 V1 chain identities drift")
     _require(run["derived_seeds"] == ["2ff3bf48550d1457", "ef7636a56e8ea29a"], "Phase 2C2 V1 derived seeds drift")
@@ -45,6 +85,7 @@ def validate_v1_contract(payload: dict[str, Any]) -> None:
     _require(run["minimum_ess_per_chain"] == 8.0, "Phase 2C2 V1 ESS gate drift")
     _require(run["maximum_chain_consistency_z"] == 5.0 and run["maximum_stationarity_z"] == 5.0, "Phase 2C2 V1 z-gate drift")
     _require(run["expected_metropolis_proposals_per_chain"] == 3670016, "Phase 2C2 V1 accounting drift")
+    _require(payload["comparison_rule"] == V1_COMPARISON_RULE, "Phase 2C2 V1 comparison-rule drift")
     observed = payload["observed_evidence"]
     _require(observed["workflow_run_id"] == 34760576995, "Phase 2C2 V1 workflow evidence drift")
     _require(observed["evidence_head_commit"] == "0b669e9d517353fa21f7fe34f96ff630b59d8ad7", "Phase 2C2 V1 evidence commit drift")
@@ -84,6 +125,7 @@ def validate_v2_contract(payload: dict[str, Any]) -> None:
     ], "Phase 2C2 V2 dependency drift")
     _validate_common_source_and_benchmark(payload)
     run = payload["reference_run"]
+    _validate_runtime_identity(run, "Phase 2C2 V2 runtime")
     _require(run["master_seed"] == "2c02198105010002", "Phase 2C2 V2 master seed drift")
     _require(run["chain_ids"] == [0, 1, 2, 3], "Phase 2C2 V2 chain identities drift")
     _require(run["derived_seeds"] == ["dfcdab179476617a", "151dd841ccef81c6", "9c28ededca3d1ae2", "17dbbf4a00214611"], "Phase 2C2 V2 derived seeds drift")
@@ -93,6 +135,7 @@ def validate_v2_contract(payload: dict[str, Any]) -> None:
     _require(run["minimum_aggregate_effective_sample_size"] == 16.0, "Phase 2C2 V2 aggregate ESS gate drift")
     _require(run["maximum_pairwise_chain_consistency_z"] == 5.0 and run["maximum_stationarity_z"] == 5.0, "Phase 2C2 V2 z-gate drift")
     _require(run["expected_metropolis_proposals_per_chain"] == 3670016, "Phase 2C2 V2 accounting drift")
+    _require(payload["comparison_rule"] == V2_COMPARISON_RULE, "Phase 2C2 V2 comparison-rule drift")
     pre = payload["predeclaration"]
     _require(pre["fresh_master_seed_and_streams"] is True, "Phase 2C2 V2 fresh-stream requirement weakened")
     _require(pre["source_surface_changed_after_v1"] is False and pre["source_envelope_changed_after_v1"] is False, "Phase 2C2 V2 source retuned after V1")
@@ -103,6 +146,17 @@ def validate_v2_contract(payload: dict[str, Any]) -> None:
     _require(observed["workflow_run_id"] == 34761701867, "Phase 2C2 V2 workflow evidence drift")
     _require(observed["evidence_head_commit"] == "f5a221fdad2046779358cc59460fae488626459b", "Phase 2C2 V2 evidence commit drift")
     _require(observed["pooled_mean"] == 0.5992920042685975, "Phase 2C2 V2 pooled mean drift")
+    _require(observed["pooled_standard_error"] == 0.0008268453534905086, "Phase 2C2 V2 pooled standard-error drift")
+    expected_arrays = {
+        "chain_means": [0.5951228942049566, 0.6010578916054883, 0.6006811934765629, 0.6003060377873822],
+        "chain_standard_errors": [0.00073731922680896, 0.0017334647942562633, 0.0013810304643338124, 0.0023415778524011042],
+        "chain_effective_sample_sizes": [37.108298427827265, 12.12458490228564, 19.780522239783117, 9.930599191453949],
+        "chain_acceptances": [0.8675000326974052, 0.8676090240478516, 0.867549078805106, 0.867567607334682],
+        "stationarity_z": [1.4650733209908853, 1.2503134066297152, 0.6586970772179463, 0.6522302609275793],
+    }
+    for field, expected in expected_arrays.items():
+        value = observed[field]
+        _require(isinstance(value, list) and len(value) == 4 and value == expected, f"Phase 2C2 V2 {field} evidence drift")
     _require(observed["aggregate_effective_sample_size"] == 78.94400476134997, "Phase 2C2 V2 aggregate ESS evidence drift")
     _require(observed["maximum_pairwise_chain_consistency_z_observed"] == 3.5504261086461475, "Phase 2C2 V2 pairwise-z evidence drift")
     _require(observed["maximum_stationarity_z_observed"] == 1.4650733209908853, "Phase 2C2 V2 stationarity evidence drift")
