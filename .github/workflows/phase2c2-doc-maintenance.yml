@@ -1,3 +1,4 @@
+# Temporary one-shot workflow; remove after documentation synchronization.
 name: Phase 2C2 documentation maintenance
 
 on:
