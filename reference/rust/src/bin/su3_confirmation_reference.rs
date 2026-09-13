@@ -1,0 +1,136 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+use yang_mills_reference::{Lattice4, ReferenceError, Su2, DIM};
+
+#[path = "../su2_ensemble.rs"]
+mod su2_ensemble;
+#[path = "../su3.rs"]
+mod su3;
+#[path = "../su3_benchmark.rs"]
+mod su3_benchmark;
+#[path = "../su3_confirmation.rs"]
+mod su3_confirmation;
+#[path = "../su3_ensemble.rs"]
+mod su3_ensemble;
+#[path = "../su3_lattice.rs"]
+mod su3_lattice;
+
+use su3_benchmark::{
+    AUTOCORRELATION_MAX_LAG, BETA, EXTENTS, MAX_METROPOLIS_ACCEPTANCE, MAX_STATIONARITY_Z,
+    MEASUREMENTS, MIN_METROPOLIS_ACCEPTANCE, PROPOSAL_ANGLE, SOURCE_ENVELOPE_MAX,
+    SOURCE_ENVELOPE_MIN, STATIONARITY_AUTOCORRELATION_MAX_LAG, STATIONARITY_HALF_MEASUREMENTS,
+    SWEEPS_BETWEEN_MEASUREMENTS, THERMALIZATION_SWEEPS,
+};
+use su3_confirmation::{
+    summarize_four_chains, CHAIN_IDS, CONFIRMATION_ID, MASTER_SEED, MAX_PAIRWISE_CHAIN_CONSISTENCY_Z,
+    MIN_AGGREGATE_ESS,
+};
+use su3_ensemble::{run_chain, Su3ChainReport, Su3EnsembleConfig};
+
+fn config(chain_id: u64) -> Su3EnsembleConfig {
+    Su3EnsembleConfig {
+        extents: EXTENTS,
+        beta: BETA,
+        master_seed: MASTER_SEED,
+        chain_id,
+        thermalization_sweeps: THERMALIZATION_SWEEPS,
+        measurements: MEASUREMENTS,
+        sweeps_between_measurements: SWEEPS_BETWEEN_MEASUREMENTS,
+        proposal_angle: PROPOSAL_ANGLE,
+        autocorrelation_max_lag: AUTOCORRELATION_MAX_LAG,
+    }
+}
+
+fn series_text(values: &[f64]) -> String {
+    values
+        .iter()
+        .map(|value| format!("{value:.17e}"))
+        .collect::<Vec<_>>()
+        .join(",")
+}
+
+fn print_chain(index: usize, report: &Su3ChainReport, summary: &su3_confirmation::ConfirmationSummary) {
+    println!("chain{index}_id={}", report.config.chain_id);
+    println!("chain{index}_derived_seed={:016x}", report.derived_seed);
+    println!("chain{index}_metropolis_proposals={}", report.metropolis_proposals);
+    println!("chain{index}_metropolis_accepts={}", report.metropolis_accepts);
+    println!("chain{index}_metropolis_acceptance={:.17e}", summary.chain_acceptances[index]);
+    println!("chain{index}_measurements={}", series_text(&report.measurements));
+    println!("chain{index}_mean={:.17e}", summary.chain_means[index]);
+    println!("chain{index}_standard_error={:.17e}", summary.chain_standard_errors[index]);
+    println!("chain{index}_effective_sample_size={:.17e}", summary.chain_effective_sample_sizes[index]);
+    println!("chain{index}_tau_int={:.17e}", report.diagnostics.integrated_autocorrelation_time);
+    println!("chain{index}_stationarity_first_half_mean={:.17e}", summary.stationarity[index].first_half_mean);
+    println!("chain{index}_stationarity_second_half_mean={:.17e}", summary.stationarity[index].second_half_mean);
+    println!("chain{index}_stationarity_z={:.17e}", summary.stationarity[index].drift_z);
+    println!("chain{index}_final_link_unitarity_residual={:.17e}", report.final_link_unitarity_residual);
+    println!("chain{index}_final_link_determinant_residual={:.17e}", report.final_link_determinant_residual);
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let chain0 = run_chain(config(CHAIN_IDS[0]))?;
+    let chain1 = run_chain(config(CHAIN_IDS[1]))?;
+    let chain2 = run_chain(config(CHAIN_IDS[2]))?;
+    let chain3 = run_chain(config(CHAIN_IDS[3]))?;
+    let reports = [&chain0, &chain1, &chain2, &chain3];
+    let summary = summarize_four_chains(reports)?;
+
+    if !summary.published_su3_baseline_reproduced {
+        return Err(format!(
+            "Phase 2C2 V2 confirmation failed: pooled_mean={:.17e}, envelope=[{:.17e},{:.17e}], aggregate_ess={:.17e}, required_aggregate_ess={:.17e}, max_pairwise_chain_z={:.17e}, max_stationarity_z={:.17e}",
+            summary.pooled_mean,
+            SOURCE_ENVELOPE_MIN,
+            SOURCE_ENVELOPE_MAX,
+            summary.aggregate_effective_sample_size,
+            MIN_AGGREGATE_ESS,
+            summary.max_pairwise_chain_consistency_z,
+            summary.max_stationarity_z,
+        )
+        .into());
+    }
+
+    println!("contract={CONFIRMATION_ID}");
+    println!("primary_doi=10.1088/0305-4616/7/5/001");
+    println!("confirmation_role=fresh_four_chain_v2");
+    println!("lattice=4,4,4,4");
+    println!("beta={BETA:.17e}");
+    println!("source_envelope_min={SOURCE_ENVELOPE_MIN:.17e}");
+    println!("source_envelope_max={SOURCE_ENVELOPE_MAX:.17e}");
+    println!("source_envelope_is_paper_error_bar=false");
+    println!("master_seed={MASTER_SEED:016x}");
+    println!("proposal_angle={PROPOSAL_ANGLE:.17e}");
+    println!("thermalization_sweeps={THERMALIZATION_SWEEPS}");
+    println!("measurements_per_chain={MEASUREMENTS}");
+    println!("sweeps_between_measurements={SWEEPS_BETWEEN_MEASUREMENTS}");
+    println!("autocorrelation_max_lag={AUTOCORRELATION_MAX_LAG}");
+    println!("stationarity_half_measurements={STATIONARITY_HALF_MEASUREMENTS}");
+    println!("stationarity_autocorrelation_max_lag={STATIONARITY_AUTOCORRELATION_MAX_LAG}");
+    println!("minimum_aggregate_effective_sample_size={MIN_AGGREGATE_ESS:.17e}");
+    println!("maximum_pairwise_chain_consistency_z={MAX_PAIRWISE_CHAIN_CONSISTENCY_Z:.17e}");
+    println!("maximum_stationarity_z={MAX_STATIONARITY_Z:.17e}");
+    println!("minimum_metropolis_acceptance={MIN_METROPOLIS_ACCEPTANCE:.17e}");
+    println!("maximum_metropolis_acceptance={MAX_METROPOLIS_ACCEPTANCE:.17e}");
+    print_chain(0, &chain0, &summary);
+    print_chain(1, &chain1, &summary);
+    print_chain(2, &chain2, &summary);
+    print_chain(3, &chain3, &summary);
+    println!("pooled_mean={:.17e}", summary.pooled_mean);
+    println!("pooled_standard_error={:.17e}", summary.pooled_standard_error);
+    println!("aggregate_effective_sample_size={:.17e}", summary.aggregate_effective_sample_size);
+    println!("max_pairwise_chain_consistency_z={:.17e}", summary.max_pairwise_chain_consistency_z);
+    println!("max_stationarity_z={:.17e}", summary.max_stationarity_z);
+    println!("max_link_unitarity_residual={:.17e}", summary.max_link_unitarity_residual);
+    println!("max_link_determinant_residual={:.17e}", summary.max_link_determinant_residual);
+    println!("source_envelope_reproduced=true");
+    println!("published_su3_baseline_reproduced=true");
+    println!("phase2c_complete=true");
+    println!("glueball_analysis_enabled=true");
+    println!("v1_reclassified_as_pass=false");
+    println!("confinement_claimed=false");
+    println!("continuum_qft_constructed=false");
+    println!("positive_mass_gap_proved=false");
+    println!("status=passed");
+    Ok(())
+}
