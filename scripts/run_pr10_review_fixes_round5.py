@@ -24,6 +24,14 @@ replacement = '''replace_once(
 if needle not in text:
     raise SystemExit("could not adapt the V2 replay-tolerance checker patch")
 text = text.replace(needle, replacement, 1)
+
+# V1 already imports Su3ChainReport to emit runtime identity/accounting evidence.
+# Preserve that import on both sides of the replay-evidence insertion patch.
+text = text.replace(
+    "use su3_ensemble::{run_chain, Su3EnsembleConfig};",
+    "use su3_ensemble::{run_chain, Su3ChainReport, Su3EnsembleConfig};",
+)
+
 text = text.replace(
     'raise SystemExit(f"expected review-fix block not found in {path_str}")',
     'raise SystemExit(f"expected review-fix block not found in {path_str}: {old[:180]!r}")',
