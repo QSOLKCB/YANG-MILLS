@@ -75,6 +75,15 @@ fn print_chain(
         series_text(&report.measurements)
     );
     println!("chain{index}_mean={:.17e}", summary.chain_means[index]);
+    println!("chain{index}_variance={:.17e}", report.diagnostics.variance);
+    println!(
+        "chain{index}_autocorrelation={}",
+        series_text(&report.diagnostics.autocorrelation)
+    );
+    println!(
+        "chain{index}_positive_window_lag={}",
+        report.diagnostics.positive_window_lag
+    );
     println!(
         "chain{index}_standard_error={:.17e}",
         summary.chain_standard_errors[index]
@@ -94,6 +103,14 @@ fn print_chain(
     println!(
         "chain{index}_stationarity_second_half_mean={:.17e}",
         summary.stationarity[index].second_half_mean
+    );
+    println!(
+        "chain{index}_stationarity_first_half_standard_error={:.17e}",
+        summary.stationarity[index].first_half_standard_error
+    );
+    println!(
+        "chain{index}_stationarity_second_half_standard_error={:.17e}",
+        summary.stationarity[index].second_half_standard_error
     );
     println!(
         "chain{index}_stationarity_z={:.17e}",

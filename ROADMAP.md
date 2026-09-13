@@ -218,7 +218,7 @@ Primary source: Langfeld, Lucini & Rago, *Physical Review Letters* **109**, 1116
 
 **Status: completed on PR #10 branch, V2 validation authority frozen pending review/merge.**
 
-Phase 2C1 does **not** authorize later `SU(3)` physics analysis by itself. Phase 2C2 preserves the failed first attempt rather than rewriting it: `YM-SU3-PLAQUETTE-BASELINE-V1` reproduced the published plaquette envelope but failed its predeclared per-chain ESS floor (`4.510 < 8`). A separately predeclared fresh-stream `YM-SU3-PLAQUETTE-BASELINE-V2` then retained the same source surface, sampler, proposal scale, per-chain schedule, and diagnostic thresholds while using four fresh independent chains and an aggregate ESS floor of 16.
+Phase 2C1 does **not** authorize later `SU(3)` physics analysis by itself. Phase 2C2 preserves the failed first attempt rather than rewriting it: `YM-SU3-PLAQUETTE-BASELINE-V1` reproduced the published plaquette envelope but failed its predeclared per-chain ESS floor (`4.510 < 8`). A separately predeclared fresh-stream `YM-SU3-PLAQUETTE-BASELINE-V2` then retained the same source surface, sampler, proposal scale, per-chain schedule, acceptance/stationarity/consistency thresholds, and group-residual limits while using four fresh independent chains. V2 explicitly changed the ESS criterion from a per-chain floor of 8 to finite-positive ESS per chain plus an aggregate ESS floor of 16.
 
 - [x] Select a peer-reviewed pure-`SU(3)` Wilson-action finite-lattice benchmark only after the Phase 2C1 sampler mechanics are frozen.
 - [x] Predeclare its action normalization, lattice geometry/volume, coupling, observable, source treatment, chain identities, thermalisation, cadence, and statistical gates before inspecting the result.

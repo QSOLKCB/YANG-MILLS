@@ -44,6 +44,7 @@ pub const MAX_METROPOLIS_ACCEPTANCE: f64 = 0.95;
 pub const MAX_LINK_UNITARITY_RESIDUAL: f64 = LINK_RESIDUAL_LIMIT;
 pub const MAX_LINK_DETERMINANT_RESIDUAL: f64 = LINK_RESIDUAL_LIMIT;
 pub const PLAQUETTE_SAMPLE_TOLERANCE: f64 = 1.0e-12;
+pub const ACCEPTANCE_EVIDENCE_TOLERANCE: f64 = 1.0e-12;
 pub const LINKS_PER_SWEEP: u64 = (EXTENTS[0] * EXTENTS[1] * EXTENTS[2] * EXTENTS[3] * 4) as u64;
 pub const PROPOSALS_PER_LINK_PER_SWEEP: u64 = 8;
 pub const EXPECTED_TOTAL_SWEEPS: usize =
@@ -164,7 +165,7 @@ fn measurements_are_physical(values: &[f64]) -> bool {
         .all(|value| value.is_finite() && (lower..=upper).contains(value))
 }
 
-fn acceptance_from_counts(report: &Su3ChainReport) -> Result<f64, BenchmarkError> {
+pub(crate) fn acceptance_from_counts(report: &Su3ChainReport) -> Result<f64, BenchmarkError> {
     if report.metropolis_proposals != EXPECTED_PROPOSALS
         || report.metropolis_accepts == 0
         || report.metropolis_accepts > report.metropolis_proposals
@@ -173,7 +174,7 @@ fn acceptance_from_counts(report: &Su3ChainReport) -> Result<f64, BenchmarkError
     }
     let acceptance = report.metropolis_accepts as f64 / report.metropolis_proposals as f64;
     if !acceptance.is_finite()
-        || report.mean_metropolis_acceptance != acceptance
+        || (report.mean_metropolis_acceptance - acceptance).abs() > ACCEPTANCE_EVIDENCE_TOLERANCE
         || !(MIN_METROPOLIS_ACCEPTANCE..=MAX_METROPOLIS_ACCEPTANCE).contains(&acceptance)
     {
         return Err(BenchmarkError::InvalidAcceptanceEvidence);
@@ -485,6 +486,17 @@ mod tests {
         assert_eq!(
             summarize_two_chains(&broken, &second),
             Err(BenchmarkError::InvalidMetropolisAccounting)
+        );
+
+        let mut rounded = first.clone();
+        rounded.mean_metropolis_acceptance += ACCEPTANCE_EVIDENCE_TOLERANCE * 0.5;
+        assert!(summarize_two_chains(&rounded, &second).is_ok());
+
+        let mut broken = first.clone();
+        broken.mean_metropolis_acceptance += ACCEPTANCE_EVIDENCE_TOLERANCE * 2.0;
+        assert_eq!(
+            summarize_two_chains(&broken, &second),
+            Err(BenchmarkError::InvalidAcceptanceEvidence)
         );
 
         let mut broken = first.clone();

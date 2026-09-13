@@ -87,7 +87,7 @@ The threshold was not reduced after seeing the result.
 
 ## V2 — fresh-stream confirmatory protocol
 
-After V1 failed only its statistical-power gate, V2 was committed **before any V2 result was inspected**. It retained the source surface, source envelope, sampler, proposal scale, per-chain schedule, and diagnostic thresholds while introducing a fresh master seed and four independent streams.
+After V1 failed only its statistical-power gate, V2 was committed **before any V2 result was inspected**. It retained the source surface, source envelope, sampler, proposal scale, per-chain schedule, acceptance window, stationarity threshold, pairwise-consistency threshold, and group-residual limits while introducing a fresh master seed and four independent streams. The ESS rule was deliberately versioned: V1 required ESS >= 8 for every chain, while V2 requires each chain ESS to remain finite and positive plus aggregate ESS >= 16 across four fresh chains.
 
 ```text
 contract = YM-SU3-PLAQUETTE-BASELINE-V2
