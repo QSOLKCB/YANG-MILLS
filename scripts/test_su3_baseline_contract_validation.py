@@ -39,6 +39,18 @@ def main() -> None:
     expect_reject(validate_v1_contract, broken, "V1 failure reclassified as frozen success")
 
     broken = copy.deepcopy(v1)
+    broken["benchmark"]["observable"] = "unrelated observable"
+    expect_reject(validate_v1_contract, broken, "V1 observable normalization drift")
+
+    broken = copy.deepcopy(v1)
+    broken["reference_run"]["sampler_id"] = "YM-SU3-ENSEMBLE-V2"
+    expect_reject(validate_v1_contract, broken, "V1 sampler identity drift")
+
+    broken = copy.deepcopy(v1)
+    broken["comparison_rule"]["within_chain_stationarity_required"] = False
+    expect_reject(validate_v1_contract, broken, "V1 stationarity comparison rule weakened")
+
+    broken = copy.deepcopy(v1)
     broken["observed_evidence"]["minimum_effective_sample_size"] = 8.1
     expect_reject(validate_v1_contract, broken, "V1 failed ESS evidence rewritten")
 
@@ -55,6 +67,10 @@ def main() -> None:
     expect_reject(validate_v2_contract, broken, "V2 source envelope retuned")
 
     broken = copy.deepcopy(v2)
+    broken["reference_run"]["stream_id"] = "YM-SU3-STREAM-V2"
+    expect_reject(validate_v2_contract, broken, "V2 stream identity drift")
+
+    broken = copy.deepcopy(v2)
     broken["reference_run"]["master_seed"] = "2c02198105010001"
     expect_reject(validate_v2_contract, broken, "V2 reused V1 master seed")
 
@@ -63,12 +79,24 @@ def main() -> None:
     expect_reject(validate_v2_contract, broken, "V2 aggregate ESS target weakened")
 
     broken = copy.deepcopy(v2)
+    broken["comparison_rule"]["raw_measurements_retained"] = False
+    expect_reject(validate_v2_contract, broken, "V2 raw-evidence comparison rule weakened")
+
+    broken = copy.deepcopy(v2)
     broken["predeclaration"]["proposal_angle_changed_after_v1"] = True
     expect_reject(validate_v2_contract, broken, "V2 proposal retuning admitted")
 
     broken = copy.deepcopy(v2)
     broken["observed_evidence"]["aggregate_effective_sample_size"] = 15.0
     expect_reject(validate_v2_contract, broken, "V2 passing ESS evidence rewritten below gate")
+
+    broken = copy.deepcopy(v2)
+    broken["observed_evidence"]["chain_means"][0] += 0.01
+    expect_reject(validate_v2_contract, broken, "V2 per-chain evidence corrupted")
+
+    broken = copy.deepcopy(v2)
+    del broken["observed_evidence"]["chain_standard_errors"]
+    expect_reject(validate_v2_contract, broken, "V2 per-chain evidence deleted")
 
     broken = copy.deepcopy(v2)
     broken["phase2c_gate"]["published_su3_baseline_reproduced"] = False
