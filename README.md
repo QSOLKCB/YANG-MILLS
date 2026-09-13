@@ -44,7 +44,7 @@ Phase 2C1 was merged in PR #9. It froze the separately versioned `SU(3)` ensembl
 
 Phase 2C2 is implemented in PR #10. The first predeclared authority, `YM-SU3-PLAQUETTE-BASELINE-V1`, reproduced the peer-reviewed `4^4`, `beta=6.0` plaquette surface but failed its predeclared per-chain ESS floor, so it remains explicitly failed. The separately predeclared `YM-SU3-PLAQUETTE-BASELINE-V2` used four fresh independent streams without changing the external target, sampler, proposal scale, or per-chain schedule. It passed with pooled mean `0.5992920043` inside the frozen `[0.56,0.63]` source envelope, aggregate ESS `78.944`, maximum pairwise chain-consistency `z ~= 3.550`, and maximum stationarity `z ~= 1.465`. The V2 authority is frozen with `published_su3_baseline_reproduced=true`, `phase2c_complete=true`, and `glueball_analysis_enabled=true`. See [`docs/PUBLISHED_SU3_PLAQUETTE_BASELINE.md`](docs/PUBLISHED_SU3_PLAQUETTE_BASELINE.md).
 
-Phase 3 glueball analysis is now authorized but has not yet been implemented. No current phase performs glueball extraction, a continuum/infinite-volume limit, construction of the interacting quantum theory, or a mass-gap proof.
+Phase 3A is implemented as a candidate authority in PR #11: `YM-GLUEBALL-OPERATORS-V1` defines an unsmeared, gauge-invariant spatial Wilson-loop basis on cubic periodic `SU(3)` spatial slices, with finite-lattice `A1++` classification and continuum `0++` channel intent. It does **not** yet construct connected correlators, apply smearing/blocking, extract an effective mass, or produce a glueball spectrum. No current phase performs a continuum/infinite-volume limit, constructs the interacting quantum theory, or proves a mass gap. See [`docs/GLUEBALL_OPERATORS.md`](docs/GLUEBALL_OPERATORS.md).
 
 ## The target
 
@@ -279,6 +279,7 @@ cargo run --quiet --locked --bin ym-su2-plaquette-baseline
 cargo run --quiet --locked --bin ym-su3-ensemble
 cargo run --release --quiet --locked --bin ym-su3-plaquette-baseline
 cargo run --release --quiet --locked --bin ym-su3-plaquette-baseline-v2
+cargo run --quiet --locked --bin ym-glueball-operators
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
