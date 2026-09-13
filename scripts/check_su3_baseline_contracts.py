@@ -19,6 +19,16 @@ EXPECTED_RUNTIME_IDENTITY = {
     "rng_id": "SPLITMIX64-V1",
     "stream_id": "YM-SU3-STREAM-V1",
 }
+EXPECTED_DIAGNOSTIC_PARAMETERS = {
+    "autocorrelation_max_lag": 24,
+    "stationarity_half_measurements": 64,
+    "stationarity_autocorrelation_max_lag": 12,
+    "minimum_metropolis_acceptance": 0.1,
+    "maximum_metropolis_acceptance": 0.95,
+    "expected_metropolis_proposals_per_chain": 3670016,
+    "maximum_link_unitarity_residual": 5e-12,
+    "maximum_link_determinant_residual": 5e-12,
+}
 V1_COMPARISON_RULE = {
     "pooled_mean_must_lie_inside_source_envelope": True,
     "independent_chain_identities_required": True,
@@ -43,6 +53,66 @@ V2_COMPARISON_RULE = {
     "metropolis_accounting_must_match_frozen_schedule": True,
     "acceptance_window_is_diagnostic_not_source_claim": True,
     "source_envelope_is_paper_error_bar": False,
+}
+V1_PREDECLARATION = {
+    "selected_after_phase2c1_freeze": True,
+    "benchmark_parameters_frozen_before_reference_result_inspection": True,
+    "phase2c1_sampler_contract_mutated": False,
+}
+V1_OBSERVED_EVIDENCE = {
+    "workflow_run_id": 34760576995,
+    "evidence_head_commit": "0b669e9d517353fa21f7fe34f96ff630b59d8ad7",
+    "pooled_mean": 0.6018083560823128,
+    "source_envelope_reproduced": True,
+    "minimum_effective_sample_size": 4.51005377363487,
+    "minimum_effective_sample_size_required": 8.0,
+    "chain_consistency_z": 0.4307895037511404,
+    "maximum_chain_consistency_z": 5.0,
+    "maximum_stationarity_z_observed": 3.7834285113688733,
+    "maximum_stationarity_z_allowed": 5.0,
+    "chain_acceptances": [0.867445537022182, 0.8678583417619977],
+    "known_failed_gate": "minimum_effective_sample_size_per_chain",
+    "parameter_retuning_after_result": False,
+}
+V1_GATE = {
+    "published_su3_baseline_reproduced": False,
+    "phase2c_complete": False,
+    "glueball_analysis_enabled": False,
+    "result_status": "failed-predeclared-effective-sample-size-gate",
+}
+V1_CLAIM_BOUNDARY = {
+    "benchmark_agreement_is_finite_lattice_validation": True,
+    "failed_statistical_gate_is_not_validation_success": True,
+    "benchmark_agreement_implies_confinement": False,
+    "benchmark_agreement_implies_continuum_qft": False,
+    "benchmark_agreement_implies_positive_mass_gap": False,
+    "glueball_analysis_authorization_is_not_a_glueball_result": True,
+}
+V2_PREDECLARATION = {
+    "designed_after_v1_statistical_power_failure": True,
+    "fresh_master_seed_and_streams": True,
+    "source_surface_changed_after_v1": False,
+    "source_envelope_changed_after_v1": False,
+    "sampler_algorithm_changed_after_v1": False,
+    "proposal_angle_changed_after_v1": False,
+    "per_chain_schedule_changed_after_v1": False,
+    "v1_failed_result_reclassified_as_pass": False,
+    "v2_parameters_frozen_before_v2_result_inspection": True,
+    "phase2c1_sampler_contract_mutated": False,
+}
+V2_GATE = {
+    "published_su3_baseline_reproduced": True,
+    "phase2c_complete": True,
+    "glueball_analysis_enabled": True,
+    "result_status": "passed-predeclared-v2-confirmation",
+}
+V2_CLAIM_BOUNDARY = {
+    "successful_v2_is_finite_lattice_validation": True,
+    "v1_source_agreement_overrides_v1_ess_failure": False,
+    "benchmark_agreement_implies_confinement": False,
+    "benchmark_agreement_implies_continuum_qft": False,
+    "benchmark_agreement_implies_positive_mass_gap": False,
+    "glueball_analysis_authorization_is_not_a_glueball_result": True,
 }
 
 
@@ -70,6 +140,11 @@ def _validate_runtime_identity(run: dict[str, Any], label: str) -> None:
         _require(run[field] == expected, f"{label} {field} drift")
 
 
+def _validate_diagnostic_parameters(run: dict[str, Any], label: str) -> None:
+    for field, expected in EXPECTED_DIAGNOSTIC_PARAMETERS.items():
+        _require(run[field] == expected, f"{label} {field} drift")
+
+
 def validate_v1_contract(payload: dict[str, Any]) -> None:
     _require(payload["contract_id"] == "YM-SU3-PLAQUETTE-BASELINE-V1", "Phase 2C2 V1 contract ID drift")
     _require(payload["status"] == "phase-2c2-v1-failed", "Phase 2C2 V1 failed status drift")
@@ -77,6 +152,7 @@ def validate_v1_contract(payload: dict[str, Any]) -> None:
     _validate_common_source_and_benchmark(payload)
     run = payload["reference_run"]
     _validate_runtime_identity(run, "Phase 2C2 V1 runtime")
+    _validate_diagnostic_parameters(run, "Phase 2C2 V1 runtime")
     _require(run["master_seed"] == "2c02198105010001", "Phase 2C2 V1 master seed drift")
     _require(run["chain_ids"] == [0, 1], "Phase 2C2 V1 chain identities drift")
     _require(run["derived_seeds"] == ["2ff3bf48550d1457", "ef7636a56e8ea29a"], "Phase 2C2 V1 derived seeds drift")
@@ -84,21 +160,11 @@ def validate_v1_contract(payload: dict[str, Any]) -> None:
     _require(run["thermalization_sweeps"] == 192 and run["measurements_per_chain"] == 128 and run["sweeps_between_measurements"] == 2 and run["total_sweeps_per_chain"] == 448, "Phase 2C2 V1 schedule drift")
     _require(run["minimum_ess_per_chain"] == 8.0, "Phase 2C2 V1 ESS gate drift")
     _require(run["maximum_chain_consistency_z"] == 5.0 and run["maximum_stationarity_z"] == 5.0, "Phase 2C2 V1 z-gate drift")
-    _require(run["expected_metropolis_proposals_per_chain"] == 3670016, "Phase 2C2 V1 accounting drift")
     _require(payload["comparison_rule"] == V1_COMPARISON_RULE, "Phase 2C2 V1 comparison-rule drift")
-    observed = payload["observed_evidence"]
-    _require(observed["workflow_run_id"] == 34760576995, "Phase 2C2 V1 workflow evidence drift")
-    _require(observed["evidence_head_commit"] == "0b669e9d517353fa21f7fe34f96ff630b59d8ad7", "Phase 2C2 V1 evidence commit drift")
-    _require(observed["source_envelope_reproduced"] is True, "Phase 2C2 V1 source agreement erased")
-    _require(observed["minimum_effective_sample_size"] == 4.51005377363487, "Phase 2C2 V1 observed ESS drift")
-    _require(observed["minimum_effective_sample_size_required"] == 8.0, "Phase 2C2 V1 required ESS drift")
-    _require(observed["known_failed_gate"] == "minimum_effective_sample_size_per_chain", "Phase 2C2 V1 failed-gate identity drift")
-    _require(observed["parameter_retuning_after_result"] is False, "Phase 2C2 V1 post-result retuning admitted")
-    gate = payload["phase2c_gate"]
-    _require(gate["published_su3_baseline_reproduced"] is False, "Phase 2C2 V1 incorrectly promoted")
-    _require(gate["phase2c_complete"] is False and gate["glueball_analysis_enabled"] is False, "Phase 2C2 V1 incorrectly graduated")
-    _require(gate["result_status"] == "failed-predeclared-effective-sample-size-gate", "Phase 2C2 V1 failure status drift")
-    _require(payload["claim_boundary"]["failed_statistical_gate_is_not_validation_success"] is True, "Phase 2C2 V1 failure boundary weakened")
+    _require(payload["predeclaration"] == V1_PREDECLARATION, "Phase 2C2 V1 predeclaration drift")
+    _require(payload["observed_evidence"] == V1_OBSERVED_EVIDENCE, "Phase 2C2 V1 observed evidence drift")
+    _require(payload["phase2c_gate"] == V1_GATE, "Phase 2C2 V1 gate drift")
+    _require(payload["claim_boundary"] == V1_CLAIM_BOUNDARY, "Phase 2C2 V1 claim boundary drift")
 
 
 def validate_v1_vectors(payload: dict[str, Any]) -> None:
@@ -126,6 +192,7 @@ def validate_v2_contract(payload: dict[str, Any]) -> None:
     _validate_common_source_and_benchmark(payload)
     run = payload["reference_run"]
     _validate_runtime_identity(run, "Phase 2C2 V2 runtime")
+    _validate_diagnostic_parameters(run, "Phase 2C2 V2 runtime")
     _require(run["master_seed"] == "2c02198105010002", "Phase 2C2 V2 master seed drift")
     _require(run["chain_ids"] == [0, 1, 2, 3], "Phase 2C2 V2 chain identities drift")
     _require(run["derived_seeds"] == ["dfcdab179476617a", "151dd841ccef81c6", "9c28ededca3d1ae2", "17dbbf4a00214611"], "Phase 2C2 V2 derived seeds drift")
@@ -134,14 +201,8 @@ def validate_v2_contract(payload: dict[str, Any]) -> None:
     _require(run["thermalization_sweeps"] == 192 and run["measurements_per_chain"] == 128 and run["sweeps_between_measurements"] == 2 and run["total_sweeps_per_chain"] == 448, "Phase 2C2 V2 schedule drift")
     _require(run["minimum_aggregate_effective_sample_size"] == 16.0, "Phase 2C2 V2 aggregate ESS gate drift")
     _require(run["maximum_pairwise_chain_consistency_z"] == 5.0 and run["maximum_stationarity_z"] == 5.0, "Phase 2C2 V2 z-gate drift")
-    _require(run["expected_metropolis_proposals_per_chain"] == 3670016, "Phase 2C2 V2 accounting drift")
     _require(payload["comparison_rule"] == V2_COMPARISON_RULE, "Phase 2C2 V2 comparison-rule drift")
-    pre = payload["predeclaration"]
-    _require(pre["fresh_master_seed_and_streams"] is True, "Phase 2C2 V2 fresh-stream requirement weakened")
-    _require(pre["source_surface_changed_after_v1"] is False and pre["source_envelope_changed_after_v1"] is False, "Phase 2C2 V2 source retuned after V1")
-    _require(pre["sampler_algorithm_changed_after_v1"] is False and pre["proposal_angle_changed_after_v1"] is False and pre["per_chain_schedule_changed_after_v1"] is False, "Phase 2C2 V2 mechanics retuned after V1")
-    _require(pre["v1_failed_result_reclassified_as_pass"] is False, "Phase 2C2 V1 failure reclassified")
-    _require(pre["v2_parameters_frozen_before_v2_result_inspection"] is True, "Phase 2C2 V2 predeclaration weakened")
+    _require(payload["predeclaration"] == V2_PREDECLARATION, "Phase 2C2 V2 predeclaration drift")
     observed = payload["observed_evidence"]
     _require(observed["workflow_run_id"] == 34761701867, "Phase 2C2 V2 workflow evidence drift")
     _require(observed["evidence_head_commit"] == "f5a221fdad2046779358cc59460fae488626459b", "Phase 2C2 V2 evidence commit drift")
@@ -169,13 +230,8 @@ def validate_v2_contract(payload: dict[str, Any]) -> None:
     _require(observed["maximum_stationarity_z_observed"] <= run["maximum_stationarity_z"], "Phase 2C2 V2 stationarity no longer passes")
     _require(observed["maximum_link_unitarity_residual_observed"] <= run["maximum_link_unitarity_residual"], "Phase 2C2 V2 unitarity no longer passes")
     _require(observed["maximum_link_determinant_residual_observed"] <= run["maximum_link_determinant_residual"], "Phase 2C2 V2 determinant no longer passes")
-    gate = payload["phase2c_gate"]
-    _require(gate["published_su3_baseline_reproduced"] is True and gate["phase2c_complete"] is True and gate["glueball_analysis_enabled"] is True, "Phase 2C2 V2 frozen gate weakened")
-    _require(gate["result_status"] == "passed-predeclared-v2-confirmation", "Phase 2C2 V2 result status drift")
-    boundary = payload["claim_boundary"]
-    _require(boundary["benchmark_agreement_implies_confinement"] is False, "Phase 2C2 confinement overclaim")
-    _require(boundary["benchmark_agreement_implies_continuum_qft"] is False, "Phase 2C2 continuum overclaim")
-    _require(boundary["benchmark_agreement_implies_positive_mass_gap"] is False, "Phase 2C2 mass-gap overclaim")
+    _require(payload["phase2c_gate"] == V2_GATE, "Phase 2C2 V2 frozen gate drift")
+    _require(payload["claim_boundary"] == V2_CLAIM_BOUNDARY, "Phase 2C2 V2 claim boundary drift")
 
 
 def validate_v2_vectors(payload: dict[str, Any]) -> None:
