@@ -1,34 +1,21 @@
 {
   "contract_id": "YM-SU3-PLAQUETTE-BASELINE-V2",
   "vector_set": "SU3-PLAQUETTE-BASELINE-PHASE2C2-V2",
-  "status": "phase-2c2-v2-candidate",
+  "status": "phase-2c2-frozen",
   "vectors": [
     {
       "id": "unchanged-published-source-envelope",
       "doi": "10.1088/0305-4616/7/5/001",
-      "source_lattice": [
-        4,
-        4,
-        4,
-        4
-      ],
+      "source_lattice": [4, 4, 4, 4],
       "beta": 6.0,
-      "expected_interval": [
-        0.56,
-        0.63
-      ],
+      "expected_interval": [0.56, 0.63],
       "source_envelope_changed_after_v1": false,
       "claim_class": "C0"
     },
     {
       "id": "four-fresh-chain-confirmation",
       "master_seed": "2c02198105010002",
-      "chain_ids": [
-        0,
-        1,
-        2,
-        3
-      ],
+      "chain_ids": [0, 1, 2, 3],
       "derived_seeds": [
         "dfcdab179476617a",
         "151dd841ccef81c6",
@@ -62,10 +49,39 @@
       "claim_class": "C0"
     },
     {
-      "id": "v2-predeclaration-boundary",
-      "published_su3_baseline_reproduced": false,
-      "phase2c_complete": false,
-      "glueball_analysis_enabled": false,
+      "id": "observed-v2-confirmation",
+      "workflow_run_id": 34761701867,
+      "evidence_head_commit": "f5a221fdad2046779358cc59460fae488626459b",
+      "pooled_mean": 0.5992920042685975,
+      "pooled_standard_error": 0.0008268453534905086,
+      "chain_means": [
+        0.5951228942049566,
+        0.6010578916054883,
+        0.6006811934765629,
+        0.6003060377873822
+      ],
+      "chain_effective_sample_sizes": [
+        37.108298427827265,
+        12.12458490228564,
+        19.780522239783117,
+        9.930599191453949
+      ],
+      "aggregate_effective_sample_size": 78.94400476134997,
+      "maximum_pairwise_chain_consistency_z_observed": 3.5504261086461475,
+      "maximum_stationarity_z_observed": 1.4650733209908853,
+      "source_envelope_reproduced": true,
+      "diagnostics_trustworthy": true,
+      "published_su3_baseline_reproduced": true,
+      "phase2c_complete": true,
+      "v1_reclassified_as_pass": false,
+      "parameter_retuning_after_v2_result": false,
+      "claim_class": "C2"
+    },
+    {
+      "id": "phase2c-frozen-boundary",
+      "published_su3_baseline_reproduced": true,
+      "phase2c_complete": true,
+      "glueball_analysis_enabled": true,
       "benchmark_agreement_implies_confinement": false,
       "benchmark_agreement_implies_continuum_qft": false,
       "benchmark_agreement_implies_positive_mass_gap": false,
