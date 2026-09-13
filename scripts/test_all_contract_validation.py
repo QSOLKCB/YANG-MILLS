@@ -10,6 +10,7 @@ from test_su2_baseline_contract_validation import main as test_su2_baseline_cont
 from test_su3_ensemble_contract_validation import main as test_su3_ensemble_contracts
 from test_su3_baseline_contract_validation import main as test_su3_baseline_contracts
 from test_glueball_operator_contract_validation import main as test_glueball_operator_contracts
+from test_glueball_smearing_contract_validation import main as test_glueball_smearing_contracts
 
 
 def main() -> None:
@@ -22,6 +23,7 @@ def main() -> None:
     test_su3_ensemble_contracts()
     test_su3_baseline_contracts()
     test_glueball_operator_contracts()
+    test_glueball_smearing_contracts()
     print("All negative YANG-MILLS contract regression checks: passed")
 
 
