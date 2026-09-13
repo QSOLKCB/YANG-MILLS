@@ -12,8 +12,8 @@
 
 use crate::su2_ensemble::diagnostics;
 use crate::su3_benchmark::{
-    stationarity_diagnostic, BenchmarkError, StationarityDiagnostic, AUTOCORRELATION_MAX_LAG,
-    BETA, EXPECTED_PROPOSALS, EXPECTED_TOTAL_SWEEPS, EXTENTS, MAX_LINK_DETERMINANT_RESIDUAL,
+    stationarity_diagnostic, BenchmarkError, StationarityDiagnostic, AUTOCORRELATION_MAX_LAG, BETA,
+    EXPECTED_PROPOSALS, EXPECTED_TOTAL_SWEEPS, EXTENTS, MAX_LINK_DETERMINANT_RESIDUAL,
     MAX_LINK_UNITARITY_RESIDUAL, MAX_METROPOLIS_ACCEPTANCE, MAX_STATIONARITY_Z, MEASUREMENTS,
     MIN_METROPOLIS_ACCEPTANCE, PLAQUETTE_SAMPLE_TOLERANCE, PROPOSAL_ANGLE, SOURCE_ENVELOPE_MAX,
     SOURCE_ENVELOPE_MIN, SWEEPS_BETWEEN_MEASUREMENTS, THERMALIZATION_SWEEPS,
@@ -127,8 +127,7 @@ fn max_pairwise_consistency_z(
     for first in 0..means.len() {
         for second in (first + 1)..means.len() {
             let difference = (means[first] - means[second]).abs();
-            let scale =
-                (standard_errors[first].powi(2) + standard_errors[second].powi(2)).sqrt();
+            let scale = (standard_errors[first].powi(2) + standard_errors[second].powi(2)).sqrt();
             if !difference.is_finite() || !scale.is_finite() || scale <= 0.0 {
                 return Err(BenchmarkError::NonFiniteStatistic);
             }
@@ -368,13 +367,8 @@ mod tests {
             synthetic_report(2, 2),
             synthetic_report(3, 3),
         ];
-        let summary = summarize_four_chains([
-            &reports[0],
-            &reports[1],
-            &reports[2],
-            &reports[3],
-        ])
-        .expect("valid synthetic confirmation");
+        let summary = summarize_four_chains([&reports[0], &reports[1], &reports[2], &reports[3]])
+            .expect("valid synthetic confirmation");
         assert!(summary.aggregate_effective_sample_size >= MIN_AGGREGATE_ESS);
         assert!(summary.source_envelope_reproduced);
         assert!(summary.diagnostics_trustworthy);

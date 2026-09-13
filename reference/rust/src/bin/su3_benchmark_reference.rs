@@ -102,13 +102,31 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("chain1_measurements={}", series_text(&second.measurements));
     println!("chain0_mean={:.17e}", summary.chain_means[0]);
     println!("chain1_mean={:.17e}", summary.chain_means[1]);
-    println!("chain0_effective_sample_size={:.17e}", summary.chain_effective_sample_sizes[0]);
-    println!("chain1_effective_sample_size={:.17e}", summary.chain_effective_sample_sizes[1]);
-    println!("minimum_effective_sample_size_observed={:.17e}", summary.min_effective_sample_size);
+    println!(
+        "chain0_effective_sample_size={:.17e}",
+        summary.chain_effective_sample_sizes[0]
+    );
+    println!(
+        "chain1_effective_sample_size={:.17e}",
+        summary.chain_effective_sample_sizes[1]
+    );
+    println!(
+        "minimum_effective_sample_size_observed={:.17e}",
+        summary.min_effective_sample_size
+    );
     println!("chain_consistency_z={:.17e}", summary.chain_consistency_z);
-    println!("maximum_stationarity_z_observed={:.17e}", summary.max_stationarity_z);
-    println!("chain0_metropolis_acceptance={:.17e}", summary.chain_acceptances[0]);
-    println!("chain1_metropolis_acceptance={:.17e}", summary.chain_acceptances[1]);
+    println!(
+        "maximum_stationarity_z_observed={:.17e}",
+        summary.max_stationarity_z
+    );
+    println!(
+        "chain0_metropolis_acceptance={:.17e}",
+        summary.chain_acceptances[0]
+    );
+    println!(
+        "chain1_metropolis_acceptance={:.17e}",
+        summary.chain_acceptances[1]
+    );
     println!("pooled_mean={:.17e}", summary.pooled_mean);
     println!("source_envelope_reproduced=true");
     println!("published_su3_baseline_reproduced=false");

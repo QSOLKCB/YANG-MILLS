@@ -24,8 +24,8 @@ use su3_benchmark::{
     SWEEPS_BETWEEN_MEASUREMENTS, THERMALIZATION_SWEEPS,
 };
 use su3_confirmation::{
-    summarize_four_chains, CHAIN_IDS, CONFIRMATION_ID, MASTER_SEED, MAX_PAIRWISE_CHAIN_CONSISTENCY_Z,
-    MIN_AGGREGATE_ESS,
+    summarize_four_chains, CHAIN_IDS, CONFIRMATION_ID, MASTER_SEED,
+    MAX_PAIRWISE_CHAIN_CONSISTENCY_Z, MIN_AGGREGATE_ESS,
 };
 use su3_ensemble::{run_chain, Su3ChainReport, Su3EnsembleConfig};
 
@@ -51,22 +51,62 @@ fn series_text(values: &[f64]) -> String {
         .join(",")
 }
 
-fn print_chain(index: usize, report: &Su3ChainReport, summary: &su3_confirmation::ConfirmationSummary) {
+fn print_chain(
+    index: usize,
+    report: &Su3ChainReport,
+    summary: &su3_confirmation::ConfirmationSummary,
+) {
     println!("chain{index}_id={}", report.config.chain_id);
     println!("chain{index}_derived_seed={:016x}", report.derived_seed);
-    println!("chain{index}_metropolis_proposals={}", report.metropolis_proposals);
-    println!("chain{index}_metropolis_accepts={}", report.metropolis_accepts);
-    println!("chain{index}_metropolis_acceptance={:.17e}", summary.chain_acceptances[index]);
-    println!("chain{index}_measurements={}", series_text(&report.measurements));
+    println!(
+        "chain{index}_metropolis_proposals={}",
+        report.metropolis_proposals
+    );
+    println!(
+        "chain{index}_metropolis_accepts={}",
+        report.metropolis_accepts
+    );
+    println!(
+        "chain{index}_metropolis_acceptance={:.17e}",
+        summary.chain_acceptances[index]
+    );
+    println!(
+        "chain{index}_measurements={}",
+        series_text(&report.measurements)
+    );
     println!("chain{index}_mean={:.17e}", summary.chain_means[index]);
-    println!("chain{index}_standard_error={:.17e}", summary.chain_standard_errors[index]);
-    println!("chain{index}_effective_sample_size={:.17e}", summary.chain_effective_sample_sizes[index]);
-    println!("chain{index}_tau_int={:.17e}", report.diagnostics.integrated_autocorrelation_time);
-    println!("chain{index}_stationarity_first_half_mean={:.17e}", summary.stationarity[index].first_half_mean);
-    println!("chain{index}_stationarity_second_half_mean={:.17e}", summary.stationarity[index].second_half_mean);
-    println!("chain{index}_stationarity_z={:.17e}", summary.stationarity[index].drift_z);
-    println!("chain{index}_final_link_unitarity_residual={:.17e}", report.final_link_unitarity_residual);
-    println!("chain{index}_final_link_determinant_residual={:.17e}", report.final_link_determinant_residual);
+    println!(
+        "chain{index}_standard_error={:.17e}",
+        summary.chain_standard_errors[index]
+    );
+    println!(
+        "chain{index}_effective_sample_size={:.17e}",
+        summary.chain_effective_sample_sizes[index]
+    );
+    println!(
+        "chain{index}_tau_int={:.17e}",
+        report.diagnostics.integrated_autocorrelation_time
+    );
+    println!(
+        "chain{index}_stationarity_first_half_mean={:.17e}",
+        summary.stationarity[index].first_half_mean
+    );
+    println!(
+        "chain{index}_stationarity_second_half_mean={:.17e}",
+        summary.stationarity[index].second_half_mean
+    );
+    println!(
+        "chain{index}_stationarity_z={:.17e}",
+        summary.stationarity[index].drift_z
+    );
+    println!(
+        "chain{index}_final_link_unitarity_residual={:.17e}",
+        report.final_link_unitarity_residual
+    );
+    println!(
+        "chain{index}_final_link_determinant_residual={:.17e}",
+        report.final_link_determinant_residual
+    );
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -117,12 +157,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     print_chain(2, &chain2, &summary);
     print_chain(3, &chain3, &summary);
     println!("pooled_mean={:.17e}", summary.pooled_mean);
-    println!("pooled_standard_error={:.17e}", summary.pooled_standard_error);
-    println!("aggregate_effective_sample_size={:.17e}", summary.aggregate_effective_sample_size);
-    println!("max_pairwise_chain_consistency_z={:.17e}", summary.max_pairwise_chain_consistency_z);
+    println!(
+        "pooled_standard_error={:.17e}",
+        summary.pooled_standard_error
+    );
+    println!(
+        "aggregate_effective_sample_size={:.17e}",
+        summary.aggregate_effective_sample_size
+    );
+    println!(
+        "max_pairwise_chain_consistency_z={:.17e}",
+        summary.max_pairwise_chain_consistency_z
+    );
     println!("max_stationarity_z={:.17e}", summary.max_stationarity_z);
-    println!("max_link_unitarity_residual={:.17e}", summary.max_link_unitarity_residual);
-    println!("max_link_determinant_residual={:.17e}", summary.max_link_determinant_residual);
+    println!(
+        "max_link_unitarity_residual={:.17e}",
+        summary.max_link_unitarity_residual
+    );
+    println!(
+        "max_link_determinant_residual={:.17e}",
+        summary.max_link_determinant_residual
+    );
     println!("source_envelope_reproduced=true");
     println!("published_su3_baseline_reproduced=true");
     println!("phase2c_complete=true");
