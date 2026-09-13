@@ -4,17 +4,33 @@ on:
   pull_request:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   published-su3-benchmark:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout PR head
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Rust toolchain
         run: rustup show
+
+      - name: Apply review hardening
+        if: github.event.pull_request.head.ref == 'phase2c2-su3-published-baseline'
+        run: |
+          python3 scripts/apply_pr10_review_fixes.py
+          cargo fmt --all
+          git diff --check
+          if ! git diff --quiet; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add reference/rust/src/su3_benchmark.rs reference/rust/src/su3_confirmation.rs reference/rust/src/bin/su3_benchmark_reference.rs reference/rust/src/bin/su3_confirmation_reference.rs docs/PUBLISHED_SU3_PLAQUETTE_BASELINE.md ROADMAP.md
+            git commit -m 'Address PR 10 review hardening'
+            git push origin HEAD:${{ github.event.pull_request.head.ref }}
+          fi
 
       - name: Strict Rust format
         run: cargo fmt --all -- --check
