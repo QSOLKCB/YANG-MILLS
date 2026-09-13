@@ -16,8 +16,8 @@ mod su3_lattice;
 use glueball_blocking::{
     deterministic_blocking_fixture, fine_site_from_coarse, max_link_residual,
     spatial_stride2_block, BLOCKING_CONTRACT_ID, BLOCKING_STATUS, BLOCK_FACTOR,
-    FROZEN_COARSE_PLAQUETTE_1X1, FROZEN_COARSE_RECTANGLE_2X1,
-    FROZEN_OUTPUT_ABS_TOLERANCE, GAUGE_COVARIANCE_TOLERANCE, TRANSFORMATION_ID,
+    FROZEN_COARSE_PLAQUETTE_1X1, FROZEN_COARSE_RECTANGLE_2X1, FROZEN_OUTPUT_ABS_TOLERANCE,
+    GAUGE_COVARIANCE_TOLERANCE, TRANSFORMATION_ID,
 };
 use glueball_operators::scalar_a1pp_operator_basis;
 use su3::SU3_ACCEPTANCE_TOLERANCE;
@@ -45,8 +45,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let transformed = fine.gauge_transform(deterministic_su3_site_gauge)?;
     let blocked_transformed = spatial_stride2_block(&transformed)?;
-    let blocked_then_transformed = coarse
-        .gauge_transform(|y| deterministic_su3_site_gauge(fine_site_from_coarse(y)))?;
+    let blocked_then_transformed =
+        coarse.gauge_transform(|y| deterministic_su3_site_gauge(fine_site_from_coarse(y)))?;
     let gauge_covariance_residual =
         max_link_residual(&blocked_transformed, &blocked_then_transformed)?;
     if !gauge_covariance_residual.is_finite()

@@ -107,9 +107,7 @@ pub const fn fine_site_from_coarse(y: [usize; DIM]) -> [usize; DIM] {
 /// For spatial `mu`, `V_mu(y)=U_mu(x) U_mu(x+mu)` with
 /// `x=(2y0,2y1,2y2,t)`. The temporal link is sampled exactly as
 /// `V_3(y)=U_3(x)`. No projection, smearing, or averaging is performed.
-pub fn spatial_stride2_block(
-    lattice: &Su3Lattice4,
-) -> Result<Su3Lattice4, GlueballBlockingError> {
+pub fn spatial_stride2_block(lattice: &Su3Lattice4) -> Result<Su3Lattice4, GlueballBlockingError> {
     let coarse_extents = blocked_extents(lattice)?;
     let mut coarse = Su3Lattice4::new_identity(coarse_extents)?;
 
