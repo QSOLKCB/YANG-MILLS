@@ -120,11 +120,11 @@ fn validate_frozen_v2_replay(
         && evidence_array_close(&summary.chain_acceptances, &FROZEN_CHAIN_ACCEPTANCES)
         && evidence_array_close(&stationarity_z, &FROZEN_STATIONARITY_Z)
         && evidence_close(summary.pooled_mean, FROZEN_POOLED_MEAN)
+        && evidence_close(summary.pooled_standard_error, FROZEN_POOLED_STANDARD_ERROR)
         && evidence_close(
-            summary.pooled_standard_error,
-            FROZEN_POOLED_STANDARD_ERROR,
+            summary.aggregate_effective_sample_size,
+            FROZEN_AGGREGATE_ESS,
         )
-        && evidence_close(summary.aggregate_effective_sample_size, FROZEN_AGGREGATE_ESS)
         && evidence_close(
             summary.max_pairwise_chain_consistency_z,
             FROZEN_MAX_PAIRWISE_CHAIN_Z,
