@@ -12,8 +12,8 @@ mod su3;
 mod su3_lattice;
 
 use glueball_operators::{
-    scalar_a1pp_operator_basis, GAUGE_INVARIANCE_TOLERANCE, OPERATOR_BASIS_ID, OPERATOR_CONTRACT_ID,
-    OPERATOR_STATUS,
+    scalar_a1pp_operator_basis, GAUGE_INVARIANCE_TOLERANCE, OPERATOR_BASIS_ID,
+    OPERATOR_CONTRACT_ID, OPERATOR_STATUS,
 };
 use su3_lattice::{deterministic_su3_site_gauge, single_traceless_su3_link_lattice, Su3Lattice4};
 
