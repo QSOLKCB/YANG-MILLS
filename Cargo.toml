@@ -1,10 +1,10 @@
 [package]
 name = "yang-mills-reference"
-version = "0.8.0"
+version = "0.9.0"
 edition = "2021"
 license = "MPL-2.0"
 repository = "https://github.com/QSOLKCB/YANG-MILLS"
-description = "Deterministic and stochastic SU(2)/SU(3) lattice, holonomy, classical-geometry, ensemble, and published-baseline reference surfaces for YANG-MILLS"
+description = "Deterministic and stochastic SU(2)/SU(3) lattice, holonomy, classical-geometry, ensemble, published-baseline, and glueball-operator reference surfaces for YANG-MILLS"
 default-run = "ym-su2-reference"
 
 [lib]
@@ -53,6 +53,10 @@ path = "reference/rust/src/bin/su3_benchmark_reference.rs"
 [[bin]]
 name = "ym-su3-plaquette-baseline-v2"
 path = "reference/rust/src/bin/su3_confirmation_reference.rs"
+
+[[bin]]
+name = "ym-glueball-operators"
+path = "reference/rust/src/bin/glueball_operators_reference.rs"
 
 [profile.release]
 lto = "thin"
