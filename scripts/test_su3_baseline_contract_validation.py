@@ -39,12 +39,24 @@ def main() -> None:
     expect_reject(validate_v1_contract, broken, "V1 failure reclassified as frozen success")
 
     broken = copy.deepcopy(v1)
+    broken["scope"] = "continuum construction and Clay Yang-Mills mass-gap solution"
+    expect_reject(validate_v1_contract, broken, "V1 scope promoted beyond finite-lattice validation")
+
+    broken = copy.deepcopy(v1)
     broken["benchmark"]["observable"] = "unrelated observable"
     expect_reject(validate_v1_contract, broken, "V1 observable normalization drift")
 
     broken = copy.deepcopy(v1)
     broken["primary_source"]["numeric_extraction"] = "quoted paper statistical error bar"
     expect_reject(validate_v1_contract, broken, "V1 graphical source extraction rewritten")
+
+    broken = copy.deepcopy(v1)
+    broken["primary_source"]["title"] = "Rewritten benchmark title"
+    expect_reject(validate_v1_contract, broken, "V1 publication title provenance rewritten")
+
+    broken = copy.deepcopy(v1)
+    del broken["primary_source"]["source_surface"]
+    expect_reject(validate_v1_contract, broken, "V1 retained source-surface provenance deleted")
 
     broken = copy.deepcopy(v1)
     broken["reference_run"]["sampler_id"] = "YM-SU3-ENSEMBLE-V2"
@@ -151,8 +163,24 @@ def main() -> None:
     expect_reject(validate_v2_contract, broken, "V2 source envelope retuned")
 
     broken = copy.deepcopy(v2)
+    broken["scope"] = "continuum quantum Yang-Mills construction and positive mass-gap proof"
+    expect_reject(validate_v2_contract, broken, "V2 scope promoted beyond finite-lattice validation")
+
+    broken = copy.deepcopy(v2)
     broken["primary_source"]["numeric_extraction"] = "quoted paper statistical error bar"
     expect_reject(validate_v2_contract, broken, "V2 graphical source extraction rewritten")
+
+    broken = copy.deepcopy(v2)
+    broken["primary_source"]["authors"][0] = "Different Author"
+    expect_reject(validate_v2_contract, broken, "V2 publication author provenance rewritten")
+
+    broken = copy.deepcopy(v2)
+    broken["primary_source"]["journal"] = "Different Journal"
+    expect_reject(validate_v2_contract, broken, "V2 publication journal provenance rewritten")
+
+    broken = copy.deepcopy(v2)
+    broken["primary_source"]["source_surface"] = "V1-only provenance field injected into V2"
+    expect_reject(validate_v2_contract, broken, "V2 primary-source provenance gained an unfrozen field")
 
     broken = copy.deepcopy(v2)
     broken["reference_run"]["stream_id"] = "YM-SU3-STREAM-V2"

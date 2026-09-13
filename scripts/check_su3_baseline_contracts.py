@@ -17,6 +17,31 @@ EXPECTED_NUMERIC_EXTRACTION = {
     "YM-SU3-PLAQUETTE-BASELINE-V1": "conservative graphical source-resolution envelope for the equivalent normalized average plaquette; not a quoted tabulated statistical error",
     "YM-SU3-PLAQUETTE-BASELINE-V2": "the same conservative graphical source-resolution envelope frozen before the V1 result was inspected",
 }
+EXPECTED_SCOPES = {
+    "YM-SU3-PLAQUETTE-BASELINE-V1": "first predeclared independent published finite-lattice validation attempt of the frozen Phase 2C1 pure-SU(3) sampler",
+    "YM-SU3-PLAQUETTE-BASELINE-V2": "fresh-stream confirmatory published finite-lattice validation after the V1 attempt reproduced the source envelope but failed its predeclared per-chain ESS gate",
+}
+EXPECTED_PRIMARY_SOURCES = {
+    "YM-SU3-PLAQUETTE-BASELINE-V1": {
+        "title": "The specific heat of SU(3) lattice gauge theory",
+        "authors": ["R. C. Edgar", "L. McCrossen", "K. J. M. Moriarty"],
+        "journal": "Journal of Physics G: Nuclear Physics 7 (1981) L85-L88",
+        "doi": "10.1088/0305-4616/7/5/001",
+        "peer_reviewed": True,
+        "source_surface": "four-dimensional pure SU(3) average action/plaquette beta scan on 4^4 and 5^4 lattices; the 4^4 calculation averages over 400 iterations through the lattice",
+        "selected_surface": "4^4 lattice at beta=6.0",
+        "numeric_extraction": EXPECTED_NUMERIC_EXTRACTION["YM-SU3-PLAQUETTE-BASELINE-V1"],
+    },
+    "YM-SU3-PLAQUETTE-BASELINE-V2": {
+        "title": "The specific heat of SU(3) lattice gauge theory",
+        "authors": ["R. C. Edgar", "L. McCrossen", "K. J. M. Moriarty"],
+        "journal": "Journal of Physics G: Nuclear Physics 7 (1981) L85-L88",
+        "doi": "10.1088/0305-4616/7/5/001",
+        "peer_reviewed": True,
+        "selected_surface": "4^4 lattice at beta=6.0",
+        "numeric_extraction": EXPECTED_NUMERIC_EXTRACTION["YM-SU3-PLAQUETTE-BASELINE-V2"],
+    },
+}
 EXPECTED_RUNTIME_IDENTITY = {
     "sampler_id": "YM-SU3-ENSEMBLE-V1",
     "proposal_id": "YM-SU3-GENERATOR-METROPOLIS-V1",
@@ -278,11 +303,8 @@ def _require(condition: bool, message: str) -> None:
 
 def _validate_common_source_and_benchmark(payload: dict[str, Any]) -> None:
     source = payload["primary_source"]
-    _require(source["doi"] == "10.1088/0305-4616/7/5/001", "Phase 2C2 source DOI drift")
-    _require(source["peer_reviewed"] is True, "Phase 2C2 source must remain peer reviewed")
-    _require(source["selected_surface"] == "4^4 lattice at beta=6.0", "Phase 2C2 source surface drift")
-    expected_extraction = EXPECTED_NUMERIC_EXTRACTION[payload["contract_id"]]
-    _require(source["numeric_extraction"] == expected_extraction, "Phase 2C2 source numeric-extraction semantics drift")
+    expected_source = EXPECTED_PRIMARY_SOURCES[payload["contract_id"]]
+    _require(source == expected_source, "Phase 2C2 complete primary-source provenance drift")
     benchmark = payload["benchmark"]
     _require(benchmark["gauge_group"] == "SU(3)" and benchmark["action"] == "Wilson", "Phase 2C2 theory surface drift")
     _require(benchmark["boundary_conditions"] == "periodic", "Phase 2C2 boundary-condition drift")
@@ -305,6 +327,7 @@ def _validate_diagnostic_parameters(run: dict[str, Any], label: str) -> None:
 def validate_v1_contract(payload: dict[str, Any]) -> None:
     _require(payload["contract_id"] == "YM-SU3-PLAQUETTE-BASELINE-V1", "Phase 2C2 V1 contract ID drift")
     _require(payload["status"] == "phase-2c2-v1-failed", "Phase 2C2 V1 failed status drift")
+    _require(payload["scope"] == EXPECTED_SCOPES[payload["contract_id"]], "Phase 2C2 V1 scope/claim drift")
     _require(payload["depends_on"] == [{"contract_id": "YM-SU3-ENSEMBLE-V1", "required_status": "phase-2c1-frozen"}], "Phase 2C2 V1 dependency drift")
     _validate_common_source_and_benchmark(payload)
     run = payload["reference_run"]
@@ -342,6 +365,7 @@ def validate_v1_vectors(payload: dict[str, Any]) -> None:
 def validate_v2_contract(payload: dict[str, Any]) -> None:
     _require(payload["contract_id"] == "YM-SU3-PLAQUETTE-BASELINE-V2", "Phase 2C2 V2 contract ID drift")
     _require(payload["status"] == "phase-2c2-frozen", "Phase 2C2 V2 frozen status drift")
+    _require(payload["scope"] == EXPECTED_SCOPES[payload["contract_id"]], "Phase 2C2 V2 scope/claim drift")
     _require(payload["depends_on"] == [
         {"contract_id": "YM-SU3-ENSEMBLE-V1", "required_status": "phase-2c1-frozen"},
         {"contract_id": "YM-SU3-PLAQUETTE-BASELINE-V1", "required_status": "phase-2c2-v1-failed"},
