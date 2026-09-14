@@ -2,14 +2,14 @@
 
 Phase 3G follows the merged and preserved negative Phase 3F production observation. It does **not** retune `YM-GLUEBALL-SCALAR-PRODUCTION-V1`.
 
-The new candidate authority is:
+The authority is now frozen after PR #18 merged:
 
 ```text
 YM-GLUEBALL-SCALAR-RECOVERY-V1
-status = phase-3g-candidate
+status = phase-3g-frozen
 ```
 
-Its purpose is deliberately narrow: test whether the Phase 3F effective-mass rejection was dominated by insufficient **independent configuration count** before changing the lattice geometry, operator basis, fit windows, transformation parameters, or scientific thresholds.
+Its purpose was deliberately narrow: test whether the Phase 3F effective-mass rejection was dominated by insufficient **independent configuration count** before changing the lattice geometry, operator basis, fit windows, transformation parameters, or scientific thresholds.
 
 ## Frozen Phase 3F baseline
 
@@ -163,13 +163,11 @@ The machine-readable Phase 3G vectors pin the observation head, workflow run, si
 
 The reference executable also replay-checks that qualitative receipt. A future deterministic replay that drifts from the pinned historical result is an implementation/reproducibility failure. The fact that the pinned receipt itself is scientifically negative remains valid and does not become a CI failure merely because `scalar_pipeline_validated=false`.
 
-## Decision boundary
+## Decision boundary and Phase 3H handoff
 
-The predeclared failure branch now applies.
+The predeclared failure branch applies and Phase 3G is now frozen.
 
-The next scalar recovery authority should **not** simply increase the chain count again. It should change geometry and/or operator overlap under a new contract, with the new hypothesis declared before observing data.
-
-A natural next experiment is a larger spatial geometry with fine extent at least `6`, so the already-frozen Phase 3B2 stride-2 blocking transformation can participate in the scalar overlap/stability study. Any changed geometry, stream, operator surface, or analysis semantics requires a new identifier.
+The next authority is separately versioned as `YM-GLUEBALL-SCALAR-GEOMETRY-RECOVERY-V1` (Phase 3H). It is predeclared at `6 x 6 x 6 x 10` with 32 fresh independent chains and adds the already-frozen Phase 3B2 stride-2 `block-1` transformation, producing a `3 x 3 x 3 x 10` coarse spatial surface. Phase 3H changes geometry/operator overlap under a fresh stream; it does not modify this Phase 3G authority.
 
 The project must still not open `2++` or `0-+` merely to bypass the unresolved scalar gate.
 
@@ -188,4 +186,4 @@ Phase 3G does not establish:
 - a positive continuum Yang–Mills mass gap;
 - a Clay Millennium Problem solution.
 
-The experiment is a finite-lattice numerical recovery test under a new, independently predeclared stream.
+The experiment is a finite-lattice numerical recovery test under a frozen, independently predeclared stream.
