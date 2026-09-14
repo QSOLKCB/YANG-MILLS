@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail-closed checks for the Phase 3F production scalar surface."""
+"""Fail-closed checks for the frozen Phase 3F production scalar surface."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from check_contracts import load, validate_exact
 
 EXPECTED_CONTRACT: dict[str, Any] = {
     "contract_id": "YM-GLUEBALL-SCALAR-PRODUCTION-V1",
-    "status": "phase-3f-candidate",
+    "status": "phase-3f-frozen",
     "scope": "bounded finite-lattice scalar A1++ production ensemble evidence with predeclared fit-window, operator, and stout-transformation stability scans",
     "depends_on": [
         {"contract_id": "YM-SU3-ENSEMBLE-V1", "required_status": "phase-2c1-frozen"},
@@ -24,6 +24,7 @@ EXPECTED_CONTRACT: dict[str, Any] = {
         "thresholds_may_not_be_weakened_after_observation": True,
         "fresh_stream_or_semantic_change_requires_new_contract_identifier": True,
         "review_hardening_classification": "implementation-only fail-closed enforcement; production schedule, scientific thresholds, and observed receipt unchanged",
+        "freeze_classification": "implementation-only lifecycle/provenance transition after merged PR #17; production schedule, analysis semantics, thresholds, and observed negative receipt are unchanged",
     },
     "evidence_class": {
         "classification": "finite-lattice production numerical observation",
@@ -133,7 +134,7 @@ EXPECTED_CONTRACT: dict[str, Any] = {
 EXPECTED_VECTORS: dict[str, Any] = {
     "contract_id": "YM-GLUEBALL-SCALAR-PRODUCTION-V1",
     "vector_set": "GLUEBALL-SCALAR-PRODUCTION-PHASE3F-V1",
-    "status": "phase-3f-candidate",
+    "status": "phase-3f-frozen",
     "vectors": [
         {
             "id": "predeclared-independent-chain-production-schedule",
