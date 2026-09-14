@@ -109,6 +109,39 @@ Three stability surfaces are evaluated:
 
 The aggregate `scalar_pipeline_validated` flag is true only if these stability conditions and the predeclared sampler diagnostics all pass.
 
+## First predeclared production outcome
+
+The first completed production receipt preserved the frozen schedule exactly. All sixteen independent chains completed with valid accounting, finite observables, acceptance fractions around `0.872`, and link residuals far below the frozen `5e-12` limit. The sampler diagnostics therefore passed.
+
+The spectroscopy gate did **not** pass. All six predeclared scalar surfaces were rejected by the frozen effective-mass authority:
+
+```text
+raw     / plaquette-1x1  -> effective-mass-rejected
+raw     / rectangle-2x1  -> effective-mass-rejected
+stout-1 / plaquette-1x1  -> effective-mass-rejected
+stout-1 / rectangle-2x1  -> effective-mass-rejected
+stout-2 / plaquette-1x1  -> effective-mass-rejected
+stout-2 / rectangle-2x1  -> effective-mass-rejected
+```
+
+Consequently:
+
+```text
+sampler_diagnostics_passed              = true
+primary_window_successes                = 0
+primary_window_max_z                    = unavailable
+operator_stability_z                    = unavailable
+transformation_stability_successes      = 0
+transformation_stability_max_z          = unavailable
+scalar_pipeline_validated               = false
+physical_glueball_mass_claimed          = false
+finite_volume_mass_gap_established      = false
+```
+
+This is a **retained negative scientific result**, not an implementation failure. The Phase 3F workflow itself passed because the predeclared experiment executed correctly and reported the negative spectroscopy outcome without weakening any gate.
+
+Phase 3F must not be “repaired” by changing these seeds, windows, thresholds, or transformation choices under the same identifier. Any follow-up experiment must use a separately versioned, predeclared authority and should address the observed effective-mass rejection directly — for example with stronger independently predeclared ensemble evidence and/or a geometry/operator surface designed before inspection to improve the signal while preserving the existing Phase 3F record.
+
 ## Scientific outcome versus CI correctness
 
 The production runtime distinguishes two questions:
@@ -134,4 +167,4 @@ Phase 3F does not by itself establish:
 - a positive continuum Yang–Mills mass gap;
 - a Clay Millennium Problem solution.
 
-If the scalar production gate passes, the next phase should increase the evidence surface rather than immediately promoting the result: larger-volume and/or independently predeclared scalar confirmation, including a geometry that admits the frozen blocking authority, is the natural next checkpoint before additional irreducible channels.
+Because the first Phase 3F production gate is negative, the next scientific phase should **not** advance immediately to additional irreducible channels. It should open a separately versioned, independently predeclared scalar confirmation/recovery experiment that addresses the effective-mass rejection while preserving Phase 3F unchanged as evidence.
