@@ -98,6 +98,9 @@ impl From<GlueballBlockingError> for GeometryRecoveryError {
 }
 
 fn validate_chain_evidence(evidence: &ChainEvidence) -> Result<(), ProductionError> {
+    if evidence.proposals == 0 || evidence.accepts > evidence.proposals {
+        return Err(ProductionError::AccountingOverflow);
+    }
     if !evidence.acceptance.is_finite()
         || !evidence.plaquette.is_finite()
         || !evidence.unitarity_residual.is_finite()
@@ -617,6 +620,24 @@ mod tests {
         assert_eq!(CORRELATOR_REPLAY_TOLERANCE, 2.0e-12);
         assert_eq!(LINK_RESIDUAL_LIMIT, 5.0e-12);
         assert_eq!(CANDIDATE_WINDOWS.len(), 3);
+    }
+
+    #[test]
+    fn impossible_acceptance_accounting_is_an_implementation_failure() {
+        let evidence = ChainEvidence {
+            chain_id: 0,
+            derived_seed: 0,
+            proposals: 10,
+            accepts: 11,
+            acceptance: 1.1,
+            plaquette: 0.5,
+            unitarity_residual: 0.0,
+            determinant_residual: 0.0,
+        };
+        assert_eq!(
+            validate_chain_evidence(&evidence),
+            Err(ProductionError::AccountingOverflow)
+        );
     }
 
     #[test]
