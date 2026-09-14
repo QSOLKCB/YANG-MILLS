@@ -1,0 +1,32 @@
+name: Phase 3C connected correlators
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  connected-correlators:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Rust toolchain
+        run: rustup show
+
+      - name: Strict Rust format
+        run: cargo fmt --all -- --check
+
+      - name: Phase 3C unit tests
+        run: cargo test --locked --bin ym-glueball-correlator
+
+      - name: Phase 3C deterministic reference vectors
+        run: cargo run --quiet --locked --bin ym-glueball-correlator
+
+      - name: Phase 3C contract checks
+        run: python3 scripts/check_glueball_correlator_contracts.py
+
+      - name: Phase 3C negative contract regressions
+        run: python3 scripts/test_glueball_correlator_contract_validation.py
