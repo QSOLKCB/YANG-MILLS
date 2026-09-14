@@ -92,6 +92,22 @@ def main() -> None:
     broken["vectors"][3]["clay_solution_claimed"] = 0
     expect_reject(validate_vectors, broken, "claim boundary boolean replaced by integer")
 
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][4]["scalar_pipeline_validated"] = True
+    expect_reject(validate_vectors, broken, "negative recovery receipt rewritten as validated")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][4]["independent_statistics_recovery_succeeded"] = True
+    expect_reject(validate_vectors, broken, "failed statistics-recovery hypothesis rewritten as success")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][4]["surface_outcomes"][0]["reason"] = "no-accepted-plateau-window"
+    expect_reject(validate_vectors, broken, "observed recovery rejection reason drifted")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][4]["independent_chains"] = 16
+    expect_reject(validate_vectors, broken, "observed recovery chain count drifted")
+
     print("Phase 3G scalar recovery negative contract regressions: passed")
 
 
