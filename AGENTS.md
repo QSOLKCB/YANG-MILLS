@@ -374,6 +374,7 @@ cargo run --quiet --locked --bin ym-glueball-effective-mass
 cargo run --quiet --locked --bin ym-glueball-scalar-fit
 cargo run --release --quiet --locked --bin ym-glueball-scalar-production
 cargo run --release --quiet --locked --bin ym-glueball-scalar-recovery
+cargo run --release --quiet --locked --bin ym-glueball-scalar-geometry-recovery
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
