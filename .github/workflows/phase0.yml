@@ -82,11 +82,11 @@ jobs:
       - name: Phase 3G fresh-stream scalar recovery evidence
         run: cargo run --release --quiet --locked --bin ym-glueball-scalar-recovery
 
-      - name: Phase 3H blocking-capable scalar geometry recovery evidence
-        run: cargo run --release --quiet --locked --bin ym-glueball-scalar-geometry-recovery
-
       - name: All contract checks
         run: python3 scripts/check_all_contracts.py
 
       - name: All negative contract regressions
         run: python3 scripts/test_all_contract_validation.py
+
+      - name: Phase 3H blocking-capable scalar geometry recovery evidence
+        run: cargo run --release --quiet --locked --bin ym-glueball-scalar-geometry-recovery
