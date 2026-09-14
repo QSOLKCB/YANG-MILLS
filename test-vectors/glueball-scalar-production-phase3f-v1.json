@@ -1,7 +1,7 @@
 {
   "contract_id": "YM-GLUEBALL-SCALAR-PRODUCTION-V1",
   "vector_set": "GLUEBALL-SCALAR-PRODUCTION-PHASE3F-V1",
-  "status": "phase-3f-candidate",
+  "status": "phase-3f-frozen",
   "vectors": [
     {
       "id": "predeclared-independent-chain-production-schedule",
