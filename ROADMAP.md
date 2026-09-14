@@ -234,17 +234,18 @@ The successful V2 confirmation (Actions run `34761701867`, evidence head `f5a221
 
 ## Phase 3 — glueball laboratory
 
-Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and is frozen. Phase 3B2 was merged in PR #13 and is frozen. Phase 3C was merged in PR #14 and is frozen. Phase 3D introduces a scalar periodic cosh effective-mass candidate with delete-one-configuration jackknife uncertainty propagation; fit-window selection and correlated spectral fitting remain unopened.
+Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and is frozen. Phase 3B2 was merged in PR #13 and is frozen. Phase 3C was merged in PR #14 and is frozen. Phase 3D was merged in PR #15 and is frozen. Phase 3E introduces predeclared scalar plateau/window selection plus a correlated periodic one-state fit using the complete delete-one jackknife covariance; production scalar spectroscopy and stability scans remain unopened.
 
 - [x] Define gauge-invariant spatial loop operator bases (`YM-GLUEBALL-OPERATORS-V1`, frozen).
 - [x] Add smearing/blocking as separately versioned transformations.
   - [x] Phase 3B1 spatial stout smearing (`YM-GLUEBALL-SPATIAL-STOUT-V1`, frozen).
   - [x] Phase 3B2 stride-2 spatial blocking (`YM-GLUEBALL-SPATIAL-BLOCK-V1`, frozen).
 - [x] Construct connected Euclidean correlators (`YM-GLUEBALL-CONNECTED-CORRELATOR-V1`, frozen; vacuum subtraction defined, no uncertainty estimate inside Phase 3C).
-- [x] Add effective-mass analysis with uncertainty propagation (`YM-GLUEBALL-EFFECTIVE-MASS-V1`, Phase 3D candidate; periodic cosh estimator plus delete-one-configuration jackknife mechanics).
-- [x] Start with the scalar `0++` channel (finite-lattice `A1++` effective-mass mechanics only; no fitted physical mass claimed).
-- [ ] Add predeclared fit-window/plateau selection and correlated scalar spectral fitting.
-- [ ] Add `2++` and `0-+` only after the scalar pipeline is validated.
+- [x] Add effective-mass analysis with uncertainty propagation (`YM-GLUEBALL-EFFECTIVE-MASS-V1`, frozen Phase 3D; periodic cosh estimator plus delete-one-configuration jackknife mechanics).
+- [x] Start with the scalar `0++` channel (finite-lattice `A1++` mechanics; no physical mass claimed).
+- [x] Add predeclared fit-window/plateau selection and correlated scalar spectral fitting (`YM-GLUEBALL-SCALAR-FIT-V1`, Phase 3E candidate; full jackknife covariance, no diagonal fallback).
+- [ ] Apply the frozen scalar mechanics to sealed production ensemble evidence with explicit fit-window and operator/transformation stability scans.
+- [ ] Add `2++` and `0-+` only after the scalar production pipeline is validated.
 - [ ] Keep finite-volume spectral masses explicitly distinct from the continuum Clay gap.
 
 **Graduation gate:** a complete analysis can be reproduced from sealed ensemble evidence and produces stable finite-lattice estimates under reasonable fit-window/operator-basis variations.
