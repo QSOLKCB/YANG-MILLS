@@ -235,11 +235,25 @@ Phase 3B1 freezes `YM-GLUEBALL-SPATIAL-STOUT-V1` after PR #12 merged. It is a de
 
 The stout parameter is an analysis/transformation parameter, not a physical observable. Phase 3B1 does not establish improved overlap, construct connected correlators, extract an effective mass or spectrum, establish confinement, construct continuum QFT, or prove a mass gap.
 
-### Phase 3B2 spatial blocking candidate authority
+### Phase 3B2 frozen spatial blocking authority
 
-Phase 3B2 introduces `YM-GLUEBALL-SPATIAL-BLOCK-V1` as a deterministic parameter-free stride-2 spatial coarse-link map. Fine spatial extents must be equal, even, and at least `6`; the output extents are `[Lx/2,Ly/2,Lz/2,Nt]`. A coarse site `y` embeds as `(2y0,2y1,2y2,y3)`. Spatial coarse links are the ordered product of the two fine spatial links along the blocked edge; temporal links are sampled exactly at the embedded fine site. No projection, averaging, or smearing is part of this blocking authority.
+Phase 3B2 freezes `YM-GLUEBALL-SPATIAL-BLOCK-V1` after PR #13 merged. It is a deterministic parameter-free stride-2 spatial coarse-link map. Fine spatial extents must be equal, even, and at least `6`; the output extents are `[Lx/2,Ly/2,Lz/2,Nt]`. A coarse site `y` embeds as `(2y0,2y1,2y2,y3)`. Spatial coarse links are the ordered product of the two fine spatial links along the blocked edge; temporal links are sampled exactly at the embedded fine site. No projection, averaging, or smearing is part of this blocking authority.
 
 The gauge-covariance regression uses the restricted coarse gauge field `G_c(y)=G_f(2y0,2y1,2y2,y3)`. Phase 3B2 does not establish improved overlap, validate combined smear/block tuning, construct connected correlators, extract an effective mass or spectrum, establish confinement, construct continuum QFT, or prove a mass gap.
+
+### Phase 3C connected-correlator candidate authority
+
+Phase 3C introduces `YM-GLUEBALL-CONNECTED-CORRELATOR-V1` for the two frozen scalar `A1++` basis elements. It defines bounded periodic finite-sample correlator mechanics and explicit same-sample vacuum subtraction only. For each scalar operator `O`,
+
+```text
+O_bar = (1/(N_cfg*N_t)) sum_(c,t) O_c(t)
+G_O(tau) = (1/(N_cfg*N_t)) sum_(c,t) O_c(t) O_c((t+tau) mod N_t)
+C_O(tau) = G_O(tau) - O_bar^2.
+```
+
+Every supplied configuration and every Euclidean time origin has equal arithmetic weight. The reference admits `1 <= N_cfg <= 64` and `2 <= N_t <= 64`, requires identical lattice extents, and applies no hidden time-reflection symmetrization. Raw, frozen-stout, or frozen-blocked lattices may feed the operator layer, but Phase 3C does not tune those transformations or validate a combined smear/block choice.
+
+The canonical four-configuration shifted-defect fixture is an analytic mechanics regression, **not** a Monte Carlo ensemble and not a physical correlator measurement. Phase 3C attaches no statistical uncertainty to it. It does not extract an effective mass, select a fit window, construct a variational/GEVP spectrum, establish a finite-volume mass gap, establish confinement, construct continuum QFT, or prove a positive continuum mass gap. Those require separately versioned later authorities.
 
 ## Donor boundary
 
@@ -282,6 +296,7 @@ cargo run --release --quiet --locked --bin ym-su3-plaquette-baseline-v2
 cargo run --quiet --locked --bin ym-glueball-operators
 cargo run --quiet --locked --bin ym-glueball-smearing
 cargo run --quiet --locked --bin ym-glueball-blocking
+cargo run --quiet --locked --bin ym-glueball-correlator
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
