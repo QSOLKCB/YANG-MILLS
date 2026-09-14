@@ -28,7 +28,8 @@
     "predeclared_before_production_run": true,
     "failed_scientific_gate_must_be_preserved": true,
     "thresholds_may_not_be_weakened_after_observation": true,
-    "fresh_stream_or_semantic_change_requires_new_contract_identifier": true
+    "fresh_stream_or_semantic_change_requires_new_contract_identifier": true,
+    "review_hardening_classification": "implementation-only fail-closed enforcement; production schedule, scientific thresholds, and observed receipt unchanged"
   },
   "evidence_class": {
     "classification": "finite-lattice production numerical observation",
@@ -57,7 +58,8 @@
     "minimum_acceptance": 0.1,
     "maximum_acceptance": 0.95,
     "maximum_link_unitarity_residual": 5e-12,
-    "maximum_link_determinant_residual": 5e-12
+    "maximum_link_determinant_residual": 5e-12,
+    "group_residual_violation_is_implementation_failure": true
   },
   "operator_and_transform_scan": {
     "operators": ["plaquette-1x1", "rectangle-2x1"],
@@ -81,12 +83,14 @@
     "candidate_windows": [[1, 3], [2, 4], [1, 4]],
     "candidates_declared_before_observation": true,
     "primary_surface": {"transformation": "stout-2", "operator": "plaquette-1x1"},
-    "surface_fit_rejection_is_recorded_evidence": true,
-    "surface_fit_rejection_is_not_implementation_failure": true
+    "data_admissibility_fit_rejection_is_recorded_evidence": true,
+    "data_admissibility_fit_rejection_is_not_implementation_failure": true,
+    "computational_fit_failure_is_implementation_failure": true
   },
   "stability": {
     "maximum_pairwise_mass_z": 5.0,
     "pairwise_scale": "sqrt(sigma_a^2+sigma_b^2)",
+    "all_successful_fit_pairs_must_be_scorable": true,
     "fit_window_scan": {
       "primary_surface_only": true,
       "minimum_successful_windows": 2,
