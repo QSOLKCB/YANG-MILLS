@@ -16,6 +16,8 @@ mod glueball_scalar_fit;
 mod glueball_scalar_production;
 #[path = "../glueball_scalar_recovery.rs"]
 mod glueball_scalar_recovery;
+#[path = "../glueball_scalar_recovery_receipt.rs"]
+mod glueball_scalar_recovery_receipt;
 #[path = "../glueball_smearing.rs"]
 mod glueball_smearing;
 #[path = "../path_holonomy.rs"]
@@ -36,6 +38,9 @@ use glueball_scalar_recovery::{
     PROPOSAL_ANGLE, RECOVERY_CONTRACT_ID, RECOVERY_STATUS, THERMALIZATION_SWEEPS,
     TOTAL_SWEEPS_PER_CHAIN,
 };
+use glueball_scalar_recovery_receipt::{
+    observed_phase3g_receipt_matches, OBSERVATION_HEAD, OBSERVATION_WORKFLOW_RUN_ID,
+};
 
 fn print_optional(label: &str, value: Option<f64>) {
     match value {
@@ -46,11 +51,16 @@ fn print_optional(label: &str, value: Option<f64>) {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let summary = run_scalar_recovery_analysis()?;
+    if !observed_phase3g_receipt_matches(&summary) {
+        return Err("Phase 3G deterministic replay no longer matches the pinned observation receipt".into());
+    }
 
     println!("contract={RECOVERY_CONTRACT_ID}");
     println!("status={RECOVERY_STATUS}");
     println!("evidence_class=fresh-stream-finite-lattice-recovery-observation");
     println!("recovery_hypothesis=independent-statistics-recovery");
+    println!("observation_head={OBSERVATION_HEAD}");
+    println!("observation_workflow_run_id={OBSERVATION_WORKFLOW_RUN_ID}");
     println!("phase3f_scalar_pipeline_validated=false");
     println!("phase3f_master_seed=0x{PHASE3F_MASTER_SEED:016x}");
     println!("phase3f_independent_chains={PHASE3F_CHAIN_COUNT}");
@@ -142,6 +152,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("continuum_qft_constructed=false");
     println!("positive_continuum_mass_gap_proved=false");
     println!("clay_solution_claimed=false");
+    println!("receipt_replay_matches=true");
     println!("result=completed");
     Ok(())
 }
