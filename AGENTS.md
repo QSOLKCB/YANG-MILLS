@@ -121,7 +121,7 @@ U_new = Vhat^dagger U_old^dagger Vhat^dagger
 
 for nonzero staple norm. It is microcanonical decorrelation, not an ergodic sampler by itself.
 
-Reference update order is lexicographic sites `x0,x1,x2,x3`, then directions `mu=0..3`. A complete Markov sweep is one heat-bath sweep followed by the configured number of over-relaxation sweeps. The checked total schedule is
+Reference update order is lexicographic sites `x0,x1,x2,x3`, then directions `mu=0,1,2,3`. A complete Markov sweep is one heat-bath sweep followed by the configured number of over-relaxation sweeps. The checked total schedule is
 
 ```text
 thermalization_sweeps + measurements*sweeps_between_measurements
