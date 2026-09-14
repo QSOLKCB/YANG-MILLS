@@ -1,0 +1,32 @@
+name: Phase 3G fresh-stream scalar recovery
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  scalar-recovery:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Rust toolchain
+        run: rustup show
+
+      - name: Strict Rust format
+        run: cargo fmt --all -- --check
+
+      - name: Phase 3G unit tests
+        run: cargo test --locked --bin ym-glueball-scalar-recovery
+
+      - name: Phase 3G contract checks
+        run: python3 scripts/check_glueball_scalar_recovery_contracts.py
+
+      - name: Phase 3G negative contract regressions
+        run: python3 scripts/test_glueball_scalar_recovery_contract_validation.py
+
+      - name: Phase 3G fresh-stream scalar recovery evidence
+        run: cargo run --release --quiet --locked --bin ym-glueball-scalar-recovery

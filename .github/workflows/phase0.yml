@@ -78,6 +78,9 @@ jobs:
       - name: Phase 3F production scalar evidence
         run: cargo run --release --quiet --locked --bin ym-glueball-scalar-production
 
+      - name: Phase 3G fresh-stream scalar recovery evidence
+        run: cargo run --release --quiet --locked --bin ym-glueball-scalar-recovery
+
       - name: All contract checks
         run: python3 scripts/check_all_contracts.py
 

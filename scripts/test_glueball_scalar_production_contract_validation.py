@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Negative contract regressions for Phase 3F production scalar analysis."""
+"""Negative contract regressions for frozen Phase 3F production scalar analysis."""
 
 from __future__ import annotations
 
@@ -23,6 +23,18 @@ def expect_reject(
 def main() -> None:
     contract = load("contracts/YM-GLUEBALL-SCALAR-PRODUCTION-V1.json")
     vectors = load("test-vectors/glueball-scalar-production-phase3f-v1.json")
+
+    broken = copy.deepcopy(contract)
+    broken["status"] = "phase-3f-candidate"
+    expect_reject(validate_contract, broken, "frozen lifecycle rolled back to candidate")
+
+    broken = copy.deepcopy(vectors)
+    broken["status"] = "phase-3f-candidate"
+    expect_reject(validate_vectors, broken, "frozen vector lifecycle rolled back to candidate")
+
+    broken = copy.deepcopy(contract)
+    del broken["change_discipline"]["freeze_classification"]
+    expect_reject(validate_contract, broken, "freeze provenance classification removed")
 
     broken = copy.deepcopy(contract)
     broken["ensemble"]["master_seed_hex"] = "0x3f00202609150002"

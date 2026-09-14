@@ -234,7 +234,7 @@ The successful V2 confirmation (Actions run `34761701867`, evidence head `f5a221
 
 ## Phase 3 — glueball laboratory
 
-Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and is frozen. Phase 3B2 was merged in PR #13 and is frozen. Phase 3C was merged in PR #14 and is frozen. Phase 3D was merged in PR #15 and is frozen. Phase 3E was merged in PR #16 and is frozen. Phase 3F introduces the first bounded production Monte Carlo scalar-spectroscopy evidence surface with predeclared fit-window, operator, and stout-transformation stability scans.
+Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and is frozen. Phase 3B2 was merged in PR #13 and is frozen. Phase 3C was merged in PR #14 and is frozen. Phase 3D was merged in PR #15 and is frozen. Phase 3E was merged in PR #16 and is frozen. Phase 3F was merged in PR #17 and is frozen with its first negative production receipt preserved. Phase 3G is the candidate fresh-stream recovery authority in PR #18.
 
 - [x] Define gauge-invariant spatial loop operator bases (`YM-GLUEBALL-OPERATORS-V1`, frozen).
 - [x] Add smearing/blocking as separately versioned transformations.
@@ -244,16 +244,24 @@ Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and 
 - [x] Add effective-mass analysis with uncertainty propagation (`YM-GLUEBALL-EFFECTIVE-MASS-V1`, Phase 3D frozen).
 - [x] Add predeclared plateau/window selection and full-covariance scalar fitting (`YM-GLUEBALL-SCALAR-FIT-V1`, Phase 3E frozen).
 - [x] Start with the scalar `0++` channel through frozen finite-lattice `A1++` mechanics.
-- [x] Predeclare and implement the first production scalar evidence/stability run (`YM-GLUEBALL-SCALAR-PRODUCTION-V1`, Phase 3F candidate).
-- [ ] Freeze the observed Phase 3F production outcome without weakening its predeclared seeds, windows, or thresholds.
-- [ ] If the Phase 3F scalar gate passes, add an independently predeclared larger-volume scalar confirmation, including a geometry that admits the frozen blocking authority.
-- [ ] If the Phase 3F scalar gate fails, preserve that failure and define a fresh-stream/new-contract confirmation rather than tuning the existing authority.
+- [x] Predeclare, execute, and preserve the first production scalar evidence/stability run (`YM-GLUEBALL-SCALAR-PRODUCTION-V1`, Phase 3F frozen after PR #17 merge).
+- [x] Preserve the Phase 3F negative result without weakening seeds, windows, thresholds, or rejection semantics.
+- [x] Predeclare a fresh-stream/new-contract independent-statistics recovery test rather than retuning Phase 3F (`YM-GLUEBALL-SCALAR-RECOVERY-V1`, Phase 3G candidate).
+- [x] Execute the first Phase 3G observation with 32 fresh independent retained chains while holding the Phase 3F geometry and analysis surface fixed.
+- [x] Preserve the Phase 3G result: sampler diagnostics passed, all six scalar surfaces were again `effective-mass-rejected`, zero primary windows succeeded, and `scalar_pipeline_validated=false`.
+- [ ] Freeze the observed Phase 3G receipt after PR #18 merges without changing its fresh stream, chain count, geometry, windows, thresholds, or scientific classification.
+- [ ] Predeclare a new scalar recovery authority that changes geometry and/or operator overlap instead of simply increasing the chain count again.
+- [ ] Prefer a blocking-capable spatial geometry with fine extent at least `6` so the frozen Phase 3B2 transformation can participate in the overlap/stability study, while declaring the exact geometry and new stream before observation.
 - [ ] Add `2++` and `0-+` only after the scalar production pipeline has passed an independently reviewed stability gate.
 - [ ] Keep finite-volume spectral masses explicitly distinct from the continuum Clay gap.
 
-**Phase 3F evidence boundary:** the predeclared `4 x 4 x 4 x 10` run uses sixteen independently seeded frozen `SU(3)` chains and one retained configuration per chain. Fit rejection or stability-gate failure is scientific evidence and does not make implementation CI fail. The `4^3` spatial geometry is below the frozen stride-2 blocking minimum fine extent, so blocking stability is explicitly deferred rather than silently substituted.
+**Phase 3F evidence boundary:** the predeclared `4 x 4 x 4 x 10` run used sixteen independently seeded frozen `SU(3)` chains and one retained configuration per chain. Sampler diagnostics passed but all six raw/stout scalar surfaces were `effective-mass-rejected`. The result is frozen historical evidence; Phase 3F is not a tunable baseline.
 
-**Graduation gate:** a complete scalar production analysis can be reproduced from sealed ensemble evidence and produces stable finite-lattice estimates under the predeclared fit-window/operator/transformation scans. Passing this finite-lattice gate still does not establish a continuum mass gap.
+**Phase 3G evidence boundary:** the independently predeclared recovery run retained the same `4 x 4 x 4 x 10`, `beta=5.7`, 68-sweep-per-chain geometry/schedule and all Phase 3F analysis semantics, changed to fresh master seed `0x3f01202609150001`, and doubled the independent chain count from 16 to 32. The observation on head `65dacc9f03cb0fd74826cd211ee7bd586668e08a` / workflow `34875522823` again rejected all six scalar surfaces. Therefore this specific independent-statistics-only recovery hypothesis failed. The negative result is machine-pinned and must not be converted into a pass by later threshold or stream changes under the same identifier.
+
+**Current scalar direction:** because both the 16-chain Phase 3F run and the fresh 32-chain Phase 3G run fail at the same effective-mass admissibility boundary, the next scientific variable should be geometry/operator overlap rather than another chain-count escalation. This conclusion is local to these predeclared tests; it is not a theorem that additional statistics can never matter.
+
+**Graduation gate:** a complete scalar production analysis can be reproduced from sealed ensemble evidence and produces stable finite-lattice estimates under predeclared fit-window/operator/transformation scans, followed by an independently reviewed confirmation on a deliberately declared recovery/confirmation surface. Passing this finite-lattice gate still does not establish a continuum mass gap.
 
 ## Phase 4 — published baseline reproduction
 
