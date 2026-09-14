@@ -16,7 +16,7 @@ use crate::su3_lattice::{traceless_cycle_link, Su3Lattice4, Su3LatticeError, DIM
 
 pub const BLOCKING_CONTRACT_ID: &str = "YM-GLUEBALL-SPATIAL-BLOCK-V1";
 pub const TRANSFORMATION_ID: &str = "YM-SPATIAL-STRIDE2-BLOCK-V1";
-pub const BLOCKING_STATUS: &str = "phase-3b2-candidate";
+pub const BLOCKING_STATUS: &str = "phase-3b2-frozen";
 pub const BLOCK_FACTOR: usize = 2;
 pub const MINIMUM_FINE_SPATIAL_EXTENT: usize = BLOCK_FACTOR * MINIMUM_SPATIAL_EXTENT;
 pub const GAUGE_COVARIANCE_TOLERANCE: f64 = 5.0e-11;
@@ -184,7 +184,7 @@ mod tests {
     fn phase3b2_identity_and_geometry_are_frozen() {
         assert_eq!(BLOCKING_CONTRACT_ID, "YM-GLUEBALL-SPATIAL-BLOCK-V1");
         assert_eq!(TRANSFORMATION_ID, "YM-SPATIAL-STRIDE2-BLOCK-V1");
-        assert_eq!(BLOCKING_STATUS, "phase-3b2-candidate");
+        assert_eq!(BLOCKING_STATUS, "phase-3b2-frozen");
         assert_eq!(BLOCK_FACTOR, 2);
         assert_eq!(MINIMUM_FINE_SPATIAL_EXTENT, 6);
         assert_eq!(GAUGE_COVARIANCE_TOLERANCE, 5.0e-11);

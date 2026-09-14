@@ -66,6 +66,9 @@ jobs:
       - name: Phase 3B2 spatial blocking reference vectors
         run: cargo run --quiet --locked --bin ym-glueball-blocking
 
+      - name: Phase 3C connected-correlator reference vectors
+        run: cargo run --quiet --locked --bin ym-glueball-correlator
+
       - name: All contract checks
         run: python3 scripts/check_all_contracts.py
 

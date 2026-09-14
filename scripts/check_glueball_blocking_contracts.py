@@ -9,7 +9,7 @@ from check_contracts import load, validate_exact
 
 EXPECTED_CONTRACT: dict[str, Any] = {
     "contract_id": "YM-GLUEBALL-SPATIAL-BLOCK-V1",
-    "status": "phase-3b2-candidate",
+    "status": "phase-3b2-frozen",
     "scope": "deterministic stride-2 spatial coarse-link blocking for finite periodic SU(3) lattices compatible with the frozen Phase 3A scalar operator surface",
     "depends_on": [
         {"contract_id": "YM-SU3-LATTICE-V1", "required_status": "phase-1b-frozen"},
@@ -84,7 +84,7 @@ EXPECTED_CONTRACT: dict[str, Any] = {
 EXPECTED_VECTORS: dict[str, Any] = {
     "contract_id": "YM-GLUEBALL-SPATIAL-BLOCK-V1",
     "vector_set": "GLUEBALL-SPATIAL-BLOCK-PHASE3B2-V1",
-    "status": "phase-3b2-candidate",
+    "status": "phase-3b2-frozen",
     "vectors": [
         {
             "id": "identity-6cubed-to-3cubed",
