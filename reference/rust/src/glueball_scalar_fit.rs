@@ -2,14 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-//! Phase 3E scalar plateau-window selection and correlated single-state fitting.
-//!
-//! This surface consumes a full connected correlator and delete-one-configuration
-//! jackknife correlator replicas. Candidate windows are declared by the caller
-//! before fitting. Plateau acceptance uses the frozen Phase 3D effective-mass
-//! transform and jackknife errors. The selected window is then fit to the
-//! periodic one-state form with the complete jackknife covariance matrix.
-//! This is bounded reference mechanics, not a physical glueball-mass result.
+//! Phase 3E scalar plateau-window selection and correlated one-state fitting.
 
 use core::fmt;
 
@@ -90,17 +83,33 @@ pub enum ScalarFitError {
 impl fmt::Display for ScalarFitError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let message = match self {
-            Self::EmptyCandidateWindows => "Phase 3E requires at least one predeclared candidate window",
-            Self::TooManyCandidateWindows => "Phase 3E candidate-window count exceeds the bounded reference limit",
-            Self::InvalidCandidateWindow => "Phase 3E candidate windows must be contiguous, bounded, and lie before the temporal midpoint",
+            Self::EmptyCandidateWindows => {
+                "Phase 3E requires at least one predeclared candidate window"
+            }
+            Self::TooManyCandidateWindows => {
+                "Phase 3E candidate-window count exceeds the bounded reference limit"
+            }
+            Self::InvalidCandidateWindow => {
+                "Phase 3E candidate windows must be bounded before the temporal midpoint"
+            }
             Self::DuplicateCandidateWindow => "Phase 3E candidate windows must be unique",
-            Self::DegeneratePlateauUncertainty => "Phase 3E plateau selection requires positive finite jackknife errors",
-            Self::NoAcceptedPlateauWindow => "Phase 3E no predeclared candidate passed the plateau criterion",
-            Self::InsufficientReplicatesForCovariance => "Phase 3E requires more jackknife replicas than fitted time points",
-            Self::CovarianceNotPositiveDefinite => "Phase 3E jackknife covariance must be positive definite",
+            Self::DegeneratePlateauUncertainty => {
+                "Phase 3E plateau selection requires positive finite jackknife errors"
+            }
+            Self::NoAcceptedPlateauWindow => {
+                "Phase 3E no predeclared candidate passed the plateau criterion"
+            }
+            Self::InsufficientReplicatesForCovariance => {
+                "Phase 3E requires more jackknife replicas than fitted time points"
+            }
+            Self::CovarianceNotPositiveDefinite => {
+                "Phase 3E jackknife covariance must be positive definite"
+            }
             Self::SingularCovariance => "Phase 3E jackknife covariance inversion failed closed",
             Self::NonFiniteStatistic => "Phase 3E fit statistic became non-finite",
-            Self::NoFiniteGridFit => "Phase 3E bounded profile grid produced no admissible finite fit",
+            Self::NoFiniteGridFit => {
+                "Phase 3E bounded profile grid produced no admissible finite fit"
+            }
             Self::AllocationFailed => "Phase 3E bounded allocation failed",
             Self::EffectiveMass(_) => "Phase 3E effective-mass plateau evaluation failed",
         };
@@ -116,6 +125,26 @@ impl From<EffectiveMassError> for ScalarFitError {
     }
 }
 
+fn zero_vec(len: usize) -> Result<Vec<f64>, ScalarFitError> {
+    let mut values = Vec::new();
+    values
+        .try_reserve_exact(len)
+        .map_err(|_| ScalarFitError::AllocationFailed)?;
+    values.resize(len, 0.0);
+    Ok(values)
+}
+
+fn zero_matrix(size: usize) -> Result<Vec<Vec<f64>>, ScalarFitError> {
+    let mut matrix = Vec::new();
+    matrix
+        .try_reserve_exact(size)
+        .map_err(|_| ScalarFitError::AllocationFailed)?;
+    for _ in 0..size {
+        matrix.push(zero_vec(size)?);
+    }
+    Ok(matrix)
+}
+
 fn validate_candidate_windows(
     time_extent: usize,
     candidates: &[FitWindow],
@@ -126,7 +155,6 @@ fn validate_candidate_windows(
     if candidates.len() > MAX_CANDIDATE_WINDOWS {
         return Err(ScalarFitError::TooManyCandidateWindows);
     }
-
     for (index, &candidate) in candidates.iter().enumerate() {
         let count = candidate
             .point_count()
@@ -150,8 +178,7 @@ fn window_lags(window: FitWindow) -> Result<Vec<usize>, ScalarFitError> {
         .point_count()
         .ok_or(ScalarFitError::InvalidCandidateWindow)?;
     let mut lags = Vec::new();
-    lags
-        .try_reserve_exact(count)
+    lags.try_reserve_exact(count)
         .map_err(|_| ScalarFitError::AllocationFailed)?;
     for tau in window.start..=window.end {
         lags.push(tau);
@@ -166,7 +193,6 @@ fn evaluate_plateau_window(
 ) -> Result<WindowSelection, ScalarFitError> {
     let lags = window_lags(window)?;
     let series = cosh_effective_mass_with_jackknife(full, jackknife, &lags)?;
-
     let mut weighted_sum = 0.0_f64;
     let mut weight_sum = 0.0_f64;
     for point in &series.points {
@@ -187,7 +213,6 @@ fn evaluate_plateau_window(
     if !weighted_effective_mass.is_finite() {
         return Err(ScalarFitError::NonFiniteStatistic);
     }
-
     let mut maximum_standardized_deviation = 0.0_f64;
     for point in &series.points {
         let z = ((point.full_estimate - weighted_effective_mass) / point.standard_error).abs();
@@ -196,7 +221,6 @@ fn evaluate_plateau_window(
         }
         maximum_standardized_deviation = maximum_standardized_deviation.max(z);
     }
-
     Ok(WindowSelection {
         window,
         weighted_effective_mass,
@@ -211,7 +235,6 @@ fn choose_plateau_window(
 ) -> Result<WindowSelection, ScalarFitError> {
     validate_candidate_windows(full.len(), candidates)?;
     let mut best: Option<WindowSelection> = None;
-
     for &candidate in candidates {
         let selection = match evaluate_plateau_window(full, jackknife, candidate) {
             Ok(value) => value,
@@ -232,15 +255,13 @@ fn choose_plateau_window(
                     .point_count()
                     .ok_or(ScalarFitError::InvalidCandidateWindow)?;
                 candidate_count > current_count
-                    || (candidate_count == current_count
-                        && candidate.start > current.window.start)
+                    || (candidate_count == current_count && candidate.start > current.window.start)
             }
         };
         if replace {
             best = Some(selection);
         }
     }
-
     best.ok_or(ScalarFitError::NoAcceptedPlateauWindow)
 }
 
@@ -254,35 +275,29 @@ fn jackknife_covariance(
     if jackknife.len() <= points {
         return Err(ScalarFitError::InsufficientReplicatesForCovariance);
     }
-
-    let mut means = vec![0.0_f64; points];
+    let mut means = zero_vec(points)?;
     for replica in jackknife {
         for (column, tau) in (window.start..=window.end).enumerate() {
-            let value = *replica.get(tau).ok_or(ScalarFitError::InvalidCandidateWindow)?;
+            let value = *replica
+                .get(tau)
+                .ok_or(ScalarFitError::InvalidCandidateWindow)?;
             if !value.is_finite() {
                 return Err(ScalarFitError::NonFiniteStatistic);
             }
             means[column] += value;
-            if !means[column].is_finite() {
-                return Err(ScalarFitError::NonFiniteStatistic);
-            }
         }
     }
     let n = jackknife.len() as f64;
     for mean in &mut means {
         *mean /= n;
     }
-
-    let mut covariance = vec![vec![0.0_f64; points]; points];
+    let mut covariance = zero_matrix(points)?;
     for replica in jackknife {
         for row in 0..points {
             let left = replica[window.start + row] - means[row];
             for column in 0..points {
                 let right = replica[window.start + column] - means[column];
                 covariance[row][column] += left * right;
-                if !covariance[row][column].is_finite() {
-                    return Err(ScalarFitError::NonFiniteStatistic);
-                }
             }
         }
     }
@@ -290,6 +305,9 @@ fn jackknife_covariance(
     for row in &mut covariance {
         for value in row {
             *value *= factor;
+            if !value.is_finite() {
+                return Err(ScalarFitError::NonFiniteStatistic);
+            }
         }
     }
     Ok(covariance)
@@ -308,8 +326,7 @@ fn validate_positive_definite(matrix: &[Vec<f64>]) -> Result<(), ScalarFitError>
     if !scale.is_finite() || scale <= 0.0 {
         return Err(ScalarFitError::CovarianceNotPositiveDefinite);
     }
-
-    let mut lower = vec![vec![0.0_f64; n]; n];
+    let mut lower = zero_matrix(n)?;
     for i in 0..n {
         for j in 0..=i {
             let mut sum = matrix[i][j];
@@ -328,9 +345,6 @@ fn validate_positive_definite(matrix: &[Vec<f64>]) -> Result<(), ScalarFitError>
                 }
                 lower[i][j] = sum / pivot;
             }
-            if !lower[i][j].is_finite() {
-                return Err(ScalarFitError::CovarianceNotPositiveDefinite);
-            }
         }
     }
     Ok(())
@@ -344,19 +358,21 @@ fn invert_matrix(matrix: &[Vec<f64>]) -> Result<Vec<Vec<f64>>, ScalarFitError> {
         .flatten()
         .map(|value| value.abs())
         .fold(0.0_f64, f64::max);
-    let mut augmented = vec![vec![0.0_f64; 2 * n]; n];
+    let mut augmented = Vec::new();
+    augmented
+        .try_reserve_exact(n)
+        .map_err(|_| ScalarFitError::AllocationFailed)?;
     for row in 0..n {
-        for column in 0..n {
-            augmented[row][column] = matrix[row][column];
-        }
-        augmented[row][n + row] = 1.0;
+        let mut values = zero_vec(2 * n)?;
+        values[..n].copy_from_slice(&matrix[row]);
+        values[n + row] = 1.0;
+        augmented.push(values);
     }
-
     for column in 0..n {
         let mut pivot_row = column;
         let mut pivot_abs = augmented[column][column].abs();
-        for row in (column + 1)..n {
-            let candidate = augmented[row][column].abs();
+        for (row, values) in augmented.iter().enumerate().skip(column + 1) {
+            let candidate = values[column].abs();
             if candidate > pivot_abs {
                 pivot_abs = candidate;
                 pivot_row = row;
@@ -368,23 +384,22 @@ fn invert_matrix(matrix: &[Vec<f64>]) -> Result<Vec<Vec<f64>>, ScalarFitError> {
         if pivot_row != column {
             augmented.swap(pivot_row, column);
         }
-
         let pivot = augmented[column][column];
-        for entry in &mut augmented[column] {
-            *entry /= pivot;
+        for value in &mut augmented[column] {
+            *value /= pivot;
         }
-        for row in 0..n {
+        let pivot_values = augmented[column].clone();
+        for (row, values) in augmented.iter_mut().enumerate() {
             if row == column {
                 continue;
             }
-            let factor = augmented[row][column];
+            let factor = values[column];
             for index in 0..(2 * n) {
-                augmented[row][index] -= factor * augmented[column][index];
+                values[index] -= factor * pivot_values[index];
             }
         }
     }
-
-    let mut inverse = vec![vec![0.0_f64; n]; n];
+    let mut inverse = zero_matrix(n)?;
     for row in 0..n {
         for column in 0..n {
             let value = augmented[row][n + column];
@@ -397,7 +412,11 @@ fn invert_matrix(matrix: &[Vec<f64>]) -> Result<Vec<Vec<f64>>, ScalarFitError> {
     Ok(inverse)
 }
 
-fn quadratic_form(left: &[f64], matrix: &[Vec<f64>], right: &[f64]) -> Result<f64, ScalarFitError> {
+fn quadratic_form(
+    left: &[f64],
+    matrix: &[Vec<f64>],
+    right: &[f64],
+) -> Result<f64, ScalarFitError> {
     if left.len() != matrix.len() || right.len() != matrix.len() {
         return Err(ScalarFitError::NonFiniteStatistic);
     }
@@ -415,7 +434,11 @@ fn quadratic_form(left: &[f64], matrix: &[Vec<f64>], right: &[f64]) -> Result<f6
     Ok(sum)
 }
 
-fn periodic_basis(time_extent: usize, window: FitWindow, mass: f64) -> Result<Vec<f64>, ScalarFitError> {
+fn periodic_basis(
+    time_extent: usize,
+    window: FitWindow,
+    mass: f64,
+) -> Result<Vec<f64>, ScalarFitError> {
     let points = window
         .point_count()
         .ok_or(ScalarFitError::InvalidCandidateWindow)?;
@@ -424,8 +447,7 @@ fn periodic_basis(time_extent: usize, window: FitWindow, mass: f64) -> Result<Ve
         .try_reserve_exact(points)
         .map_err(|_| ScalarFitError::AllocationFailed)?;
     for tau in window.start..=window.end {
-        let value = (-mass * tau as f64).exp()
-            + (-mass * (time_extent - tau) as f64).exp();
+        let value = (-mass * tau as f64).exp() + (-mass * (time_extent - tau) as f64).exp();
         if !value.is_finite() || value <= 0.0 {
             return Err(ScalarFitError::NonFiniteStatistic);
         }
@@ -453,7 +475,6 @@ fn profile_grid_fit(
     if values.len() != expected || values.iter().any(|value| !value.is_finite()) {
         return Err(ScalarFitError::NonFiniteStatistic);
     }
-
     let mut best: Option<ProfileFit> = None;
     for grid_index in 0..=MASS_GRID_STEPS {
         let mass = MASS_GRID_MIN + MASS_GRID_STEP * grid_index as f64;
@@ -462,21 +483,23 @@ fn profile_grid_fit(
         }
         let basis = periodic_basis(time_extent, window, mass)?;
         let denominator = quadratic_form(&basis, inverse_covariance, &basis)?;
-        if !denominator.is_finite() || denominator <= 0.0 {
+        if denominator <= 0.0 || !denominator.is_finite() {
             continue;
         }
         let numerator = quadratic_form(&basis, inverse_covariance, values)?;
         let amplitude = numerator / denominator;
-        if !amplitude.is_finite() || amplitude <= 0.0 {
+        if amplitude <= 0.0 || !amplitude.is_finite() {
             continue;
         }
-        let residual = values
-            .iter()
-            .zip(&basis)
-            .map(|(&value, &model)| value - amplitude * model)
-            .collect::<Vec<_>>();
+        let mut residual = Vec::new();
+        residual
+            .try_reserve_exact(expected)
+            .map_err(|_| ScalarFitError::AllocationFailed)?;
+        for (&value, &model) in values.iter().zip(&basis) {
+            residual.push(value - amplitude * model);
+        }
         let chi_square = quadratic_form(&residual, inverse_covariance, &residual)?;
-        if !chi_square.is_finite() || chi_square < 0.0 {
+        if chi_square < 0.0 || !chi_square.is_finite() {
             continue;
         }
         let candidate = ProfileFit {
@@ -507,7 +530,9 @@ fn window_values(values: &[f64], window: FitWindow) -> Result<Vec<f64>, ScalarFi
         .try_reserve_exact(points)
         .map_err(|_| ScalarFitError::AllocationFailed)?;
     for tau in window.start..=window.end {
-        let value = *values.get(tau).ok_or(ScalarFitError::InvalidCandidateWindow)?;
+        let value = *values
+            .get(tau)
+            .ok_or(ScalarFitError::InvalidCandidateWindow)?;
         if !value.is_finite() {
             return Err(ScalarFitError::NonFiniteStatistic);
         }
@@ -522,9 +547,6 @@ fn jackknife_standard_error(values: &[f64]) -> Result<(f64, f64), ScalarFitError
     }
     let n = values.len() as f64;
     let mean = values.iter().sum::<f64>() / n;
-    if !mean.is_finite() {
-        return Err(ScalarFitError::NonFiniteStatistic);
-    }
     let mut sum = 0.0_f64;
     for &value in values {
         let delta = value - mean;
@@ -532,16 +554,21 @@ fn jackknife_standard_error(values: &[f64]) -> Result<(f64, f64), ScalarFitError
     }
     let variance = ((n - 1.0) / n) * sum;
     let standard_error = variance.sqrt();
-    if !variance.is_finite() || variance < 0.0 || !standard_error.is_finite() {
+    if !mean.is_finite()
+        || !variance.is_finite()
+        || variance < 0.0
+        || !standard_error.is_finite()
+    {
         return Err(ScalarFitError::NonFiniteStatistic);
     }
     Ok((mean, standard_error))
 }
 
-fn maximum_off_diagonal_correlation(covariance: &[Vec<f64>]) -> Result<f64, ScalarFitError> {
-    let n = covariance.len();
+fn maximum_off_diagonal_correlation(
+    covariance: &[Vec<f64>],
+) -> Result<f64, ScalarFitError> {
     let mut maximum = 0.0_f64;
-    for row in 0..n {
+    for row in 0..covariance.len() {
         if covariance[row][row] <= 0.0 || !covariance[row][row].is_finite() {
             return Err(ScalarFitError::CovarianceNotPositiveDefinite);
         }
@@ -557,15 +584,6 @@ fn maximum_off_diagonal_correlation(covariance: &[Vec<f64>]) -> Result<f64, Scal
     Ok(maximum)
 }
 
-/// Select a predeclared effective-mass plateau window, then perform a correlated
-/// periodic one-state fit using the complete delete-one jackknife covariance.
-///
-/// Window selection is deterministic: among windows with
-/// `max |m_eff(t)-m_bar|/sigma(t) <= 2.5`, choose the largest point count; ties
-/// choose the later starting time. The fit uses
-/// `C(t)=A(exp(-m t)+exp(-m(N_t-t)))`, profiles `A` analytically for each mass,
-/// and scans the frozen `[0.05,2.0]` mass grid in steps of `0.001`. Jackknife
-/// parameter errors refit every replica using the same covariance authority.
 pub fn correlated_scalar_fit(
     full: &[f64],
     jackknife: &[Vec<f64>],
@@ -576,7 +594,6 @@ pub fn correlated_scalar_fit(
     let covariance = jackknife_covariance(jackknife, window)?;
     let inverse_covariance = invert_matrix(&covariance)?;
     let maximum_off_diagonal_correlation = maximum_off_diagonal_correlation(&covariance)?;
-
     let full_values = window_values(full, window)?;
     let full_fit = profile_grid_fit(full.len(), window, &full_values, &inverse_covariance)?;
 
@@ -594,10 +611,10 @@ pub fn correlated_scalar_fit(
         replica_masses.push(fit.mass);
         replica_amplitudes.push(fit.amplitude);
     }
-    let (mass_jackknife_mean, mass_standard_error) = jackknife_standard_error(&replica_masses)?;
+    let (mass_jackknife_mean, mass_standard_error) =
+        jackknife_standard_error(&replica_masses)?;
     let (amplitude_jackknife_mean, amplitude_standard_error) =
         jackknife_standard_error(&replica_amplitudes)?;
-
     let points = window
         .point_count()
         .ok_or(ScalarFitError::InvalidCandidateWindow)?;
@@ -606,7 +623,6 @@ pub fn correlated_scalar_fit(
     if !chi_square_per_dof.is_finite() {
         return Err(ScalarFitError::NonFiniteStatistic);
     }
-
     Ok(ScalarFitResult {
         time_extent: full.len(),
         jackknife_replicates: jackknife.len(),
@@ -637,10 +653,6 @@ const HADAMARD_8: [[f64; 8]; 8] = [
     [1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0],
 ];
 
-/// Synthetic covariance fixture for Phase 3E mechanics only. The full
-/// correlator is an exact `m=0.5`, `A=1` periodic one-state curve. Eight
-/// jackknife-shaped replicas apply balanced correlated perturbations at
-/// `tau=1..7`. They are not a Monte Carlo ensemble and are not physical data.
 pub fn canonical_scalar_fit_fixture(
 ) -> Result<(Vec<f64>, Vec<Vec<f64>>, Vec<FitWindow>), ScalarFitError> {
     let full = analytic_periodic_single_state(16, 0.5, 1.0)?;
@@ -660,11 +672,13 @@ pub fn canonical_scalar_fit_fixture(
         }
         jackknife.push(replica);
     }
-    let candidates = vec![
-        FitWindow { start: 1, end: 3 },
-        FitWindow { start: 2, end: 5 },
-        FitWindow { start: 3, end: 6 },
-    ];
+    let mut candidates = Vec::new();
+    candidates
+        .try_reserve_exact(3)
+        .map_err(|_| ScalarFitError::AllocationFailed)?;
+    candidates.push(FitWindow { start: 1, end: 3 });
+    candidates.push(FitWindow { start: 2, end: 5 });
+    candidates.push(FitWindow { start: 3, end: 6 });
     Ok((full, jackknife, candidates))
 }
 
@@ -699,7 +713,11 @@ mod tests {
         let (full, jackknife, candidates) = canonical_scalar_fit_fixture().unwrap();
         let result = correlated_scalar_fit(&full, &jackknife, &candidates).unwrap();
         assert_eq!(result.selected_window, FitWindow { start: 3, end: 6 });
-        assert_close(result.plateau_weighted_effective_mass, 0.5, ANALYTIC_REPLAY_TOLERANCE);
+        assert_close(
+            result.plateau_weighted_effective_mass,
+            0.5,
+            ANALYTIC_REPLAY_TOLERANCE,
+        );
         assert!(result.plateau_maximum_z <= 1.0e-10);
         assert_close(result.fitted_mass, 0.5, 1.0e-15);
         assert_close(result.fitted_amplitude, 1.0, ANALYTIC_REPLAY_TOLERANCE);
@@ -730,7 +748,10 @@ mod tests {
         ] {
             assert!(correlated_scalar_fit(&full, &jackknife, &candidates).is_err());
         }
-        let duplicate = [FitWindow { start: 2, end: 5 }, FitWindow { start: 2, end: 5 }];
+        let duplicate = [
+            FitWindow { start: 2, end: 5 },
+            FitWindow { start: 2, end: 5 },
+        ];
         assert_eq!(
             correlated_scalar_fit(&full, &jackknife, &duplicate).unwrap_err(),
             ScalarFitError::DuplicateCandidateWindow
