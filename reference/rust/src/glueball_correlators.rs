@@ -15,7 +15,7 @@ use crate::glueball_operators::{scalar_a1pp_operator_basis, GlueballOperatorErro
 use crate::su3_lattice::{traceless_cycle_link, Su3Lattice4, Su3LatticeError};
 
 pub const CORRELATOR_CONTRACT_ID: &str = "YM-GLUEBALL-CONNECTED-CORRELATOR-V1";
-pub const CORRELATOR_STATUS: &str = "phase-3c-candidate";
+pub const CORRELATOR_STATUS: &str = "phase-3c-frozen";
 pub const MAX_CONFIGURATIONS: usize = 64;
 pub const MAX_TIME_EXTENT: usize = 64;
 pub const GAUGE_INVARIANCE_TOLERANCE: f64 = 5.0e-11;
@@ -343,7 +343,7 @@ mod tests {
             CORRELATOR_CONTRACT_ID,
             "YM-GLUEBALL-CONNECTED-CORRELATOR-V1"
         );
-        assert_eq!(CORRELATOR_STATUS, "phase-3c-candidate");
+        assert_eq!(CORRELATOR_STATUS, "phase-3c-frozen");
         assert_eq!(MAX_CONFIGURATIONS, 64);
         assert_eq!(MAX_TIME_EXTENT, 64);
         assert_eq!(GAUGE_INVARIANCE_TOLERANCE, 5.0e-11);
