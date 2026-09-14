@@ -27,9 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .max((result.mass_jackknife_mean - 0.5).abs())
         .max((result.mass_standard_error - 0.005916079783099616).abs())
         .max((result.maximum_off_diagonal_correlation - 1.0 / 17.0).abs());
-    if !maximum_replay_residual.is_finite()
-        || maximum_replay_residual > ANALYTIC_REPLAY_TOLERANCE
-    {
+    if !maximum_replay_residual.is_finite() || maximum_replay_residual > ANALYTIC_REPLAY_TOLERANCE {
         return Err("Phase 3E analytic correlated-fit regression mismatch".into());
     }
 
@@ -51,10 +49,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("chi_square={:.17e}", result.chi_square);
     println!("degrees_of_freedom={}", result.degrees_of_freedom);
     println!("chi_square_per_dof={:.17e}", result.chi_square_per_dof);
-    println!(
-        "mass_jackknife_mean={:.17e}",
-        result.mass_jackknife_mean
-    );
+    println!("mass_jackknife_mean={:.17e}", result.mass_jackknife_mean);
     println!("mass_standard_error={:.17e}", result.mass_standard_error);
     println!(
         "amplitude_jackknife_mean={:.17e}",
