@@ -29,9 +29,7 @@ mod su3_ensemble;
 #[path = "../su3_lattice.rs"]
 mod su3_lattice;
 
-use glueball_scalar_production::{
-    OperatorKind, CANDIDATE_WINDOWS, STABILITY_MAX_Z, STOUT_LEVELS,
-};
+use glueball_scalar_production::{OperatorKind, CANDIDATE_WINDOWS, STABILITY_MAX_Z, STOUT_LEVELS};
 use glueball_scalar_recovery::{
     run_scalar_recovery_analysis, BETA, CHAIN_COUNT, EXPECTED_TOTAL_PROPOSALS, EXTENTS,
     MASTER_SEED, PHASE3F_CHAIN_COUNT, PHASE3F_MASTER_SEED, POST_THERMALIZATION_SWEEPS,
