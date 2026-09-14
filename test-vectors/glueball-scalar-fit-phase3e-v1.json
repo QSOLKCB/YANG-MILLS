@@ -1,0 +1,90 @@
+{
+  "contract_id": "YM-GLUEBALL-SCALAR-FIT-V1",
+  "vector_set": "GLUEBALL-SCALAR-FIT-PHASE3E-V1",
+  "status": "phase-3e-candidate",
+  "vectors": [
+    {
+      "id": "canonical-correlated-single-state-fit",
+      "time_extent": 16,
+      "full_mass": 0.5,
+      "full_amplitude": 1.0,
+      "jackknife_replicates": 8,
+      "candidate_windows": [[1, 3], [2, 5], [3, 6]],
+      "expected_selected_window": [3, 6],
+      "expected_plateau_weighted_effective_mass": 0.5,
+      "expected_fitted_mass": 0.5,
+      "expected_fitted_amplitude": 1.0,
+      "expected_chi_square": 0.0,
+      "expected_degrees_of_freedom": 2,
+      "absolute_tolerance": 2e-10,
+      "claim_class": "C1"
+    },
+    {
+      "id": "correlated-covariance-not-diagonal",
+      "selected_window": [3, 6],
+      "expected_maximum_off_diagonal_correlation": 0.058823529411764705,
+      "diagonal_only_fallback": false,
+      "absolute_tolerance": 2e-10,
+      "claim_class": "C1"
+    },
+    {
+      "id": "jackknife-parameter-refit",
+      "replica_mass_grid_results": [0.5, 0.498, 0.5, 0.504, 0.503, 0.499, 0.497, 0.499],
+      "expected_mass_jackknife_mean": 0.5,
+      "expected_mass_standard_error": 0.005916079783099616,
+      "amplitude_standard_error_must_be_positive": true,
+      "standard_error_formula": "sqrt((N-1)/N*sum_i (theta_i-theta_bar)^2)",
+      "absolute_tolerance": 2e-10,
+      "claim_class": "C1"
+    },
+    {
+      "id": "window-tie-prefers-later-start",
+      "passing_equal_length_windows": [[2, 5], [3, 6]],
+      "expected_selected_window": [3, 6],
+      "claim_class": "C1"
+    },
+    {
+      "id": "duplicate-window-rejected",
+      "candidate_windows": [[2, 5], [2, 5]],
+      "expected": "DuplicateCandidateWindow",
+      "claim_class": "C0"
+    },
+    {
+      "id": "midpoint-window-rejected",
+      "time_extent": 16,
+      "candidate_window": [3, 8],
+      "expected": "InvalidCandidateWindow",
+      "claim_class": "C0"
+    },
+    {
+      "id": "insufficient-covariance-rank-rejected",
+      "selected_window_points": 4,
+      "jackknife_replicates": 4,
+      "expected": "InsufficientReplicatesForCovariance",
+      "claim_class": "C0"
+    },
+    {
+      "id": "singular-covariance-rejected",
+      "configuration": "eight identical jackknife correlators",
+      "expected": "CovarianceNotPositiveDefinite",
+      "claim_class": "C0"
+    },
+    {
+      "id": "claim-boundary",
+      "canonical_fixture_is_physical_ensemble": false,
+      "fit_window_selected": true,
+      "full_jackknife_covariance_used": true,
+      "correlated_single_state_fit_performed": true,
+      "production_ensemble_analyzed": false,
+      "physical_glueball_mass_reported": false,
+      "scalar_pipeline_fully_validated": false,
+      "variational_gevp_solved": false,
+      "finite_volume_mass_gap_established": false,
+      "confinement_established": false,
+      "continuum_qft_constructed": false,
+      "positive_continuum_mass_gap_proved": false,
+      "clay_solution_claimed": false,
+      "claim_class": "C0"
+    }
+  ]
+}
