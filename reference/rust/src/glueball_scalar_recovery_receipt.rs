@@ -13,7 +13,7 @@ use crate::glueball_scalar_production::{
     MIN_ACCEPTANCE,
 };
 use crate::glueball_scalar_recovery::{CHAIN_COUNT, MASTER_SEED};
-use crate::su3_ensemble::derive_su3_chain_seed;
+use crate::su3_ensemble::{derive_su3_chain_seed, LINK_RESIDUAL_LIMIT};
 
 pub const OBSERVATION_HEAD: &str = "65dacc9f03cb0fd74826cd211ee7bd586668e08a";
 pub const OBSERVATION_WORKFLOW_RUN_ID: u64 = 34_875_522_823;
@@ -55,6 +55,11 @@ fn retained_chain_identity_matches(evidence: &[ChainEvidence]) -> bool {
                 && chain.accepts <= chain.proposals
                 && (MIN_ACCEPTANCE..=MAX_ACCEPTANCE).contains(&expected_acceptance)
                 && chain.acceptance.to_bits() == expected_acceptance.to_bits()
+                && chain.plaquette.is_finite()
+                && chain.unitarity_residual.is_finite()
+                && chain.determinant_residual.is_finite()
+                && chain.unitarity_residual <= LINK_RESIDUAL_LIMIT
+                && chain.determinant_residual <= LINK_RESIDUAL_LIMIT
         })
 }
 
@@ -190,6 +195,29 @@ mod tests {
         let mut summary = pinned_summary();
         summary.chain_evidence[9].accepts = EXPECTED_PROPOSALS_PER_CHAIN;
         summary.chain_evidence[9].acceptance = 1.0;
+        assert!(!observed_phase3g_receipt_matches(&summary));
+    }
+
+    #[test]
+    fn pinned_receipt_rechecks_finite_statistics_and_group_residuals() {
+        let mut summary = pinned_summary();
+        summary.chain_evidence[2].plaquette = f64::NAN;
+        assert!(!observed_phase3g_receipt_matches(&summary));
+
+        let mut summary = pinned_summary();
+        summary.chain_evidence[6].unitarity_residual = f64::NAN;
+        assert!(!observed_phase3g_receipt_matches(&summary));
+
+        let mut summary = pinned_summary();
+        summary.chain_evidence[10].determinant_residual = f64::INFINITY;
+        assert!(!observed_phase3g_receipt_matches(&summary));
+
+        let mut summary = pinned_summary();
+        summary.chain_evidence[14].unitarity_residual = LINK_RESIDUAL_LIMIT * 2.0;
+        assert!(!observed_phase3g_receipt_matches(&summary));
+
+        let mut summary = pinned_summary();
+        summary.chain_evidence[18].determinant_residual = LINK_RESIDUAL_LIMIT * 2.0;
         assert!(!observed_phase3g_receipt_matches(&summary));
     }
 }
