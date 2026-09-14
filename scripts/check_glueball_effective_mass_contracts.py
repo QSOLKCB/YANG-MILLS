@@ -9,7 +9,7 @@ from check_contracts import load, validate_exact
 
 EXPECTED_CONTRACT: dict[str, Any] = {
     "contract_id": "YM-GLUEBALL-EFFECTIVE-MASS-V1",
-    "status": "phase-3d-candidate",
+    "status": "phase-3d-frozen",
     "scope": "bounded scalar A1++ periodic cosh effective-mass estimator with delete-one-configuration jackknife uncertainty propagation",
     "depends_on": [
         {
@@ -100,7 +100,7 @@ EXPECTED_CONTRACT: dict[str, Any] = {
 EXPECTED_VECTORS: dict[str, Any] = {
     "contract_id": "YM-GLUEBALL-EFFECTIVE-MASS-V1",
     "vector_set": "GLUEBALL-EFFECTIVE-MASS-PHASE3D-V1",
-    "status": "phase-3d-candidate",
+    "status": "phase-3d-frozen",
     "vectors": [
         {
             "id": "periodic-single-state-cosh-mass",
