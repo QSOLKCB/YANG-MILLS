@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+use yang_mills_reference::{Lattice4, ReferenceError, Su2, DIM};
+
 #[path = "../glueball_correlators.rs"]
 mod glueball_correlators;
 #[path = "../glueball_effective_mass.rs"]
@@ -14,6 +16,8 @@ mod glueball_scalar_fit;
 mod glueball_scalar_production;
 #[path = "../glueball_smearing.rs"]
 mod glueball_smearing;
+#[path = "../path_holonomy.rs"]
+mod path_holonomy;
 #[path = "../su2_ensemble.rs"]
 mod su2_ensemble;
 #[path = "../su3.rs"]
