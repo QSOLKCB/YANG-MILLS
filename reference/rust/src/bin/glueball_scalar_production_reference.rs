@@ -44,7 +44,10 @@ fn print_optional(label: &str, value: Option<f64>) {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let summary = run_production_scalar_analysis()?;
     if !observed_phase3f_receipt_matches(&summary) {
-        return Err("Phase 3F deterministic production receipt drifted from the pinned historical evidence".into());
+        return Err(
+            "Phase 3F deterministic production receipt drifted from the pinned historical evidence"
+                .into(),
+        );
     }
 
     println!("contract={PRODUCTION_CONTRACT_ID}");
