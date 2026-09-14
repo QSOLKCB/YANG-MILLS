@@ -1,0 +1,88 @@
+{
+  "contract_id": "YM-GLUEBALL-CONNECTED-CORRELATOR-V1",
+  "vector_set": "GLUEBALL-CONNECTED-CORRELATOR-PHASE3C-V1",
+  "status": "phase-3c-candidate",
+  "vectors": [
+    {
+      "id": "identity-connected-zero",
+      "configuration_count": 2,
+      "extents": [3, 3, 3, 4],
+      "configuration": "all links identity",
+      "expected": {
+        "plaquette_vacuum_mean": 1.0,
+        "rectangle_vacuum_mean": 1.0,
+        "plaquette_raw": [1.0, 1.0, 1.0, 1.0],
+        "rectangle_raw": [1.0, 1.0, 1.0, 1.0],
+        "plaquette_connected": [0.0, 0.0, 0.0, 0.0],
+        "rectangle_connected": [0.0, 0.0, 0.0, 0.0]
+      },
+      "tolerance": 0.0,
+      "claim_class": "C1"
+    },
+    {
+      "id": "shifted-defect-analytic-correlators",
+      "configuration_count": 4,
+      "extents": [3, 3, 3, 4],
+      "configuration": "configuration c has one traceless-cycle spatial link at [0,0,0,c] in direction 0",
+      "expected": {
+        "plaquette_vacuum_mean": 0.9876543209876543,
+        "rectangle_vacuum_mean": 0.9814814814814815,
+        "plaquette_raw": [0.9759183051364121, 0.9753086419753086, 0.9753086419753086, 0.9753086419753086],
+        "rectangle_raw": [0.9643347050754458, 0.9629629629629629, 0.9629629629629629, 0.9629629629629629],
+        "plaquette_connected": [0.0004572473708276177, -0.00015241579027587258, -0.00015241579027587258, -0.00015241579027587258],
+        "rectangle_connected": [0.00102880658436214, -0.0003429355281207133, -0.0003429355281207133, -0.0003429355281207133]
+      },
+      "absolute_tolerance": 2e-12,
+      "claim_class": "C2"
+    },
+    {
+      "id": "deterministic-gauge-invariance",
+      "configuration_count": 4,
+      "extents": [3, 3, 3, 4],
+      "configuration": "shifted-defect analytic fixture",
+      "gauge_field": "deterministic_su3_site_gauge applied independently to every configuration",
+      "observable": "maximum residual across vacuum means, raw correlators, and connected correlators",
+      "expected_max": 5e-11,
+      "claim_class": "C2"
+    },
+    {
+      "id": "empty-configuration-set-rejected",
+      "configuration_count": 0,
+      "expected": "EmptyConfigurationSet",
+      "claim_class": "C0"
+    },
+    {
+      "id": "mixed-lattice-extents-rejected",
+      "extents": [[3, 3, 3, 4], [4, 4, 4, 4]],
+      "expected": "LatticeExtentsMismatch",
+      "claim_class": "C0"
+    },
+    {
+      "id": "configuration-limit-rejected",
+      "configuration_count": 65,
+      "expected": "TooManyConfigurations",
+      "claim_class": "C0"
+    },
+    {
+      "id": "time-extent-limit-rejected",
+      "configuration_count": 1,
+      "extents": [3, 3, 3, 65],
+      "expected": "TimeExtentTooLarge",
+      "claim_class": "C0"
+    },
+    {
+      "id": "claim-boundary",
+      "canonical_fixture_is_physical_ensemble": false,
+      "vacuum_subtraction_defined": true,
+      "connected_correlator_constructed": true,
+      "uncertainty_estimated": false,
+      "effective_mass_extracted": false,
+      "fit_window_selected": false,
+      "glueball_spectrum_extracted": false,
+      "finite_volume_mass_gap_established": false,
+      "positive_continuum_mass_gap_proved": false,
+      "clay_solution_claimed": false,
+      "claim_class": "C0"
+    }
+  ]
+}
