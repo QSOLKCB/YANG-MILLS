@@ -25,8 +25,8 @@ def main() -> None:
     vectors = load("test-vectors/glueball-spatial-block-phase3b2-v1.json")
 
     broken = copy.deepcopy(contract)
-    broken["status"] = "phase-3b2-frozen"
-    expect_reject(validate_contract, broken, "candidate status silently promoted")
+    broken["status"] = "phase-3b2-candidate"
+    expect_reject(validate_contract, broken, "frozen status silently reopened")
 
     broken = copy.deepcopy(contract)
     broken["geometry"]["block_factor"] = 3
