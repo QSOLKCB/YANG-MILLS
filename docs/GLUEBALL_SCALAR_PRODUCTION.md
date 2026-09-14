@@ -2,18 +2,18 @@
 
 Phase 3F is the first Phase 3 surface that executes the frozen scalar spectroscopy pipeline on **production Monte Carlo configurations** rather than an analytic mechanics fixture.
 
-The candidate authority is:
+The frozen authority is:
 
 ```text
 YM-GLUEBALL-SCALAR-PRODUCTION-V1
-status = phase-3f-candidate
+status = phase-3f-frozen
 ```
 
 Its evidence class is a **finite-lattice production numerical observation**. That is materially stronger evidence than the synthetic mechanics fixtures used to validate Phases 3C–3E, but it is still not a continuum glueball mass, a confinement theorem, a construction of continuum quantum Yang–Mills theory, or a proof of a positive mass gap.
 
 ## Predeclaration discipline
 
-The production schedule, stream identity, analysis windows, transformations, operators, and stability thresholds are machine-readable and frozen before the first production observation is inspected. If a scientific gate fails, the result must be retained. Thresholds may not be weakened and seeds may not be replaced after seeing the outcome under the same contract identifier.
+The production schedule, stream identity, analysis windows, transformations, operators, and stability thresholds were machine-readable and frozen before the first production observation was inspected. When the scientific gate failed, the result was retained. Thresholds were not weakened and seeds were not replaced after seeing the outcome under the same contract identifier.
 
 A fresh stream or incompatible analysis semantics require a new contract identifier.
 
@@ -28,7 +28,7 @@ rng      = SPLITMIX64-V1
 stream   = YM-SU3-STREAM-V1
 ```
 
-The predeclared schedule is:
+The frozen schedule is:
 
 ```text
 lattice                     = 4 x 4 x 4 x 10
@@ -74,7 +74,7 @@ For each delete-one replica, the omitted unit is **one retained independent-chai
 
 ## Frozen Phase 3E fit
 
-Phase 3F uses the frozen `YM-GLUEBALL-SCALAR-FIT-V1` mechanics without changing them. Candidate windows are predeclared as:
+Phase 3F uses the frozen `YM-GLUEBALL-SCALAR-FIT-V1` mechanics without changing them. Candidate windows are frozen as:
 
 ```text
 [1,3]
@@ -99,7 +99,7 @@ Successful finite-lattice mass fits are compared with
 z = |m_a - m_b| / sqrt(sigma_a^2 + sigma_b^2).
 ```
 
-The predeclared stability gate is `z <= 5`.
+The frozen stability gate is `z <= 5`.
 
 Three stability surfaces are evaluated:
 
@@ -140,7 +140,15 @@ finite_volume_mass_gap_established      = false
 
 This is a **retained negative scientific result**, not an implementation failure. The Phase 3F workflow itself passed because the predeclared experiment executed correctly and reported the negative spectroscopy outcome without weakening any gate.
 
-Phase 3F must not be “repaired” by changing these seeds, windows, thresholds, or transformation choices under the same identifier. Any follow-up experiment must use a separately versioned, predeclared authority and should address the observed effective-mass rejection directly — for example with stronger independently predeclared ensemble evidence and/or a geometry/operator surface designed before inspection to improve the signal while preserving the existing Phase 3F record.
+Phase 3F may not be “repaired” by changing these seeds, windows, thresholds, or transformation choices under the same identifier. Its machine-readable receipt and deterministic replay guard preserve the historical outcome.
+
+## Phase 3G handoff
+
+PR #18 introduces the separately versioned `YM-GLUEBALL-SCALAR-RECOVERY-V1` authority to test the narrow hypothesis that the Phase 3F rejection was primarily an independent-statistics limitation.
+
+Phase 3G kept the complete Phase 3F geometry and analysis semantics fixed, changed to fresh master seed `0x3f01202609150001`, and doubled the independent chain count from 16 to 32. Its first predeclared observation on source head `65dacc9f03cb0fd74826cd211ee7bd586668e08a` also produced six `effective-mass-rejected` surfaces with `scalar_pipeline_validated=false` while sampler diagnostics passed.
+
+Therefore simply doubling the independent retained configuration count was not sufficient on this fixed surface. The next recovery experiment should change geometry and/or operator overlap under another new predeclared contract rather than reopening Phase 3F or repeatedly escalating chain count.
 
 ## Scientific outcome versus CI correctness
 
@@ -167,4 +175,4 @@ Phase 3F does not by itself establish:
 - a positive continuum Yang–Mills mass gap;
 - a Clay Millennium Problem solution.
 
-Because the first Phase 3F production gate is negative, the next scientific phase should **not** advance immediately to additional irreducible channels. It should open a separately versioned, independently predeclared scalar confirmation/recovery experiment that addresses the effective-mass rejection while preserving Phase 3F unchanged as evidence.
+Phase 3F remains frozen negative evidence. Later scalar recovery work must use separately versioned authorities.
