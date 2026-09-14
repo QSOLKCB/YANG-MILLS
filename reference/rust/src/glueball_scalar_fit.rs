@@ -11,7 +11,7 @@ use crate::glueball_effective_mass::{
 };
 
 pub const SCALAR_FIT_CONTRACT_ID: &str = "YM-GLUEBALL-SCALAR-FIT-V1";
-pub const SCALAR_FIT_STATUS: &str = "phase-3e-candidate";
+pub const SCALAR_FIT_STATUS: &str = "phase-3e-frozen";
 pub const MIN_WINDOW_POINTS: usize = 3;
 pub const MAX_WINDOW_POINTS: usize = 8;
 pub const MAX_CANDIDATE_WINDOWS: usize = 16;
@@ -704,7 +704,7 @@ mod tests {
     #[test]
     fn phase3e_identity_is_frozen() {
         assert_eq!(SCALAR_FIT_CONTRACT_ID, "YM-GLUEBALL-SCALAR-FIT-V1");
-        assert_eq!(SCALAR_FIT_STATUS, "phase-3e-candidate");
+        assert_eq!(SCALAR_FIT_STATUS, "phase-3e-frozen");
         assert_eq!(MIN_WINDOW_POINTS, 3);
         assert_eq!(MAX_WINDOW_POINTS, 8);
         assert_eq!(MAX_CANDIDATE_WINDOWS, 16);

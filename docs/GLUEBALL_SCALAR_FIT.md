@@ -1,17 +1,19 @@
 # Phase 3E — scalar plateau selection and correlated one-state fitting
 
-Phase 3E adds the next separately versioned scalar spectroscopy-analysis surface after frozen Phase 3D effective-mass mechanics.
+Phase 3E is the frozen scalar spectroscopy-analysis mechanics authority after Phase 3D effective-mass mechanics. PR #16 merged this surface without changing its mathematical/statistical semantics during the lifecycle handoff.
 
-The candidate authority is:
+The frozen authority is:
 
 ```text
 YM-GLUEBALL-SCALAR-FIT-V1
-status = phase-3e-candidate
+status = phase-3e-frozen
 ```
+
+The candidate→frozen transition is classified as **implementation-only lifecycle/provenance**. Window-selection, covariance, spectral-fit, uncertainty, canonical-fixture, and claim semantics are unchanged.
 
 It is deliberately limited to **predeclared plateau-window selection plus correlated periodic one-state fitting** for the finite-lattice scalar `A1++` channel, whose continuum target is `0++`.
 
-This phase does **not** analyze a production Monte Carlo glueball ensemble, establish a physical glueball mass, validate operator-basis stability, solve a GEVP, establish a finite-volume mass gap, establish confinement, construct continuum quantum Yang–Mills theory, or prove a positive continuum mass gap.
+Phase 3E itself does **not** analyze a production Monte Carlo glueball ensemble, establish a physical glueball mass, validate operator-basis stability, solve a GEVP, establish a finite-volume mass gap, establish confinement, construct continuum quantum Yang–Mills theory, or prove a positive continuum mass gap. Production scalar evidence is owned by the separately versioned Phase 3F authority.
 
 ## 1. Predeclared candidate windows
 
@@ -205,4 +207,4 @@ Phase 3E does **not** establish:
 - a positive continuum mass gap;
 - a Clay Millennium Problem solution.
 
-The next scalar authority should apply the frozen mechanics to **sealed production ensemble evidence with explicit fit-window and operator/transformation stability scans** before Phase 3 expands to additional channels.
+Phase 3F is the separately versioned authority that applies these frozen mechanics to **predeclared production ensemble evidence with fit-window and operator/transformation stability scans**.

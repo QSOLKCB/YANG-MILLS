@@ -75,6 +75,9 @@ jobs:
       - name: Phase 3E scalar correlated-fit reference vectors
         run: cargo run --quiet --locked --bin ym-glueball-scalar-fit
 
+      - name: Phase 3F production scalar evidence
+        run: cargo run --release --quiet --locked --bin ym-glueball-scalar-production
+
       - name: All contract checks
         run: python3 scripts/check_all_contracts.py
 

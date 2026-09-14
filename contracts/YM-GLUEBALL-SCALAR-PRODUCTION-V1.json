@@ -1,0 +1,137 @@
+{
+  "contract_id": "YM-GLUEBALL-SCALAR-PRODUCTION-V1",
+  "status": "phase-3f-candidate",
+  "scope": "bounded finite-lattice scalar A1++ production ensemble evidence with predeclared fit-window, operator, and stout-transformation stability scans",
+  "depends_on": [
+    {
+      "contract_id": "YM-SU3-ENSEMBLE-V1",
+      "required_status": "phase-2c1-frozen"
+    },
+    {
+      "contract_id": "YM-SU3-PLAQUETTE-BASELINE-V2",
+      "required_status": "phase-2c2-frozen"
+    },
+    {
+      "contract_id": "YM-GLUEBALL-CONNECTED-CORRELATOR-V1",
+      "required_status": "phase-3c-frozen"
+    },
+    {
+      "contract_id": "YM-GLUEBALL-EFFECTIVE-MASS-V1",
+      "required_status": "phase-3d-frozen"
+    },
+    {
+      "contract_id": "YM-GLUEBALL-SCALAR-FIT-V1",
+      "required_status": "phase-3e-frozen"
+    }
+  ],
+  "change_discipline": {
+    "predeclared_before_production_run": true,
+    "failed_scientific_gate_must_be_preserved": true,
+    "thresholds_may_not_be_weakened_after_observation": true,
+    "fresh_stream_or_semantic_change_requires_new_contract_identifier": true,
+    "review_hardening_classification": "implementation-only fail-closed enforcement; production schedule, scientific thresholds, and observed receipt unchanged"
+  },
+  "evidence_class": {
+    "classification": "finite-lattice production numerical observation",
+    "production_monte_carlo_configurations": true,
+    "physical_glueball_mass_claimed": false,
+    "continuum_inference_claimed": false
+  },
+  "ensemble": {
+    "sampler_id": "YM-SU3-ENSEMBLE-V1",
+    "proposal_id": "YM-SU3-GENERATOR-METROPOLIS-V1",
+    "rng_id": "SPLITMIX64-V1",
+    "stream_id": "YM-SU3-STREAM-V1",
+    "extents": [4, 4, 4, 10],
+    "beta": 5.7,
+    "master_seed_hex": "0x3f00202609150001",
+    "independent_chain_count": 16,
+    "chain_ids": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+    "cold_start_each_chain": true,
+    "thermalization_sweeps": 64,
+    "post_thermalization_sweeps": 4,
+    "total_sweeps_per_chain": 68,
+    "proposal_angle": 0.35,
+    "retained_configurations_per_chain": 1,
+    "sequential_configurations_pooled_within_chain": false,
+    "expected_proposals_per_chain": 1392640,
+    "minimum_acceptance": 0.1,
+    "maximum_acceptance": 0.95,
+    "maximum_link_unitarity_residual": 5e-12,
+    "maximum_link_determinant_residual": 5e-12,
+    "group_residual_violation_is_implementation_failure": true
+  },
+  "operator_and_transform_scan": {
+    "operators": ["plaquette-1x1", "rectangle-2x1"],
+    "transformations": [
+      {"id": "raw", "stout_rho": null, "stout_levels": 0},
+      {"id": "stout-1", "stout_rho": 0.1, "stout_levels": 1},
+      {"id": "stout-2", "stout_rho": 0.1, "stout_levels": 2}
+    ],
+    "blocking_scan_defined": false,
+    "blocking_exclusion_reason": "the predeclared 4^3 spatial production geometry is below the frozen stride-2 blocking minimum fine extent of 6"
+  },
+  "correlator": {
+    "authority": "YM-GLUEBALL-CONNECTED-CORRELATOR-V1",
+    "full_sample_vacuum_subtraction_recomputed": true,
+    "delete_one_configuration_vacuum_subtraction_recomputed_per_replica": true,
+    "independent_chain_configuration_is_jackknife_unit": true,
+    "full_sample_replay_against_phase3c_absolute_tolerance": 2e-12
+  },
+  "fit": {
+    "authority": "YM-GLUEBALL-SCALAR-FIT-V1",
+    "candidate_windows": [[1, 3], [2, 4], [1, 4]],
+    "candidates_declared_before_observation": true,
+    "primary_surface": {"transformation": "stout-2", "operator": "plaquette-1x1"},
+    "data_admissibility_fit_rejection_is_recorded_evidence": true,
+    "data_admissibility_fit_rejection_is_not_implementation_failure": true,
+    "computational_fit_failure_is_implementation_failure": true
+  },
+  "stability": {
+    "maximum_pairwise_mass_z": 5.0,
+    "pairwise_scale": "sqrt(sigma_a^2+sigma_b^2)",
+    "all_successful_fit_pairs_must_be_scorable": true,
+    "fit_window_scan": {
+      "primary_surface_only": true,
+      "minimum_successful_windows": 2,
+      "maximum_pairwise_z": 5.0
+    },
+    "operator_scan": {
+      "transformation": "stout-2",
+      "operators": ["plaquette-1x1", "rectangle-2x1"],
+      "both_fits_required_for_validation": true,
+      "maximum_pairwise_z": 5.0
+    },
+    "transformation_scan": {
+      "operator": "plaquette-1x1",
+      "transformations": ["raw", "stout-1", "stout-2"],
+      "minimum_successful_transformations": 2,
+      "maximum_pairwise_z": 5.0
+    }
+  },
+  "scientific_gate": {
+    "sampler_diagnostics_must_pass": true,
+    "primary_surface_fit_must_succeed": true,
+    "fit_window_stability_must_pass": true,
+    "operator_stability_must_pass": true,
+    "transformation_stability_must_pass": true,
+    "scientific_gate_failure_causes_ci_failure": false,
+    "scientific_gate_failure_must_be_reported": true
+  },
+  "future_surfaces": {
+    "blocked_operator_stability_scan_defined": false,
+    "larger_volume_scalar_confirmation_defined": false,
+    "tensor_2pp_channel_defined": false,
+    "pseudoscalar_0mp_channel_defined": false,
+    "finite_volume_spectrum_extracted": false
+  },
+  "claim_boundary": {
+    "production_numerical_observation_is_physical_glueball_mass": false,
+    "scalar_pipeline_validation_is_continuum_mass_gap": false,
+    "finite_volume_mass_gap_established": false,
+    "confinement_established": false,
+    "continuum_qft_constructed": false,
+    "positive_continuum_mass_gap_proved": false,
+    "clay_solution_claimed": false
+  }
+}

@@ -178,7 +178,7 @@ Phase 2 separates sampler mechanics from external finite-lattice validation so n
 - [x] Record thermalisation, checked total sweep count, measurement cadence, update order, and chain identity.
 - [x] Retain raw average-plaquette measurements in the reference chain report.
 - [x] Measure a versioned autocorrelation sequence, integrated autocorrelation time, effective sample size, and diagnostic standard error.
-- [x] Add fixed-chain deterministic replay and distinct independent-chain identity regressions.
+- [x] Add fixed-chain deterministic replay and distinct-chain identity regressions.
 - [x] Add a `beta=0` Haar sanity surface with exact ensemble expectation zero, broad finite-sample acceptance band, ESS floor, and unit-link residual gate.
 - [x] Bound heat-bath rejection attempts and fail closed rather than silently biasing an update.
 - [x] Freeze `SPLITMIX64-V1` golden integer outputs while explicitly declining universal cross-platform bitwise floating identity.
@@ -234,21 +234,26 @@ The successful V2 confirmation (Actions run `34761701867`, evidence head `f5a221
 
 ## Phase 3 — glueball laboratory
 
-Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and is frozen. Phase 3B2 was merged in PR #13 and is frozen. Phase 3C was merged in PR #14 and is frozen. Phase 3D was merged in PR #15 and is frozen. Phase 3E introduces predeclared scalar plateau/window selection plus a correlated periodic one-state fit using the complete delete-one jackknife covariance; production scalar spectroscopy and stability scans remain unopened.
+Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and is frozen. Phase 3B2 was merged in PR #13 and is frozen. Phase 3C was merged in PR #14 and is frozen. Phase 3D was merged in PR #15 and is frozen. Phase 3E was merged in PR #16 and is frozen. Phase 3F introduces the first bounded production Monte Carlo scalar-spectroscopy evidence surface with predeclared fit-window, operator, and stout-transformation stability scans.
 
 - [x] Define gauge-invariant spatial loop operator bases (`YM-GLUEBALL-OPERATORS-V1`, frozen).
 - [x] Add smearing/blocking as separately versioned transformations.
   - [x] Phase 3B1 spatial stout smearing (`YM-GLUEBALL-SPATIAL-STOUT-V1`, frozen).
   - [x] Phase 3B2 stride-2 spatial blocking (`YM-GLUEBALL-SPATIAL-BLOCK-V1`, frozen).
-- [x] Construct connected Euclidean correlators (`YM-GLUEBALL-CONNECTED-CORRELATOR-V1`, frozen; vacuum subtraction defined, no uncertainty estimate inside Phase 3C).
-- [x] Add effective-mass analysis with uncertainty propagation (`YM-GLUEBALL-EFFECTIVE-MASS-V1`, frozen Phase 3D; periodic cosh estimator plus delete-one-configuration jackknife mechanics).
-- [x] Start with the scalar `0++` channel (finite-lattice `A1++` mechanics; no physical mass claimed).
-- [x] Add predeclared fit-window/plateau selection and correlated scalar spectral fitting (`YM-GLUEBALL-SCALAR-FIT-V1`, Phase 3E candidate; full jackknife covariance, no diagonal fallback).
-- [ ] Apply the frozen scalar mechanics to sealed production ensemble evidence with explicit fit-window and operator/transformation stability scans.
-- [ ] Add `2++` and `0-+` only after the scalar production pipeline is validated.
+- [x] Construct connected Euclidean correlators (`YM-GLUEBALL-CONNECTED-CORRELATOR-V1`, frozen).
+- [x] Add effective-mass analysis with uncertainty propagation (`YM-GLUEBALL-EFFECTIVE-MASS-V1`, Phase 3D frozen).
+- [x] Add predeclared plateau/window selection and full-covariance scalar fitting (`YM-GLUEBALL-SCALAR-FIT-V1`, Phase 3E frozen).
+- [x] Start with the scalar `0++` channel through frozen finite-lattice `A1++` mechanics.
+- [x] Predeclare and implement the first production scalar evidence/stability run (`YM-GLUEBALL-SCALAR-PRODUCTION-V1`, Phase 3F candidate).
+- [ ] Freeze the observed Phase 3F production outcome without weakening its predeclared seeds, windows, or thresholds.
+- [ ] If the Phase 3F scalar gate passes, add an independently predeclared larger-volume scalar confirmation, including a geometry that admits the frozen blocking authority.
+- [ ] If the Phase 3F scalar gate fails, preserve that failure and define a fresh-stream/new-contract confirmation rather than tuning the existing authority.
+- [ ] Add `2++` and `0-+` only after the scalar production pipeline has passed an independently reviewed stability gate.
 - [ ] Keep finite-volume spectral masses explicitly distinct from the continuum Clay gap.
 
-**Graduation gate:** a complete analysis can be reproduced from sealed ensemble evidence and produces stable finite-lattice estimates under reasonable fit-window/operator-basis variations.
+**Phase 3F evidence boundary:** the predeclared `4 x 4 x 4 x 10` run uses sixteen independently seeded frozen `SU(3)` chains and one retained configuration per chain. Fit rejection or stability-gate failure is scientific evidence and does not make implementation CI fail. The `4^3` spatial geometry is below the frozen stride-2 blocking minimum fine extent, so blocking stability is explicitly deferred rather than silently substituted.
+
+**Graduation gate:** a complete scalar production analysis can be reproduced from sealed ensemble evidence and produces stable finite-lattice estimates under the predeclared fit-window/operator/transformation scans. Passing this finite-lattice gate still does not establish a continuum mass gap.
 
 ## Phase 4 — published baseline reproduction
 

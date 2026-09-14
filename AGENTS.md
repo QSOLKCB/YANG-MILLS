@@ -273,9 +273,9 @@ sqrt((N-1)/N * sum_i (m_i - m_bar)^2).
 
 The canonical periodic single-state fixture is mechanics evidence only, not a Monte Carlo ensemble or physical glueball measurement. Phase 3D does not select a plateau/fit window or perform a correlated spectral fit; those are owned by separately versioned Phase 3E.
 
-### Phase 3E scalar correlated-fit candidate authority
+### Phase 3E frozen scalar correlated-fit authority
 
-Phase 3E introduces `YM-GLUEBALL-SCALAR-FIT-V1`. Candidate scalar windows must be supplied before fitting; agents may not silently generate windows after inspecting the fit result. A candidate passes the frozen plateau rule
+Phase 3E freezes `YM-GLUEBALL-SCALAR-FIT-V1` after PR #16 merged. Candidate scalar windows must be supplied before fitting; agents may not silently generate windows after inspecting the fit result. A candidate passes the frozen plateau rule
 
 ```text
 max_t |m_eff(t)-m_bar| / sigma(t) <= 2.5
@@ -283,7 +283,7 @@ max_t |m_eff(t)-m_bar| / sigma(t) <= 2.5
 
 where `m_bar` is the inverse-variance weighted Phase 3D effective mass. Selection prefers the largest passing window and, for equal lengths, the later starting time.
 
-On the selected window, the authority uses the complete delete-one jackknife covariance matrix. Diagonal-only covariance fallback, silent regularization, or data-dependent covariance replacement is outside the candidate authority. The matrix must be positive definite and invertible under the frozen relative pivot tolerance.
+On the selected window, the authority uses the complete delete-one jackknife covariance matrix. Diagonal-only covariance fallback, silent regularization, or data-dependent covariance replacement is outside the frozen authority. The matrix must be positive definite and invertible under the frozen relative pivot tolerance.
 
 The fitted scalar model is
 
@@ -293,7 +293,19 @@ C(tau) = A [exp(-m tau) + exp(-m(N_t-tau))].
 
 For each frozen grid mass, amplitude is profiled analytically and the correlated chi-square is evaluated with the full inverse covariance. The reference scans `0.05 <= m <= 2.0` in steps of `0.001`; exact chi-square ties choose the lower mass. Every jackknife replica is refit on the selected full-sample window with the same covariance authority to propagate mass and amplitude uncertainty.
 
-The canonical Hadamard-perturbed single-state fixture is deterministic mechanics evidence only. It must not be described as production spectroscopy or a physical glueball mass. Phase 3E does not validate fit-window/operator/transformation stability on sealed Monte Carlo evidence, solve a GEVP, add `2++`/`0-+`, establish a finite-volume mass gap, establish confinement, construct continuum QFT, or prove a positive continuum mass gap.
+The canonical Hadamard-perturbed single-state fixture is deterministic mechanics evidence only. It must not be described as production spectroscopy or a physical glueball mass. Production scalar evidence and stability are owned by separately versioned Phase 3F.
+
+### Phase 3F production scalar candidate authority
+
+Phase 3F introduces `YM-GLUEBALL-SCALAR-PRODUCTION-V1` as a finite-lattice production numerical-observation surface. The predeclared experiment uses sixteen independently seeded cold-start `SU(3)` chains on `4 x 4 x 4 x 10` at `beta=5.7`, with master seed `0x3f00202609150001`, 64 thermalisation sweeps, four additional sweeps, proposal angle `0.35`, and one retained configuration per independent chain. These values are frozen before inspection and may not be retuned under the same identifier.
+
+The retained configurations are analyzed with both frozen scalar operators on `raw`, `stout-1`, and `stout-2` surfaces. Phase 3F does not claim blocking stability because the frozen Phase 3B2 authority requires fine spatial extent at least 6 while this run uses spatial extent 4. Full and delete-one correlators must preserve Phase 3C vacuum-subtraction semantics, and the full correlator is replay-checked against Phase 3C to the declared tolerance.
+
+Phase 3F uses the frozen Phase 3E candidate windows `[1,3]`, `[2,4]`, and `[1,4]`. Fit-window, operator, and transformation stability comparisons use the predeclared combined-uncertainty statistic with `z <= 5`. A negative spectroscopy gate is a retained scientific result and must **not** be converted into a CI failure or “fixed” by weakening thresholds after inspection.
+
+The first predeclared production observation completed correctly. Sampler diagnostics passed, but every one of the six scalar surfaces was rejected by the frozen effective-mass authority, giving `primary_window_successes=0`, `transformation_stability_successes=0`, and `scalar_pipeline_validated=false`. Agents must preserve this negative result. Any follow-up intended to improve the scalar signal requires a new, independently predeclared contract/stream rather than mutation of Phase 3F. Do not advance to `2++` or `0-+` merely to bypass the failed scalar gate.
+
+Phase 3F still does not establish a physical continuum glueball mass, finite-volume mass gap, confinement, continuum QFT construction, positive continuum mass gap, or Clay solution.
 
 ## Donor boundary
 
@@ -339,13 +351,14 @@ cargo run --quiet --locked --bin ym-glueball-blocking
 cargo run --quiet --locked --bin ym-glueball-correlator
 cargo run --quiet --locked --bin ym-glueball-effective-mass
 cargo run --quiet --locked --bin ym-glueball-scalar-fit
+cargo run --release --quiet --locked --bin ym-glueball-scalar-production
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
 
 The unified contract entry points are authoritative. Adding a new contract surface without registering it in those commands is a readiness failure.
 
-Tests must fail closed on invalid lattice extents, invalid group construction, invalid/oversized paths, invalid ensemble schedules, non-finite inputs/statistics, rejection-limit exhaustion, numerically inert or asymmetric stochastic proposals, broken contract structure, weakened benchmark provenance, weakened stationarity/equilibration gates, incomplete runtime evidence, weakened covariance/fit rules, or weakened claim boundaries. Public `Result` APIs may not turn admissible numerical/allocation failures into panics.
+Tests must fail closed on invalid lattice extents, invalid group construction, invalid/oversized paths, invalid ensemble schedules, non-finite inputs/statistics, rejection-limit exhaustion, numerically inert or asymmetric stochastic proposals, broken contract structure, weakened benchmark provenance, weakened stationarity/equilibration gates, incomplete runtime evidence, weakened covariance/fit rules, weakened production predeclaration/stability rules, or weakened claim boundaries. Public `Result` APIs may not turn admissible numerical/allocation failures into panics.
 
 Floating-point equality is not assumed. Every numerical/statistical comparison must have an explicit tolerance or uncertainty rule and must not be advertised as bitwise cross-platform identity unless separately established.
 

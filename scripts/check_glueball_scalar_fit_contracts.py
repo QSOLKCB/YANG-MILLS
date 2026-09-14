@@ -9,7 +9,11 @@ from check_contracts import load, validate_exact
 
 EXPECTED_CONTRACT: dict[str, Any] = {
     "contract_id": "YM-GLUEBALL-SCALAR-FIT-V1",
-    "status": "phase-3e-candidate",
+    "status": "phase-3e-frozen",
+    "change_classification": {
+        "classification": "implementation-only",
+        "reason": "PR #16 merged the reviewed Phase 3E authority; this lifecycle transition changes no window-selection, covariance, spectral-fit, uncertainty, fixture, or claim semantics",
+    },
     "scope": "bounded scalar A1++ predeclared plateau-window selection and correlated periodic one-state fit with delete-one jackknife parameter uncertainty",
     "depends_on": [
         {"contract_id": "YM-GLUEBALL-EFFECTIVE-MASS-V1", "required_status": "phase-3d-frozen"},
@@ -130,7 +134,7 @@ EXPECTED_CONTRACT: dict[str, Any] = {
 EXPECTED_VECTORS: dict[str, Any] = {
     "contract_id": "YM-GLUEBALL-SCALAR-FIT-V1",
     "vector_set": "GLUEBALL-SCALAR-FIT-PHASE3E-V1",
-    "status": "phase-3e-candidate",
+    "status": "phase-3e-frozen",
     "vectors": [
         {
             "id": "canonical-correlated-single-state-fit",
