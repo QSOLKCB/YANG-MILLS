@@ -28,9 +28,10 @@ mod su3_ensemble;
 mod su3_lattice;
 
 use glueball_scalar_production::{
-    run_production_scalar_analysis, OperatorKind, BETA, CANDIDATE_WINDOWS, CHAIN_COUNT, EXTENTS,
-    MASTER_SEED, POST_THERMALIZATION_SWEEPS, PRODUCTION_CONTRACT_ID, PRODUCTION_STATUS,
-    PROPOSAL_ANGLE, STABILITY_MAX_Z, STOUT_LEVELS, THERMALIZATION_SWEEPS, TOTAL_SWEEPS_PER_CHAIN,
+    observed_phase3f_receipt_matches, run_production_scalar_analysis, OperatorKind, BETA,
+    CANDIDATE_WINDOWS, CHAIN_COUNT, EXTENTS, MASTER_SEED, POST_THERMALIZATION_SWEEPS,
+    PRODUCTION_CONTRACT_ID, PRODUCTION_STATUS, PROPOSAL_ANGLE, STABILITY_MAX_Z, STOUT_LEVELS,
+    THERMALIZATION_SWEEPS, TOTAL_SWEEPS_PER_CHAIN,
 };
 
 fn print_optional(label: &str, value: Option<f64>) {
@@ -42,6 +43,9 @@ fn print_optional(label: &str, value: Option<f64>) {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let summary = run_production_scalar_analysis()?;
+    if !observed_phase3f_receipt_matches(&summary) {
+        return Err("Phase 3F deterministic production receipt drifted from the pinned historical evidence".into());
+    }
 
     println!("contract={PRODUCTION_CONTRACT_ID}");
     println!("status={PRODUCTION_STATUS}");
