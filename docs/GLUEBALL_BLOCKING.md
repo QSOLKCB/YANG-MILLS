@@ -1,16 +1,16 @@
 # Phase 3B2 — deterministic spatial blocking
 
-Phase 3B2 completes the first transformation pair in the glueball laboratory by adding a separately versioned spatial coarse-link map after Phase 3B1 stout smearing.
+Phase 3B2 completed the first transformation pair in the glueball laboratory by adding a separately versioned spatial coarse-link map after Phase 3B1 stout smearing. PR #13 merged cleanly, so the authority is frozen without changing its transformation semantics.
 
-The candidate authority is:
+The frozen authority is:
 
 ```text
 YM-GLUEBALL-SPATIAL-BLOCK-V1
-status         = phase-3b2-candidate
+status         = phase-3b2-frozen
 transformation = YM-SPATIAL-STRIDE2-BLOCK-V1
 ```
 
-It is intentionally simpler than a tuned spectroscopy blocking scheme. The goal here is to freeze a transparent, gauge-covariant reference coarse-graining map before connected correlators are introduced.
+It is intentionally simpler than a tuned spectroscopy blocking scheme. Its purpose is to preserve a transparent, gauge-covariant reference coarse-graining map that later analysis authorities may consume.
 
 ## Geometry
 
@@ -44,7 +44,7 @@ For spatial directions `mu in {0,1,2}`,
 V_mu(y) = U_mu(x) U_mu(x + mu).
 ```
 
-The order is part of the frozen candidate semantics. No projection, averaging, or smearing is performed inside the blocking map.
+The order is part of the frozen semantics. No projection, averaging, or smearing is performed inside the blocking map.
 
 The temporal link is sampled exactly at the embedded fine site:
 
@@ -72,7 +72,7 @@ within `5e-11` maximum link-matrix residual.
 
 ## Deterministic validation
 
-The candidate freezes the following surfaces:
+The frozen surface requires:
 
 - identity `6x6x6x3` blocks exactly to identity `3x3x3x3`;
 - a temporal link at an embedded coarse site is copied exactly;
@@ -89,11 +89,11 @@ with absolute replay tolerance `1e-12`;
 
 ## Relationship to stout smearing
 
-Phase 3B1 and Phase 3B2 are separate authorities. The blocking map does **not** require stout smearing. A future analysis contract may explicitly compose smearing and blocking, but no combined parameter tuning or overlap-improvement claim is established here.
+Phase 3B1 and Phase 3B2 remain separate frozen authorities. The blocking map does **not** require stout smearing. A later analysis contract may explicitly consume raw, smeared, or blocked fields, but no combined parameter tuning or overlap-improvement claim is established by Phase 3B2 itself.
 
 ## Claim boundary
 
-Phase 3B2 does not claim:
+Phase 3B2 itself does not claim:
 
 - improved ground-state overlap;
 - a connected Euclidean correlator;
@@ -106,4 +106,4 @@ Phase 3B2 does not claim:
 - a positive continuum mass gap;
 - a Clay Millennium Problem solution.
 
-The next roadmap surface after Phase 3B2 is connected Euclidean correlators under a new, separately versioned authority.
+Connected correlators are owned by the separately versioned Phase 3C authority rather than being back-propagated into this frozen transformation contract.
