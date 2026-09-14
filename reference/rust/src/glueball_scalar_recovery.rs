@@ -32,7 +32,7 @@ use crate::su3_ensemble::{
 use crate::su3_lattice::{Su3Lattice4, Su3LatticeError};
 
 pub const RECOVERY_CONTRACT_ID: &str = "YM-GLUEBALL-SCALAR-RECOVERY-V1";
-pub const RECOVERY_STATUS: &str = "phase-3g-candidate";
+pub const RECOVERY_STATUS: &str = "phase-3g-frozen";
 pub const EXTENTS: [usize; 4] = PHASE3F_EXTENTS;
 pub const BETA: f64 = PHASE3F_BETA;
 pub const PHASE3F_MASTER_SEED: u64 = 0x3f00_2026_0915_0001;
@@ -499,7 +499,7 @@ mod tests {
     #[test]
     fn phase3g_identity_is_predeclared_and_fresh() {
         assert_eq!(RECOVERY_CONTRACT_ID, "YM-GLUEBALL-SCALAR-RECOVERY-V1");
-        assert_eq!(RECOVERY_STATUS, "phase-3g-candidate");
+        assert_eq!(RECOVERY_STATUS, "phase-3g-frozen");
         assert_eq!(PRODUCTION_STATUS, "phase-3f-frozen");
         assert_eq!(SAMPLER_ID, "YM-SU3-ENSEMBLE-V1");
         assert_eq!(PROPOSAL_ID, "YM-SU3-GENERATOR-METROPOLIS-V1");
