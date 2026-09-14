@@ -16,8 +16,8 @@ use crate::glueball_scalar_fit::{correlated_scalar_fit, ScalarFitError, ScalarFi
 use crate::glueball_scalar_production::{
     ChainEvidence, CorrelatorEvidence, OperatorKind, ProductionError, ProductionSummary,
     SurfaceOutcome, SurfaceRecord, BETA as PHASE3F_BETA, CANDIDATE_WINDOWS,
-    CORRELATOR_REPLAY_TOLERANCE, EXPECTED_PROPOSALS_PER_CHAIN,
-    EXTENTS as PHASE3F_EXTENTS, MAX_ACCEPTANCE, MIN_ACCEPTANCE, OBSERVED_REJECTION_CODE,
+    CORRELATOR_REPLAY_TOLERANCE, EXPECTED_PROPOSALS_PER_CHAIN, EXTENTS as PHASE3F_EXTENTS,
+    MAX_ACCEPTANCE, MIN_ACCEPTANCE, OBSERVED_REJECTION_CODE,
     POST_THERMALIZATION_SWEEPS as PHASE3F_POST_THERMALIZATION_SWEEPS, PRIMARY_OPERATOR,
     PRIMARY_TRANSFORMATION, PROPOSAL_ANGLE as PHASE3F_PROPOSAL_ANGLE, STABILITY_MAX_Z,
     STOUT_LEVELS, THERMALIZATION_SWEEPS as PHASE3F_THERMALIZATION_SWEEPS,
@@ -62,8 +62,8 @@ fn validate_chain_evidence(evidence: &ChainEvidence) -> Result<(), ProductionErr
     Ok(())
 }
 
-fn generate_fresh_configurations(
-) -> Result<(Vec<ChainEvidence>, Vec<Su3Lattice4>), ProductionError> {
+fn generate_fresh_configurations() -> Result<(Vec<ChainEvidence>, Vec<Su3Lattice4>), ProductionError>
+{
     let mut evidence = Vec::new();
     let mut lattices = Vec::new();
     evidence
