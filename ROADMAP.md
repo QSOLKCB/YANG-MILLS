@@ -234,13 +234,13 @@ The successful V2 confirmation (Actions run `34761701867`, evidence head `f5a221
 
 ## Phase 3 — glueball laboratory
 
-Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and is frozen. Phase 3B2 introduces the separately versioned stride-2 spatial blocking candidate; connected correlators and later spectroscopy stages remain unopened.
+Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and is frozen. Phase 3B2 was merged in PR #13 and is frozen. Phase 3C introduces the connected Euclidean correlator candidate with explicit vacuum subtraction; effective-mass analysis and uncertainty propagation remain unopened.
 
 - [x] Define gauge-invariant spatial loop operator bases (`YM-GLUEBALL-OPERATORS-V1`, frozen).
-- [ ] Add smearing/blocking as separately versioned transformations.
+- [x] Add smearing/blocking as separately versioned transformations.
   - [x] Phase 3B1 spatial stout smearing (`YM-GLUEBALL-SPATIAL-STOUT-V1`, frozen).
-  - [x] Phase 3B2 stride-2 spatial blocking (`YM-GLUEBALL-SPATIAL-BLOCK-V1`, candidate).
-- [ ] Construct connected Euclidean correlators.
+  - [x] Phase 3B2 stride-2 spatial blocking (`YM-GLUEBALL-SPATIAL-BLOCK-V1`, frozen).
+- [x] Construct connected Euclidean correlators (`YM-GLUEBALL-CONNECTED-CORRELATOR-V1`, candidate; vacuum subtraction defined, no uncertainty estimate).
 - [ ] Add effective-mass analysis with uncertainty propagation.
 - [ ] Start with the scalar `0++` channel.
 - [ ] Add `2++` and `0-+` only after the scalar pipeline is validated.
