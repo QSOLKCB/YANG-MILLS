@@ -255,9 +255,9 @@ Every supplied configuration and every Euclidean time origin has equal arithmeti
 
 The canonical four-configuration shifted-defect fixture is an analytic mechanics regression, **not** a Monte Carlo ensemble and not a physical correlator measurement. Phase 3C attaches no statistical uncertainty to it. It does not extract an effective mass, select a fit window, construct a variational/GEVP spectrum, establish a finite-volume mass gap, establish confinement, construct continuum QFT, or prove a positive continuum mass gap. Those require separately versioned later authorities.
 
-### Phase 3D effective-mass candidate authority
+### Phase 3D frozen effective-mass authority
 
-Phase 3D introduces `YM-GLUEBALL-EFFECTIVE-MASS-V1` as a bounded scalar `A1++` / continuum-target `0++` analysis surface. It depends on frozen Phase 3C correlator semantics and evaluates
+Phase 3D freezes `YM-GLUEBALL-EFFECTIVE-MASS-V1` after PR #15 merged. It is a bounded scalar `A1++` / continuum-target `0++` analysis surface that depends on frozen Phase 3C correlator semantics and evaluates
 
 ```text
 m_eff(tau) = acosh((C(tau-1) + C(tau+1)) / (2 C(tau)))
@@ -265,13 +265,35 @@ m_eff(tau) = acosh((C(tau-1) + C(tau+1)) / (2 C(tau)))
 
 only for predeclared strictly increasing lags with `1 <= tau < N_t/2`. The reference requires `4 <= N_t <= 64`, `C(tau)>0`, and an `acosh` argument at least one; invalid or non-finite inputs fail closed.
 
-Uncertainty is propagated with delete-one-configuration jackknife replicas. Replica `i` must omit configuration `i` and recompute the **complete** connected correlator, including its own vacuum mean and subtraction, before the nonlinear effective-mass transform is applied. Reusing the full-sample vacuum mean inside replicas is outside the authority. The reference admits `3 <= N <= 64` replicas and reports the standard jackknife error
+Uncertainty is propagated with delete-one-configuration jackknife replicas. Replica `i` must omit configuration `i` and recompute the **complete** connected correlator, including its own vacuum mean and subtraction, before the nonlinear effective-mass transform is applied. Reusing the full-sample vacuum mean inside replicas is outside the authority. The reference admits `3 <= N <= 64` replicas and reports
 
 ```text
 sqrt((N-1)/N * sum_i (m_i - m_bar)^2).
 ```
 
-The canonical periodic single-state fixture is analytic mechanics evidence only, not a Monte Carlo ensemble or physical glueball measurement. Phase 3D does not select a plateau/fit window, perform a correlated spectral fit, solve a variational GEVP, establish a finite-volume mass gap, establish confinement, construct continuum QFT, or prove a positive continuum mass gap.
+The canonical periodic single-state fixture is mechanics evidence only, not a Monte Carlo ensemble or physical glueball measurement. Phase 3D does not select a plateau/fit window or perform a correlated spectral fit; those are owned by separately versioned Phase 3E.
+
+### Phase 3E scalar correlated-fit candidate authority
+
+Phase 3E introduces `YM-GLUEBALL-SCALAR-FIT-V1`. Candidate scalar windows must be supplied before fitting; agents may not silently generate windows after inspecting the fit result. A candidate passes the frozen plateau rule
+
+```text
+max_t |m_eff(t)-m_bar| / sigma(t) <= 2.5
+```
+
+where `m_bar` is the inverse-variance weighted Phase 3D effective mass. Selection prefers the largest passing window and, for equal lengths, the later starting time.
+
+On the selected window, the authority uses the complete delete-one jackknife covariance matrix. Diagonal-only covariance fallback, silent regularization, or data-dependent covariance replacement is outside the candidate authority. The matrix must be positive definite and invertible under the frozen relative pivot tolerance.
+
+The fitted scalar model is
+
+```text
+C(tau) = A [exp(-m tau) + exp(-m(N_t-tau))].
+```
+
+For each frozen grid mass, amplitude is profiled analytically and the correlated chi-square is evaluated with the full inverse covariance. The reference scans `0.05 <= m <= 2.0` in steps of `0.001`; exact chi-square ties choose the lower mass. Every jackknife replica is refit on the selected full-sample window with the same covariance authority to propagate mass and amplitude uncertainty.
+
+The canonical Hadamard-perturbed single-state fixture is deterministic mechanics evidence only. It must not be described as production spectroscopy or a physical glueball mass. Phase 3E does not validate fit-window/operator/transformation stability on sealed Monte Carlo evidence, solve a GEVP, add `2++`/`0-+`, establish a finite-volume mass gap, establish confinement, construct continuum QFT, or prove a positive continuum mass gap.
 
 ## Donor boundary
 
@@ -316,13 +338,14 @@ cargo run --quiet --locked --bin ym-glueball-smearing
 cargo run --quiet --locked --bin ym-glueball-blocking
 cargo run --quiet --locked --bin ym-glueball-correlator
 cargo run --quiet --locked --bin ym-glueball-effective-mass
+cargo run --quiet --locked --bin ym-glueball-scalar-fit
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
 
 The unified contract entry points are authoritative. Adding a new contract surface without registering it in those commands is a readiness failure.
 
-Tests must fail closed on invalid lattice extents, invalid group construction, invalid/oversized paths, invalid ensemble schedules, non-finite inputs/statistics, rejection-limit exhaustion, numerically inert or asymmetric stochastic proposals, broken contract structure, weakened benchmark provenance, weakened stationarity/equilibration gates, incomplete runtime evidence, or weakened claim boundaries. Public `Result` APIs may not turn admissible numerical/allocation failures into panics.
+Tests must fail closed on invalid lattice extents, invalid group construction, invalid/oversized paths, invalid ensemble schedules, non-finite inputs/statistics, rejection-limit exhaustion, numerically inert or asymmetric stochastic proposals, broken contract structure, weakened benchmark provenance, weakened stationarity/equilibration gates, incomplete runtime evidence, weakened covariance/fit rules, or weakened claim boundaries. Public `Result` APIs may not turn admissible numerical/allocation failures into panics.
 
 Floating-point equality is not assumed. Every numerical/statistical comparison must have an explicit tolerance or uncertainty rule and must not be advertised as bitwise cross-platform identity unless separately established.
 
