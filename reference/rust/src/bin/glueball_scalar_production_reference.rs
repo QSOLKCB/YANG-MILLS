@@ -26,14 +26,13 @@ mod su3_lattice;
 use glueball_scalar_production::{
     run_production_scalar_analysis, OperatorKind, BETA, CANDIDATE_WINDOWS, CHAIN_COUNT, EXTENTS,
     MASTER_SEED, POST_THERMALIZATION_SWEEPS, PRODUCTION_CONTRACT_ID, PRODUCTION_STATUS,
-    PROPOSAL_ANGLE, STOUT_LEVELS, STABILITY_MAX_Z, THERMALIZATION_SWEEPS,
-    TOTAL_SWEEPS_PER_CHAIN,
+    PROPOSAL_ANGLE, STABILITY_MAX_Z, STOUT_LEVELS, THERMALIZATION_SWEEPS, TOTAL_SWEEPS_PER_CHAIN,
 };
 
-fn optional(value: Option<f64>) -> String {
+fn print_optional(label: &str, value: Option<f64>) {
     match value {
-        Some(value) => format!("{value:.17e}"),
-        None => "unavailable".to_string(),
+        Some(value) => println!("{label}={value:.17e}"),
+        None => println!("{label}=unavailable"),
     }
 }
 
@@ -47,7 +46,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("proposal=YM-SU3-GENERATOR-METROPOLIS-V1");
     println!("rng=SPLITMIX64-V1");
     println!("stream=YM-SU3-STREAM-V1");
-    println!("extents={},{},{},{}", EXTENTS[0], EXTENTS[1], EXTENTS[2], EXTENTS[3]);
+    println!(
+        "extents={},{},{},{}",
+        EXTENTS[0], EXTENTS[1], EXTENTS[2], EXTENTS[3]
+    );
     println!("beta={BETA:.17e}");
     println!("master_seed=0x{MASTER_SEED:016x}");
     println!("independent_chains={CHAIN_COUNT}");
@@ -99,19 +101,28 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    println!("sampler_diagnostics_passed={}", summary.sampler_diagnostics_passed);
-    println!("primary_window_successes={}", summary.primary_window_successes);
-    println!("primary_window_max_z={}", optional(summary.primary_window_max_z));
-    println!("operator_stability_z={}", optional(summary.operator_stability_z));
+    println!(
+        "sampler_diagnostics_passed={}",
+        summary.sampler_diagnostics_passed
+    );
+    println!(
+        "primary_window_successes={}",
+        summary.primary_window_successes
+    );
+    print_optional("primary_window_max_z", summary.primary_window_max_z);
+    print_optional("operator_stability_z", summary.operator_stability_z);
     println!(
         "transformation_stability_successes={}",
         summary.transformation_stability_successes
     );
-    println!(
-        "transformation_stability_max_z={}",
-        optional(summary.transformation_stability_max_z)
+    print_optional(
+        "transformation_stability_max_z",
+        summary.transformation_stability_max_z,
     );
-    println!("scalar_pipeline_validated={}", summary.scalar_pipeline_validated);
+    println!(
+        "scalar_pipeline_validated={}",
+        summary.scalar_pipeline_validated
+    );
     println!("physical_glueball_mass_claimed=false");
     println!("finite_volume_mass_gap_established=false");
     println!("confinement_established=false");
