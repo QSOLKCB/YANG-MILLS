@@ -44,7 +44,7 @@ Phase 2C1 was merged in PR #9. It froze the separately versioned `SU(3)` ensembl
 
 Phase 2C2 is implemented in PR #10. The first predeclared authority, `YM-SU3-PLAQUETTE-BASELINE-V1`, reproduced the peer-reviewed `4^4`, `beta=6.0` plaquette surface but failed its predeclared per-chain ESS floor, so it remains explicitly failed. The separately predeclared `YM-SU3-PLAQUETTE-BASELINE-V2` used four fresh independent streams without changing the external target, sampler, proposal scale, or per-chain schedule. It passed with pooled mean `0.5992920043` inside the frozen `[0.56,0.63]` source envelope, aggregate ESS `78.944`, maximum pairwise chain-consistency `z ~= 3.550`, and maximum stationarity `z ~= 1.465`. The V2 authority is frozen with `published_su3_baseline_reproduced=true`, `phase2c_complete=true`, and `glueball_analysis_enabled=true`. See [`docs/PUBLISHED_SU3_PLAQUETTE_BASELINE.md`](docs/PUBLISHED_SU3_PLAQUETTE_BASELINE.md).
 
-Phase 3A was merged in PR #11 and is frozen as `YM-GLUEBALL-OPERATORS-V1`. Phase 3B1 was merged in PR #12 and is frozen as `YM-GLUEBALL-SPATIAL-STOUT-V1`. Phase 3B2 was merged in PR #13 and is frozen as `YM-GLUEBALL-SPATIAL-BLOCK-V1`. Phase 3C introduces candidate `YM-GLUEBALL-CONNECTED-CORRELATOR-V1`: bounded periodic connected Euclidean two-point estimators for the two frozen scalar `A1++` basis elements, with explicit same-sample vacuum subtraction. The canonical four-configuration fixture is analytic mechanics evidence, not a Monte Carlo ensemble or physical mass measurement. Uncertainty propagation, effective masses, fit windows, and glueball spectra remain unimplemented. No current phase performs a continuum/infinite-volume limit, constructs the interacting quantum theory, or proves a mass gap. See [`docs/GLUEBALL_OPERATORS.md`](docs/GLUEBALL_OPERATORS.md), [`docs/GLUEBALL_SMEARING.md`](docs/GLUEBALL_SMEARING.md), [`docs/GLUEBALL_BLOCKING.md`](docs/GLUEBALL_BLOCKING.md), and [`docs/GLUEBALL_CORRELATORS.md`](docs/GLUEBALL_CORRELATORS.md).
+Phase 3A was merged in PR #11 and is frozen as `YM-GLUEBALL-OPERATORS-V1`. Phase 3B1 was merged in PR #12 and is frozen as `YM-GLUEBALL-SPATIAL-STOUT-V1`. Phase 3B2 was merged in PR #13 and is frozen as `YM-GLUEBALL-SPATIAL-BLOCK-V1`. Phase 3C was merged in PR #14 and is frozen as `YM-GLUEBALL-CONNECTED-CORRELATOR-V1`, defining bounded periodic connected Euclidean two-point estimators with explicit same-sample vacuum subtraction. Phase 3D introduces candidate `YM-GLUEBALL-EFFECTIVE-MASS-V1`: a scalar `A1++` / continuum-target `0++` periodic cosh effective-mass estimator with delete-one-configuration jackknife uncertainty propagation. The canonical periodic single-state fixture is analytic mechanics evidence, not a Monte Carlo ensemble or physical mass measurement. Fit-window/plateau selection, correlated spectral fitting, GEVP spectroscopy, additional `2++`/`0-+` channels, and finite-volume mass extraction remain later authorities. No current phase performs a continuum/infinite-volume limit, constructs the interacting quantum theory, or proves a mass gap. See [`docs/GLUEBALL_OPERATORS.md`](docs/GLUEBALL_OPERATORS.md), [`docs/GLUEBALL_SMEARING.md`](docs/GLUEBALL_SMEARING.md), [`docs/GLUEBALL_BLOCKING.md`](docs/GLUEBALL_BLOCKING.md), [`docs/GLUEBALL_CORRELATORS.md`](docs/GLUEBALL_CORRELATORS.md), and [`docs/GLUEBALL_EFFECTIVE_MASS.md`](docs/GLUEBALL_EFFECTIVE_MASS.md).
 
 ## The target
 
@@ -283,6 +283,7 @@ cargo run --quiet --locked --bin ym-glueball-operators
 cargo run --quiet --locked --bin ym-glueball-smearing
 cargo run --quiet --locked --bin ym-glueball-blocking
 cargo run --quiet --locked --bin ym-glueball-correlator
+cargo run --quiet --locked --bin ym-glueball-effective-mass
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
@@ -307,7 +308,7 @@ scripts/               fail-closed contract checks
 
 ## Roadmap
 
-The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 2B closes the published `SU(2)` plaquette validation gate. Phase 2C1 freezes a separately versioned `SU(3)` sampler, and Phase 2C2 freezes its independent published finite-lattice validation after preserving the failed V1 attempt and passing the fresh-stream V2 confirmation. Phase 3A/B freeze the scalar operator and transformation mechanics; Phase 3C now opens connected-correlator mechanics while keeping uncertainty and mass extraction as separate later authorities.
+The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 2B closes the published `SU(2)` plaquette validation gate. Phase 2C1 freezes a separately versioned `SU(3)` sampler, and Phase 2C2 freezes its independent published finite-lattice validation after preserving the failed V1 attempt and passing the fresh-stream V2 confirmation. Phase 3A/B freeze the scalar operator and transformation mechanics; Phase 3C is frozen as the connected-correlator authority; Phase 3D now opens scalar effective-mass mechanics with jackknife uncertainty while keeping fit-window selection, spectral fitting, additional channels, and finite-volume mass extraction as later authorities.
 
 ## Licence
 
