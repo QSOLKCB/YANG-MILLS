@@ -112,16 +112,24 @@ fn validate_inputs(
     if full.iter().any(|value| !value.is_finite()) {
         return Err(EffectiveMassError::NonFiniteCorrelator);
     }
-    if jackknife.iter().any(|replica| {
-        replica.len() != time_extent || replica.iter().any(|value| !value.is_finite())
-    }) {
+    if jackknife
+        .iter()
+        .any(|replica| replica.len() != time_extent)
+    {
         return Err(EffectiveMassError::ShapeMismatch);
+    }
+    if jackknife
+        .iter()
+        .flatten()
+        .any(|value| !value.is_finite())
+    {
+        return Err(EffectiveMassError::NonFiniteCorrelator);
     }
 
     let mut previous = 0usize;
     for (index, &tau) in lags.iter().enumerate() {
         if tau == 0
-            || tau + 1 >= time_extent
+            || tau >= time_extent - 1
             || tau.saturating_mul(2) >= time_extent
             || (index != 0 && tau <= previous)
         {
@@ -357,7 +365,7 @@ mod tests {
     #[test]
     fn analysis_lags_must_be_pre_midpoint_and_strictly_increasing() {
         let (full, jackknife, _) = canonical_fixture();
-        for lags in [vec![0], vec![8], vec![2, 2], vec![3, 2]] {
+        for lags in [vec![0], vec![8], vec![2, 2], vec![3, 2], vec![usize::MAX]] {
             assert_eq!(
                 cosh_effective_mass_with_jackknife(&full, &jackknife, &lags).unwrap_err(),
                 EffectiveMassError::InvalidAnalysisLag
@@ -369,6 +377,13 @@ mod tests {
     fn non_finite_input_fails_closed() {
         let (mut full, jackknife, _) = canonical_fixture();
         full[1] = f64::NAN;
+        assert_eq!(
+            cosh_effective_mass_with_jackknife(&full, &jackknife, &[2]).unwrap_err(),
+            EffectiveMassError::NonFiniteCorrelator
+        );
+
+        let (full, mut jackknife, _) = canonical_fixture();
+        jackknife[0][1] = f64::INFINITY;
         assert_eq!(
             cosh_effective_mass_with_jackknife(&full, &jackknife, &[2]).unwrap_err(),
             EffectiveMassError::NonFiniteCorrelator
