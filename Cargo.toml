@@ -1,10 +1,10 @@
 [package]
 name = "yang-mills-reference"
-version = "0.13.0"
+version = "0.14.0"
 edition = "2021"
 license = "MPL-2.0"
 repository = "https://github.com/QSOLKCB/YANG-MILLS"
-description = "Deterministic and stochastic SU(2)/SU(3) lattice, holonomy, classical-geometry, ensemble, published-baseline, glueball-operator, spatial-smearing, spatial-blocking, connected-correlator, and effective-mass reference surfaces for YANG-MILLS"
+description = "Deterministic and stochastic SU(2)/SU(3) lattice, holonomy, classical-geometry, ensemble, published-baseline, glueball-operator, spatial-smearing, spatial-blocking, connected-correlator, effective-mass, and correlated scalar-fit reference surfaces for YANG-MILLS"
 default-run = "ym-su2-reference"
 
 [lib]
@@ -73,6 +73,10 @@ path = "reference/rust/src/bin/glueball_correlator_reference.rs"
 [[bin]]
 name = "ym-glueball-effective-mass"
 path = "reference/rust/src/bin/glueball_effective_mass_reference.rs"
+
+[[bin]]
+name = "ym-glueball-scalar-fit"
+path = "reference/rust/src/bin/glueball_scalar_fit_reference.rs"
 
 [profile.release]
 lto = "thin"
