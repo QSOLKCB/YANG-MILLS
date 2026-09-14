@@ -93,11 +93,7 @@ impl OperatorKind {
 pub const PRIMARY_OPERATOR: OperatorKind = OperatorKind::Plaquette1x1;
 pub const OBSERVED_SURFACE_OUTCOMES: [(&str, OperatorKind, &str); 6] = [
     ("raw", OperatorKind::Plaquette1x1, OBSERVED_REJECTION_CODE),
-    (
-        "raw",
-        OperatorKind::Rectangle2x1,
-        OBSERVED_REJECTION_CODE,
-    ),
+    ("raw", OperatorKind::Rectangle2x1, OBSERVED_REJECTION_CODE),
     (
         "stout-1",
         OperatorKind::Plaquette1x1,
@@ -670,10 +666,18 @@ pub fn run_production_scalar_analysis() -> Result<ProductionSummary, ProductionE
     let (primary_window_successes, primary_window_max_z) = window_stability(primary)?;
 
     let operator_stability_z = match (
-        surface(&surfaces, PRIMARY_TRANSFORMATION, OperatorKind::Plaquette1x1)
-            .and_then(|record| record.outcome.fit.as_ref()),
-        surface(&surfaces, PRIMARY_TRANSFORMATION, OperatorKind::Rectangle2x1)
-            .and_then(|record| record.outcome.fit.as_ref()),
+        surface(
+            &surfaces,
+            PRIMARY_TRANSFORMATION,
+            OperatorKind::Plaquette1x1,
+        )
+        .and_then(|record| record.outcome.fit.as_ref()),
+        surface(
+            &surfaces,
+            PRIMARY_TRANSFORMATION,
+            OperatorKind::Rectangle2x1,
+        )
+        .and_then(|record| record.outcome.fit.as_ref()),
     ) {
         (Some(first), Some(second)) => stable_z(first, second),
         _ => None,
@@ -769,7 +773,10 @@ mod tests {
         assert_eq!(PRIMARY_OPERATOR, OperatorKind::Plaquette1x1);
         assert_eq!(STABILITY_MAX_Z, 5.0);
         assert_eq!(CORRELATOR_REPLAY_TOLERANCE, 2.0e-12);
-        assert_eq!(OBSERVED_RECEIPT_HEAD, "88b7f450701884e6351878e7890410e4095e3d6d");
+        assert_eq!(
+            OBSERVED_RECEIPT_HEAD,
+            "88b7f450701884e6351878e7890410e4095e3d6d"
+        );
         assert_eq!(OBSERVED_RECEIPT_WORKFLOW_RUN_ID, 34_862_755_015);
         assert_eq!(
             CANDIDATE_WINDOWS,
@@ -809,7 +816,10 @@ mod tests {
 
     #[test]
     fn computational_fit_failures_are_not_scientific_rejections() {
-        assert_eq!(scientific_fit_error_code(&ScalarFitError::AllocationFailed), None);
+        assert_eq!(
+            scientific_fit_error_code(&ScalarFitError::AllocationFailed),
+            None
+        );
         assert_eq!(
             scientific_fit_error_code(&ScalarFitError::NonFiniteStatistic),
             None
@@ -860,18 +870,20 @@ mod tests {
     fn pinned_observed_receipt_matches_only_the_recorded_negative_outcome() {
         let surfaces = OBSERVED_SURFACE_OUTCOMES
             .iter()
-            .map(|&(transformation, operator, rejection_code)| SurfaceRecord {
-                outcome: SurfaceOutcome {
-                    transformation,
-                    operator,
-                    fit: None,
-                    error_code: Some(rejection_code),
+            .map(
+                |&(transformation, operator, rejection_code)| SurfaceRecord {
+                    outcome: SurfaceOutcome {
+                        transformation,
+                        operator,
+                        fit: None,
+                        error_code: Some(rejection_code),
+                    },
+                    correlator: CorrelatorEvidence {
+                        full: Vec::new(),
+                        jackknife: Vec::new(),
+                    },
                 },
-                correlator: CorrelatorEvidence {
-                    full: Vec::new(),
-                    jackknife: Vec::new(),
-                },
-            })
+            )
             .collect();
         let mut summary = ProductionSummary {
             chain_evidence: Vec::new(),
