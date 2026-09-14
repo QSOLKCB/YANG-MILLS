@@ -1,0 +1,46 @@
+{
+  "contract_id": "YM-GLUEBALL-SCALAR-PRODUCTION-V1",
+  "vector_set": "GLUEBALL-SCALAR-PRODUCTION-PHASE3F-V1",
+  "status": "phase-3f-candidate",
+  "vectors": [
+    {
+      "id": "predeclared-independent-chain-production-schedule",
+      "extents": [4, 4, 4, 10],
+      "beta": 5.7,
+      "master_seed_hex": "0x3f00202609150001",
+      "chain_count": 16,
+      "thermalization_sweeps": 64,
+      "post_thermalization_sweeps": 4,
+      "proposal_angle": 0.35,
+      "retained_configurations_per_chain": 1,
+      "expected_proposals_per_chain": 1392640,
+      "claim_class": "C0"
+    },
+    {
+      "id": "predeclared-fit-windows",
+      "candidate_windows": [[1, 3], [2, 4], [1, 4]],
+      "primary_surface": "stout-2/plaquette-1x1",
+      "maximum_pairwise_mass_z": 5.0,
+      "claim_class": "C0"
+    },
+    {
+      "id": "predeclared-operator-transformation-scan",
+      "operators": ["plaquette-1x1", "rectangle-2x1"],
+      "transformations": ["raw", "stout-1", "stout-2"],
+      "stout_rho": 0.1,
+      "blocked_scan_defined": false,
+      "claim_class": "C0"
+    },
+    {
+      "id": "scientific-gate-boundary",
+      "production_monte_carlo_configurations": true,
+      "scientific_gate_failure_causes_ci_failure": false,
+      "failed_scientific_gate_must_be_preserved": true,
+      "physical_glueball_mass_claimed": false,
+      "finite_volume_mass_gap_established": false,
+      "positive_continuum_mass_gap_proved": false,
+      "clay_solution_claimed": false,
+      "claim_class": "C0"
+    }
+  ]
+}
