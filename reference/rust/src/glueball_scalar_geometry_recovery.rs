@@ -52,8 +52,7 @@ pub const POST_THERMALIZATION_SWEEPS: usize = PHASE3F_POST_THERMALIZATION_SWEEPS
 pub const TOTAL_SWEEPS_PER_CHAIN: usize = PHASE3F_TOTAL_SWEEPS_PER_CHAIN;
 pub const PROPOSAL_ANGLE: f64 = PHASE3F_PROPOSAL_ANGLE;
 pub const RETAINED_CONFIGURATIONS_PER_CHAIN: usize = 1;
-pub const LINKS_PER_SWEEP: u64 =
-    (EXTENTS[0] * EXTENTS[1] * EXTENTS[2] * EXTENTS[3] * DIM) as u64;
+pub const LINKS_PER_SWEEP: u64 = (EXTENTS[0] * EXTENTS[1] * EXTENTS[2] * EXTENTS[3] * DIM) as u64;
 pub const PROPOSALS_PER_LINK: u64 = 8;
 pub const EXPECTED_PROPOSALS_PER_CHAIN: u64 =
     LINKS_PER_SWEEP * PROPOSALS_PER_LINK * TOTAL_SWEEPS_PER_CHAIN as u64;
@@ -72,7 +71,10 @@ impl fmt::Display for GeometryRecoveryError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Analysis(error) => {
-                write!(f, "Phase 3H geometry recovery implementation failure: {error:?}")
+                write!(
+                    f,
+                    "Phase 3H geometry recovery implementation failure: {error:?}"
+                )
             }
             Self::Blocking(error) => {
                 write!(f, "Phase 3H frozen blocking transformation failed: {error}")
@@ -487,8 +489,7 @@ pub fn run_scalar_geometry_recovery_analysis() -> Result<ProductionSummary, Geom
     let (chain_evidence, raw) = generate_fresh_configurations()?;
     let sampler_diagnostics_passed = chain_evidence.iter().all(|evidence| {
         (MIN_ACCEPTANCE..=MAX_ACCEPTANCE).contains(&evidence.acceptance)
-            && evidence.acceptance
-                == evidence.accepts as f64 / evidence.proposals as f64
+            && evidence.acceptance == evidence.accepts as f64 / evidence.proposals as f64
     });
 
     let stout1 = stout_transform(&raw, STOUT_LEVELS[0])?;
