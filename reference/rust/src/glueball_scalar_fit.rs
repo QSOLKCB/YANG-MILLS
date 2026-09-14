@@ -134,6 +134,14 @@ fn zero_vec(len: usize) -> Result<Vec<f64>, ScalarFitError> {
     Ok(values)
 }
 
+fn copy_vec(values: &[f64]) -> Result<Vec<f64>, ScalarFitError> {
+    let mut copy = Vec::new();
+    copy.try_reserve_exact(values.len())
+        .map_err(|_| ScalarFitError::AllocationFailed)?;
+    copy.extend_from_slice(values);
+    Ok(copy)
+}
+
 fn zero_matrix(size: usize) -> Result<Vec<Vec<f64>>, ScalarFitError> {
     let mut matrix = Vec::new();
     matrix
@@ -388,11 +396,11 @@ fn invert_matrix(matrix: &[Vec<f64>]) -> Result<Vec<Vec<f64>>, ScalarFitError> {
         for value in &mut augmented[column] {
             *value /= pivot;
         }
-        let pivot_values = augmented[column].clone();
-        for (row, values) in augmented.iter_mut().enumerate() {
-            if row == column {
-                continue;
-            }
+        let (before, pivot_and_after) = augmented.split_at_mut(column);
+        let (pivot_values, after) = pivot_and_after
+            .split_first_mut()
+            .ok_or(ScalarFitError::SingularCovariance)?;
+        for values in before.iter_mut().chain(after.iter_mut()) {
             let factor = values[column];
             for index in 0..(2 * n) {
                 values[index] -= factor * pivot_values[index];
@@ -562,9 +570,19 @@ fn maximum_off_diagonal_correlation(covariance: &[Vec<f64>]) -> Result<f64, Scal
         if covariance[row][row] <= 0.0 || !covariance[row][row].is_finite() {
             return Err(ScalarFitError::CovarianceNotPositiveDefinite);
         }
+        let row_scale = covariance[row][row].sqrt();
+        if !row_scale.is_finite() || row_scale <= 0.0 {
+            return Err(ScalarFitError::CovarianceNotPositiveDefinite);
+        }
         for column in 0..row {
-            let denominator = (covariance[row][row] * covariance[column][column]).sqrt();
-            let correlation = (covariance[row][column] / denominator).abs();
+            if covariance[column][column] <= 0.0 || !covariance[column][column].is_finite() {
+                return Err(ScalarFitError::CovarianceNotPositiveDefinite);
+            }
+            let column_scale = covariance[column][column].sqrt();
+            if !column_scale.is_finite() || column_scale <= 0.0 {
+                return Err(ScalarFitError::CovarianceNotPositiveDefinite);
+            }
+            let correlation = ((covariance[row][column] / row_scale) / column_scale).abs();
             if !correlation.is_finite() {
                 return Err(ScalarFitError::NonFiniteStatistic);
             }
@@ -650,7 +668,7 @@ pub fn canonical_scalar_fit_fixture(
         .try_reserve_exact(HADAMARD_8.len())
         .map_err(|_| ScalarFitError::AllocationFailed)?;
     for row in HADAMARD_8 {
-        let mut replica = full.clone();
+        let mut replica = copy_vec(&full)?;
         for tau in 1..=7 {
             let pattern = if tau == 1 {
                 row[1]
@@ -775,5 +793,22 @@ mod tests {
         let maximum = maximum_off_diagonal_correlation(&covariance).unwrap();
         assert!(maximum > 0.05);
         assert_close(maximum, 1.0 / 17.0, ANALYTIC_REPLAY_TOLERANCE);
+    }
+
+    #[test]
+    fn covariance_correlation_normalization_is_scale_stable() {
+        let (_, jackknife, _) = canonical_scalar_fit_fixture().unwrap();
+        let covariance = jackknife_covariance(&jackknife, FitWindow { start: 3, end: 6 }).unwrap();
+        let baseline = maximum_off_diagonal_correlation(&covariance).unwrap();
+        let mut scaled = covariance.clone();
+        for row in &mut scaled {
+            for value in row {
+                *value *= 1.0e200;
+                assert!(value.is_finite());
+            }
+        }
+        let scaled_maximum = maximum_off_diagonal_correlation(&scaled).unwrap();
+        assert_close(baseline, 1.0 / 17.0, ANALYTIC_REPLAY_TOLERANCE);
+        assert_close(scaled_maximum, baseline, ANALYTIC_REPLAY_TOLERANCE);
     }
 }
