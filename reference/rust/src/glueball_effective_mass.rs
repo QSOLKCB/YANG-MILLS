@@ -112,17 +112,10 @@ fn validate_inputs(
     if full.iter().any(|value| !value.is_finite()) {
         return Err(EffectiveMassError::NonFiniteCorrelator);
     }
-    if jackknife
-        .iter()
-        .any(|replica| replica.len() != time_extent)
-    {
+    if jackknife.iter().any(|replica| replica.len() != time_extent) {
         return Err(EffectiveMassError::ShapeMismatch);
     }
-    if jackknife
-        .iter()
-        .flatten()
-        .any(|value| !value.is_finite())
-    {
+    if jackknife.iter().flatten().any(|value| !value.is_finite()) {
         return Err(EffectiveMassError::NonFiniteCorrelator);
     }
 
