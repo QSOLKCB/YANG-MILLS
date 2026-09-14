@@ -28,7 +28,7 @@ use crate::su3_ensemble::{
 use crate::su3_lattice::{Su3Lattice4, Su3LatticeError};
 
 pub const PRODUCTION_CONTRACT_ID: &str = "YM-GLUEBALL-SCALAR-PRODUCTION-V1";
-pub const PRODUCTION_STATUS: &str = "phase-3f-candidate";
+pub const PRODUCTION_STATUS: &str = "phase-3f-frozen";
 pub const EXTENTS: [usize; 4] = [4, 4, 4, 10];
 pub const BETA: f64 = 5.7;
 pub const MASTER_SEED: u64 = 0x3f00_2026_0915_0001;
@@ -746,7 +746,7 @@ mod tests {
     #[test]
     fn phase3f_identity_is_predeclared() {
         assert_eq!(PRODUCTION_CONTRACT_ID, "YM-GLUEBALL-SCALAR-PRODUCTION-V1");
-        assert_eq!(PRODUCTION_STATUS, "phase-3f-candidate");
+        assert_eq!(PRODUCTION_STATUS, "phase-3f-frozen");
         assert_eq!(SAMPLER_ID, "YM-SU3-ENSEMBLE-V1");
         assert_eq!(PROPOSAL_ID, "YM-SU3-GENERATOR-METROPOLIS-V1");
         assert_eq!(RNG_ID, "SPLITMIX64-V1");
