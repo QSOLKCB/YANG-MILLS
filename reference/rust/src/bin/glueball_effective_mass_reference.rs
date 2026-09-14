@@ -6,8 +6,8 @@
 mod glueball_effective_mass;
 
 use glueball_effective_mass::{
-    analytic_periodic_single_state, cosh_effective_mass_with_jackknife,
-    ANALYTIC_REPLAY_TOLERANCE, EFFECTIVE_MASS_CONTRACT_ID, EFFECTIVE_MASS_STATUS,
+    analytic_periodic_single_state, cosh_effective_mass_with_jackknife, ANALYTIC_REPLAY_TOLERANCE,
+    EFFECTIVE_MASS_CONTRACT_ID, EFFECTIVE_MASS_STATUS,
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -32,9 +32,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .max((point.jackknife_mean - full_mass).abs())
             .max((point.standard_error - expected_standard_error).abs());
     }
-    if !maximum_replay_residual.is_finite()
-        || maximum_replay_residual > ANALYTIC_REPLAY_TOLERANCE
-    {
+    if !maximum_replay_residual.is_finite() || maximum_replay_residual > ANALYTIC_REPLAY_TOLERANCE {
         return Err("Phase 3D analytic effective-mass regression mismatch".into());
     }
 
