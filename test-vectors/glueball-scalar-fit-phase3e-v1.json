@@ -1,7 +1,7 @@
 {
   "contract_id": "YM-GLUEBALL-SCALAR-FIT-V1",
   "vector_set": "GLUEBALL-SCALAR-FIT-PHASE3E-V1",
-  "status": "phase-3e-candidate",
+  "status": "phase-3e-frozen",
   "vectors": [
     {
       "id": "canonical-correlated-single-state-fit",
