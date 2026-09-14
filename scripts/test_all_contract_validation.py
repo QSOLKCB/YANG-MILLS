@@ -13,6 +13,7 @@ from test_glueball_operator_contract_validation import main as test_glueball_ope
 from test_glueball_smearing_contract_validation import main as test_glueball_smearing_contracts
 from test_glueball_blocking_contract_validation import main as test_glueball_blocking_contracts
 from test_glueball_correlator_contract_validation import main as test_glueball_correlator_contracts
+from test_glueball_effective_mass_contract_validation import main as test_glueball_effective_mass_contracts
 
 
 def main() -> None:
@@ -28,6 +29,7 @@ def main() -> None:
     test_glueball_smearing_contracts()
     test_glueball_blocking_contracts()
     test_glueball_correlator_contracts()
+    test_glueball_effective_mass_contracts()
     print("All negative YANG-MILLS contract regression checks: passed")
 
 
