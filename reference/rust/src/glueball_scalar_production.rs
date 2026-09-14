@@ -14,6 +14,7 @@
 use core::fmt;
 
 use crate::glueball_correlators::{scalar_connected_correlators, GlueballCorrelatorError};
+use crate::glueball_effective_mass::EffectiveMassError;
 use crate::glueball_operators::{scalar_a1pp_operator_basis, GlueballOperatorError};
 use crate::glueball_scalar_fit::{
     correlated_scalar_fit, FitWindow, ScalarFitError, ScalarFitResult,
@@ -36,6 +37,7 @@ pub const THERMALIZATION_SWEEPS: usize = 64;
 pub const POST_THERMALIZATION_SWEEPS: usize = 4;
 pub const TOTAL_SWEEPS_PER_CHAIN: usize = THERMALIZATION_SWEEPS + POST_THERMALIZATION_SWEEPS;
 pub const PROPOSAL_ANGLE: f64 = 0.35;
+pub const RETAINED_CONFIGURATIONS_PER_CHAIN: usize = 1;
 pub const LINKS_PER_SWEEP: u64 = (EXTENTS[0] * EXTENTS[1] * EXTENTS[2] * EXTENTS[3] * 4) as u64;
 pub const PROPOSALS_PER_LINK: u64 = 8;
 pub const EXPECTED_PROPOSALS_PER_CHAIN: u64 =
@@ -43,6 +45,8 @@ pub const EXPECTED_PROPOSALS_PER_CHAIN: u64 =
 pub const MIN_ACCEPTANCE: f64 = 0.10;
 pub const MAX_ACCEPTANCE: f64 = 0.95;
 pub const STOUT_LEVELS: [usize; 2] = [1, 2];
+pub const TRANSFORMATION_LABELS: [&str; 3] = ["raw", "stout-1", "stout-2"];
+pub const PRIMARY_TRANSFORMATION: &str = "stout-2";
 pub const STABILITY_MAX_Z: f64 = 5.0;
 pub const CORRELATOR_REPLAY_TOLERANCE: f64 = 2.0e-12;
 pub const CANDIDATE_WINDOWS: [FitWindow; 3] = [
@@ -50,6 +54,9 @@ pub const CANDIDATE_WINDOWS: [FitWindow; 3] = [
     FitWindow { start: 2, end: 4 },
     FitWindow { start: 1, end: 4 },
 ];
+pub const OBSERVED_RECEIPT_HEAD: &str = "88b7f450701884e6351878e7890410e4095e3d6d";
+pub const OBSERVED_RECEIPT_WORKFLOW_RUN_ID: u64 = 34_862_755_015;
+pub const OBSERVED_REJECTION_CODE: &str = "effective-mass-rejected";
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct ChainEvidence {
@@ -82,6 +89,36 @@ impl OperatorKind {
         }
     }
 }
+
+pub const PRIMARY_OPERATOR: OperatorKind = OperatorKind::Plaquette1x1;
+pub const OBSERVED_SURFACE_OUTCOMES: [(&str, OperatorKind, &str); 6] = [
+    ("raw", OperatorKind::Plaquette1x1, OBSERVED_REJECTION_CODE),
+    (
+        "raw",
+        OperatorKind::Rectangle2x1,
+        OBSERVED_REJECTION_CODE,
+    ),
+    (
+        "stout-1",
+        OperatorKind::Plaquette1x1,
+        OBSERVED_REJECTION_CODE,
+    ),
+    (
+        "stout-1",
+        OperatorKind::Rectangle2x1,
+        OBSERVED_REJECTION_CODE,
+    ),
+    (
+        "stout-2",
+        OperatorKind::Plaquette1x1,
+        OBSERVED_REJECTION_CODE,
+    ),
+    (
+        "stout-2",
+        OperatorKind::Rectangle2x1,
+        OBSERVED_REJECTION_CODE,
+    ),
+];
 
 #[derive(Clone, Debug)]
 pub struct CorrelatorEvidence {
@@ -130,11 +167,13 @@ pub enum ProductionError {
     ConfigurationShapeMismatch,
     NonFiniteStatistic,
     CorrelatorReplayMismatch,
+    LinkResidualExceeded,
     Sampler(Su3EnsembleError),
     Lattice(Su3LatticeError),
     Smearing(GlueballSmearingError),
     Operator(GlueballOperatorError),
     Correlator(GlueballCorrelatorError),
+    Fit(ScalarFitError),
 }
 
 impl fmt::Display for ProductionError {
@@ -148,11 +187,15 @@ impl fmt::Display for ProductionError {
             Self::CorrelatorReplayMismatch => {
                 "Phase 3F operator-sample correlator disagrees with frozen Phase 3C"
             }
+            Self::LinkResidualExceeded => {
+                "Phase 3F generated link violated the frozen SU(3) residual bound"
+            }
             Self::Sampler(_) => "Phase 3F frozen SU(3) sampler failed",
             Self::Lattice(_) => "Phase 3F lattice operation failed",
             Self::Smearing(_) => "Phase 3F stout transformation failed",
             Self::Operator(_) => "Phase 3F scalar operator evaluation failed",
             Self::Correlator(_) => "Phase 3F frozen correlator evaluation failed",
+            Self::Fit(_) => "Phase 3F frozen scalar fit failed computationally",
         };
         f.write_str(message)
     }
@@ -199,6 +242,22 @@ fn zero_vec(len: usize) -> Result<Vec<f64>, ProductionError> {
     Ok(values)
 }
 
+fn validate_chain_evidence(evidence: &ChainEvidence) -> Result<(), ProductionError> {
+    if !evidence.acceptance.is_finite()
+        || !evidence.plaquette.is_finite()
+        || !evidence.unitarity_residual.is_finite()
+        || !evidence.determinant_residual.is_finite()
+    {
+        return Err(ProductionError::NonFiniteStatistic);
+    }
+    if evidence.unitarity_residual > LINK_RESIDUAL_LIMIT
+        || evidence.determinant_residual > LINK_RESIDUAL_LIMIT
+    {
+        return Err(ProductionError::LinkResidualExceeded);
+    }
+    Ok(())
+}
+
 fn generate_independent_configurations() -> Result<Vec<RetainedConfiguration>, ProductionError> {
     let mut retained = Vec::new();
     retained
@@ -225,30 +284,18 @@ fn generate_independent_configurations() -> Result<Vec<RetainedConfiguration>, P
         if accounting.proposals != EXPECTED_PROPOSALS_PER_CHAIN {
             return Err(ProductionError::AccountingOverflow);
         }
-        let acceptance = accounting.accepts as f64 / accounting.proposals as f64;
-        let plaquette = average_plaquette(&lattice)?;
-        let unitarity_residual = lattice.max_link_unitarity_residual();
-        let determinant_residual = lattice.max_link_determinant_residual();
-        if !acceptance.is_finite()
-            || !plaquette.is_finite()
-            || !unitarity_residual.is_finite()
-            || !determinant_residual.is_finite()
-        {
-            return Err(ProductionError::NonFiniteStatistic);
-        }
-        retained.push(RetainedConfiguration {
-            evidence: ChainEvidence {
-                chain_id,
-                derived_seed,
-                proposals: accounting.proposals,
-                accepts: accounting.accepts,
-                acceptance,
-                plaquette,
-                unitarity_residual,
-                determinant_residual,
-            },
-            lattice,
-        });
+        let evidence = ChainEvidence {
+            chain_id,
+            derived_seed,
+            proposals: accounting.proposals,
+            accepts: accounting.accepts,
+            acceptance: accounting.accepts as f64 / accounting.proposals as f64,
+            plaquette: average_plaquette(&lattice)?,
+            unitarity_residual: lattice.max_link_unitarity_residual(),
+            determinant_residual: lattice.max_link_determinant_residual(),
+        };
+        validate_chain_evidence(&evidence)?;
+        retained.push(RetainedConfiguration { evidence, lattice });
     }
     Ok(retained)
 }
@@ -428,21 +475,33 @@ fn correlator_evidence(
     Ok(CorrelatorEvidence { full, jackknife })
 }
 
-fn fit_error_code(error: &ScalarFitError) -> &'static str {
+fn scientific_fit_error_code(error: &ScalarFitError) -> Option<&'static str> {
     match error {
-        ScalarFitError::EmptyCandidateWindows => "empty-candidate-windows",
-        ScalarFitError::TooManyCandidateWindows => "too-many-candidate-windows",
-        ScalarFitError::InvalidCandidateWindow => "invalid-candidate-window",
-        ScalarFitError::DuplicateCandidateWindow => "duplicate-candidate-window",
-        ScalarFitError::DegeneratePlateauUncertainty => "degenerate-plateau-uncertainty",
-        ScalarFitError::NoAcceptedPlateauWindow => "no-accepted-plateau-window",
-        ScalarFitError::InsufficientReplicatesForCovariance => "insufficient-covariance-rank",
-        ScalarFitError::CovarianceNotPositiveDefinite => "covariance-not-positive-definite",
-        ScalarFitError::SingularCovariance => "singular-covariance",
-        ScalarFitError::NonFiniteStatistic => "non-finite-statistic",
-        ScalarFitError::NoFiniteGridFit => "no-finite-grid-fit",
-        ScalarFitError::AllocationFailed => "allocation-failed",
-        ScalarFitError::EffectiveMass(_) => "effective-mass-rejected",
+        ScalarFitError::DegeneratePlateauUncertainty => Some("degenerate-plateau-uncertainty"),
+        ScalarFitError::NoAcceptedPlateauWindow => Some("no-accepted-plateau-window"),
+        ScalarFitError::CovarianceNotPositiveDefinite => Some("covariance-not-positive-definite"),
+        ScalarFitError::SingularCovariance => Some("singular-covariance"),
+        ScalarFitError::NoFiniteGridFit => Some("no-finite-grid-fit"),
+        ScalarFitError::EffectiveMass(EffectiveMassError::NonPositiveCentralCorrelator)
+        | ScalarFitError::EffectiveMass(EffectiveMassError::AcoshDomainViolation) => {
+            Some(OBSERVED_REJECTION_CODE)
+        }
+        _ => None,
+    }
+}
+
+fn production_fit_error(error: ScalarFitError) -> ProductionError {
+    match error {
+        ScalarFitError::AllocationFailed
+        | ScalarFitError::EffectiveMass(EffectiveMassError::AllocationFailed) => {
+            ProductionError::AllocationFailed
+        }
+        ScalarFitError::NonFiniteStatistic
+        | ScalarFitError::EffectiveMass(EffectiveMassError::NonFiniteCorrelator)
+        | ScalarFitError::EffectiveMass(EffectiveMassError::NonFiniteStatistic) => {
+            ProductionError::NonFiniteStatistic
+        }
+        other => ProductionError::Fit(other),
     }
 }
 
@@ -450,9 +509,9 @@ fn analyze_surface(
     transformation: &'static str,
     operator: OperatorKind,
     correlator: CorrelatorEvidence,
-) -> SurfaceRecord {
+) -> Result<SurfaceRecord, ProductionError> {
     match correlated_scalar_fit(&correlator.full, &correlator.jackknife, &CANDIDATE_WINDOWS) {
-        Ok(fit) => SurfaceRecord {
+        Ok(fit) => Ok(SurfaceRecord {
             outcome: SurfaceOutcome {
                 transformation,
                 operator,
@@ -460,15 +519,18 @@ fn analyze_surface(
                 error_code: None,
             },
             correlator,
-        },
-        Err(error) => SurfaceRecord {
-            outcome: SurfaceOutcome {
-                transformation,
-                operator,
-                fit: None,
-                error_code: Some(fit_error_code(&error)),
-            },
-            correlator,
+        }),
+        Err(error) => match scientific_fit_error_code(&error) {
+            Some(error_code) => Ok(SurfaceRecord {
+                outcome: SurfaceOutcome {
+                    transformation,
+                    operator,
+                    fit: None,
+                    error_code: Some(error_code),
+                },
+                correlator,
+            }),
+            None => Err(production_fit_error(error)),
         },
     }
 }
@@ -493,12 +555,12 @@ fn add_transformation_surfaces(
         transformation,
         OperatorKind::Plaquette1x1,
         p,
-    ));
+    )?);
     surfaces.push(analyze_surface(
         transformation,
         OperatorKind::Rectangle2x1,
         r,
-    ));
+    )?);
     Ok(())
 }
 
@@ -512,17 +574,19 @@ fn stable_z(first: &ScalarFitResult, second: &ScalarFitResult) -> Option<f64> {
 }
 
 fn maximum_pairwise_z(fits: &[ScalarFitResult]) -> (usize, Option<f64>) {
+    if fits.len() < 2 {
+        return (fits.len(), None);
+    }
     let mut maximum = 0.0_f64;
-    let mut pairs = 0usize;
     for first in 0..fits.len() {
         for second in (first + 1)..fits.len() {
-            if let Some(z) = stable_z(&fits[first], &fits[second]) {
-                pairs += 1;
-                maximum = maximum.max(z);
-            }
+            let Some(z) = stable_z(&fits[first], &fits[second]) else {
+                return (fits.len(), None);
+            };
+            maximum = maximum.max(z);
         }
     }
-    (fits.len(), (pairs > 0).then_some(maximum))
+    (fits.len(), Some(maximum))
 }
 
 fn window_stability(primary: &SurfaceRecord) -> Result<(usize, Option<f64>), ProductionError> {
@@ -531,12 +595,14 @@ fn window_stability(primary: &SurfaceRecord) -> Result<(usize, Option<f64>), Pro
         .try_reserve_exact(CANDIDATE_WINDOWS.len())
         .map_err(|_| ProductionError::AllocationFailed)?;
     for &window in &CANDIDATE_WINDOWS {
-        if let Ok(fit) = correlated_scalar_fit(
+        match correlated_scalar_fit(
             &primary.correlator.full,
             &primary.correlator.jackknife,
             &[window],
         ) {
-            successful.push(fit);
+            Ok(fit) => successful.push(fit),
+            Err(error) if scientific_fit_error_code(&error).is_some() => {}
+            Err(error) => return Err(production_fit_error(error)),
         }
     }
     Ok(maximum_pairwise_z(&successful))
@@ -552,6 +618,29 @@ fn surface<'a>(
     })
 }
 
+pub fn observed_phase3f_receipt_matches(summary: &ProductionSummary) -> bool {
+    let surfaces_match = summary.surfaces.len() == OBSERVED_SURFACE_OUTCOMES.len()
+        && summary
+            .surfaces
+            .iter()
+            .zip(OBSERVED_SURFACE_OUTCOMES.iter())
+            .all(|(record, expected)| {
+                let (transformation, operator, rejection_code) = *expected;
+                record.outcome.transformation == transformation
+                    && record.outcome.operator == operator
+                    && record.outcome.fit.is_none()
+                    && record.outcome.error_code == Some(rejection_code)
+            });
+    summary.sampler_diagnostics_passed
+        && surfaces_match
+        && summary.primary_window_successes == 0
+        && summary.primary_window_max_z.is_none()
+        && summary.operator_stability_z.is_none()
+        && summary.transformation_stability_successes == 0
+        && summary.transformation_stability_max_z.is_none()
+        && !summary.scalar_pipeline_validated
+}
+
 pub fn run_production_scalar_analysis() -> Result<ProductionSummary, ProductionError> {
     let retained = generate_independent_configurations()?;
     let mut chain_evidence = Vec::new();
@@ -561,11 +650,9 @@ pub fn run_production_scalar_analysis() -> Result<ProductionSummary, ProductionE
     for configuration in &retained {
         chain_evidence.push(configuration.evidence);
     }
-    let sampler_diagnostics_passed = chain_evidence.iter().all(|evidence| {
-        (MIN_ACCEPTANCE..=MAX_ACCEPTANCE).contains(&evidence.acceptance)
-            && evidence.unitarity_residual <= LINK_RESIDUAL_LIMIT
-            && evidence.determinant_residual <= LINK_RESIDUAL_LIMIT
-    });
+    let sampler_diagnostics_passed = chain_evidence
+        .iter()
+        .all(|evidence| (MIN_ACCEPTANCE..=MAX_ACCEPTANCE).contains(&evidence.acceptance));
 
     let raw = extract_lattices(&retained)?;
     let stout1 = stout_transform(&raw, STOUT_LEVELS[0])?;
@@ -574,18 +661,18 @@ pub fn run_production_scalar_analysis() -> Result<ProductionSummary, ProductionE
     surfaces
         .try_reserve_exact(6)
         .map_err(|_| ProductionError::AllocationFailed)?;
-    add_transformation_surfaces(&mut surfaces, "raw", &raw)?;
-    add_transformation_surfaces(&mut surfaces, "stout-1", &stout1)?;
-    add_transformation_surfaces(&mut surfaces, "stout-2", &stout2)?;
+    add_transformation_surfaces(&mut surfaces, TRANSFORMATION_LABELS[0], &raw)?;
+    add_transformation_surfaces(&mut surfaces, TRANSFORMATION_LABELS[1], &stout1)?;
+    add_transformation_surfaces(&mut surfaces, TRANSFORMATION_LABELS[2], &stout2)?;
 
-    let primary = surface(&surfaces, "stout-2", OperatorKind::Plaquette1x1)
+    let primary = surface(&surfaces, PRIMARY_TRANSFORMATION, PRIMARY_OPERATOR)
         .ok_or(ProductionError::ConfigurationShapeMismatch)?;
     let (primary_window_successes, primary_window_max_z) = window_stability(primary)?;
 
     let operator_stability_z = match (
-        surface(&surfaces, "stout-2", OperatorKind::Plaquette1x1)
+        surface(&surfaces, PRIMARY_TRANSFORMATION, OperatorKind::Plaquette1x1)
             .and_then(|record| record.outcome.fit.as_ref()),
-        surface(&surfaces, "stout-2", OperatorKind::Rectangle2x1)
+        surface(&surfaces, PRIMARY_TRANSFORMATION, OperatorKind::Rectangle2x1)
             .and_then(|record| record.outcome.fit.as_ref()),
     ) {
         (Some(first), Some(second)) => stable_z(first, second),
@@ -594,10 +681,10 @@ pub fn run_production_scalar_analysis() -> Result<ProductionSummary, ProductionE
 
     let mut transformation_fits = Vec::new();
     transformation_fits
-        .try_reserve_exact(3)
+        .try_reserve_exact(TRANSFORMATION_LABELS.len())
         .map_err(|_| ProductionError::AllocationFailed)?;
-    for label in ["raw", "stout-1", "stout-2"] {
-        if let Some(fit) = surface(&surfaces, label, OperatorKind::Plaquette1x1)
+    for label in TRANSFORMATION_LABELS {
+        if let Some(fit) = surface(&surfaces, label, PRIMARY_OPERATOR)
             .and_then(|record| record.outcome.fit.as_ref())
         {
             transformation_fits.push(fit.clone());
@@ -632,6 +719,26 @@ pub fn run_production_scalar_analysis() -> Result<ProductionSummary, ProductionE
 mod tests {
     use super::*;
 
+    fn fit_result(mass: f64, standard_error: f64) -> ScalarFitResult {
+        ScalarFitResult {
+            time_extent: 10,
+            jackknife_replicates: 16,
+            selected_window: FitWindow { start: 1, end: 3 },
+            plateau_weighted_effective_mass: mass,
+            plateau_maximum_z: 1.0,
+            fitted_mass: mass,
+            fitted_amplitude: 1.0,
+            chi_square: 1.0,
+            degrees_of_freedom: 1,
+            chi_square_per_dof: 1.0,
+            mass_jackknife_mean: mass,
+            mass_standard_error: standard_error,
+            amplitude_jackknife_mean: 1.0,
+            amplitude_standard_error: 0.1,
+            maximum_off_diagonal_correlation: 0.2,
+        }
+    }
+
     #[test]
     fn phase3f_identity_is_predeclared() {
         assert_eq!(PRODUCTION_CONTRACT_ID, "YM-GLUEBALL-SCALAR-PRODUCTION-V1");
@@ -642,8 +749,28 @@ mod tests {
         assert_eq!(STREAM_ID, "YM-SU3-STREAM-V1");
         assert_eq!(EXTENTS, [4, 4, 4, 10]);
         assert_eq!(BETA, 5.7);
+        assert_eq!(MASTER_SEED, 0x3f00_2026_0915_0001);
         assert_eq!(CHAIN_COUNT, 16);
+        assert_eq!(THERMALIZATION_SWEEPS, 64);
+        assert_eq!(POST_THERMALIZATION_SWEEPS, 4);
         assert_eq!(TOTAL_SWEEPS_PER_CHAIN, 68);
+        assert_eq!(PROPOSAL_ANGLE, 0.35);
+        assert_eq!(RETAINED_CONFIGURATIONS_PER_CHAIN, 1);
+        assert_eq!(LINKS_PER_SWEEP, 2560);
+        assert_eq!(PROPOSALS_PER_LINK, 8);
+        assert_eq!(EXPECTED_PROPOSALS_PER_CHAIN, 1_392_640);
+        assert_eq!(MIN_ACCEPTANCE, 0.1);
+        assert_eq!(MAX_ACCEPTANCE, 0.95);
+        assert_eq!(LINK_RESIDUAL_LIMIT, 5.0e-12);
+        assert_eq!(CANONICAL_RHO, 0.1);
+        assert_eq!(STOUT_LEVELS, [1, 2]);
+        assert_eq!(TRANSFORMATION_LABELS, ["raw", "stout-1", "stout-2"]);
+        assert_eq!(PRIMARY_TRANSFORMATION, "stout-2");
+        assert_eq!(PRIMARY_OPERATOR, OperatorKind::Plaquette1x1);
+        assert_eq!(STABILITY_MAX_Z, 5.0);
+        assert_eq!(CORRELATOR_REPLAY_TOLERANCE, 2.0e-12);
+        assert_eq!(OBSERVED_RECEIPT_HEAD, "88b7f450701884e6351878e7890410e4095e3d6d");
+        assert_eq!(OBSERVED_RECEIPT_WORKFLOW_RUN_ID, 34_862_755_015);
         assert_eq!(
             CANDIDATE_WINDOWS,
             [
@@ -655,30 +782,110 @@ mod tests {
     }
 
     #[test]
-    fn stability_z_uses_combined_uncertainty() {
-        let mut first = ScalarFitResult {
-            time_extent: 10,
-            jackknife_replicates: 16,
-            selected_window: FitWindow { start: 1, end: 3 },
-            plateau_weighted_effective_mass: 0.5,
-            plateau_maximum_z: 1.0,
-            fitted_mass: 0.50,
-            fitted_amplitude: 1.0,
-            chi_square: 1.0,
-            degrees_of_freedom: 1,
-            chi_square_per_dof: 1.0,
-            mass_jackknife_mean: 0.50,
-            mass_standard_error: 0.03,
-            amplitude_jackknife_mean: 1.0,
-            amplitude_standard_error: 0.1,
-            maximum_off_diagonal_correlation: 0.2,
+    fn link_residual_violation_is_an_implementation_failure() {
+        let mut evidence = ChainEvidence {
+            chain_id: 0,
+            derived_seed: 1,
+            proposals: EXPECTED_PROPOSALS_PER_CHAIN,
+            accepts: EXPECTED_PROPOSALS_PER_CHAIN / 2,
+            acceptance: 0.5,
+            plaquette: 0.6,
+            unitarity_residual: LINK_RESIDUAL_LIMIT,
+            determinant_residual: LINK_RESIDUAL_LIMIT,
         };
-        let mut second = first.clone();
-        second.fitted_mass = 0.55;
-        second.mass_standard_error = 0.04;
+        assert_eq!(validate_chain_evidence(&evidence), Ok(()));
+        evidence.unitarity_residual = LINK_RESIDUAL_LIMIT * 2.0;
+        assert_eq!(
+            validate_chain_evidence(&evidence),
+            Err(ProductionError::LinkResidualExceeded)
+        );
+        evidence.unitarity_residual = 0.0;
+        evidence.determinant_residual = LINK_RESIDUAL_LIMIT * 2.0;
+        assert_eq!(
+            validate_chain_evidence(&evidence),
+            Err(ProductionError::LinkResidualExceeded)
+        );
+    }
+
+    #[test]
+    fn computational_fit_failures_are_not_scientific_rejections() {
+        assert_eq!(scientific_fit_error_code(&ScalarFitError::AllocationFailed), None);
+        assert_eq!(
+            scientific_fit_error_code(&ScalarFitError::NonFiniteStatistic),
+            None
+        );
+        assert_eq!(
+            scientific_fit_error_code(&ScalarFitError::EffectiveMass(
+                EffectiveMassError::AllocationFailed
+            )),
+            None
+        );
+        assert_eq!(
+            scientific_fit_error_code(&ScalarFitError::EffectiveMass(
+                EffectiveMassError::NonPositiveCentralCorrelator
+            )),
+            Some(OBSERVED_REJECTION_CODE)
+        );
+        assert_eq!(
+            production_fit_error(ScalarFitError::AllocationFailed),
+            ProductionError::AllocationFailed
+        );
+        assert_eq!(
+            production_fit_error(ScalarFitError::NonFiniteStatistic),
+            ProductionError::NonFiniteStatistic
+        );
+    }
+
+    #[test]
+    fn stability_z_uses_combined_uncertainty() {
+        let mut first = fit_result(0.50, 0.03);
+        let mut second = fit_result(0.55, 0.04);
         assert!((stable_z(&first, &second).unwrap() - 1.0).abs() <= 1.0e-12);
         first.mass_standard_error = 0.0;
         second.mass_standard_error = 0.0;
         assert_eq!(stable_z(&first, &second), None);
+    }
+
+    #[test]
+    fn pairwise_stability_requires_every_successful_pair_to_be_scorable() {
+        let fits = [
+            fit_result(0.50, 0.0),
+            fit_result(0.55, 0.0),
+            fit_result(0.525, 0.05),
+        ];
+        assert_eq!(maximum_pairwise_z(&fits), (3, None));
+    }
+
+    #[test]
+    fn pinned_observed_receipt_matches_only_the_recorded_negative_outcome() {
+        let surfaces = OBSERVED_SURFACE_OUTCOMES
+            .iter()
+            .map(|&(transformation, operator, rejection_code)| SurfaceRecord {
+                outcome: SurfaceOutcome {
+                    transformation,
+                    operator,
+                    fit: None,
+                    error_code: Some(rejection_code),
+                },
+                correlator: CorrelatorEvidence {
+                    full: Vec::new(),
+                    jackknife: Vec::new(),
+                },
+            })
+            .collect();
+        let mut summary = ProductionSummary {
+            chain_evidence: Vec::new(),
+            surfaces,
+            sampler_diagnostics_passed: true,
+            primary_window_successes: 0,
+            primary_window_max_z: None,
+            operator_stability_z: None,
+            transformation_stability_successes: 0,
+            transformation_stability_max_z: None,
+            scalar_pipeline_validated: false,
+        };
+        assert!(observed_phase3f_receipt_matches(&summary));
+        summary.scalar_pipeline_validated = true;
+        assert!(!observed_phase3f_receipt_matches(&summary));
     }
 }
