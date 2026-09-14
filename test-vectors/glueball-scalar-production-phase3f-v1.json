@@ -41,6 +41,28 @@
       "positive_continuum_mass_gap_proved": false,
       "clay_solution_claimed": false,
       "claim_class": "C0"
+    },
+    {
+      "id": "observed-negative-production-receipt",
+      "observation_head": "88b7f450701884e6351878e7890410e4095e3d6d",
+      "workflow_run_id": 34862755015,
+      "sampler_diagnostics_passed": true,
+      "surface_outcomes": [
+        {"transformation": "raw", "operator": "plaquette-1x1", "fit": "rejected", "reason": "effective-mass-rejected"},
+        {"transformation": "raw", "operator": "rectangle-2x1", "fit": "rejected", "reason": "effective-mass-rejected"},
+        {"transformation": "stout-1", "operator": "plaquette-1x1", "fit": "rejected", "reason": "effective-mass-rejected"},
+        {"transformation": "stout-1", "operator": "rectangle-2x1", "fit": "rejected", "reason": "effective-mass-rejected"},
+        {"transformation": "stout-2", "operator": "plaquette-1x1", "fit": "rejected", "reason": "effective-mass-rejected"},
+        {"transformation": "stout-2", "operator": "rectangle-2x1", "fit": "rejected", "reason": "effective-mass-rejected"}
+      ],
+      "primary_window_successes": 0,
+      "primary_window_max_z": null,
+      "operator_stability_z": null,
+      "transformation_stability_successes": 0,
+      "transformation_stability_max_z": null,
+      "scalar_pipeline_validated": false,
+      "physical_glueball_mass_claimed": false,
+      "claim_class": "C2"
     }
   ]
 }
