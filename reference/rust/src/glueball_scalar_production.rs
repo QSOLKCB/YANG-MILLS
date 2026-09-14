@@ -15,7 +15,9 @@ use core::fmt;
 
 use crate::glueball_correlators::{scalar_connected_correlators, GlueballCorrelatorError};
 use crate::glueball_operators::{scalar_a1pp_operator_basis, GlueballOperatorError};
-use crate::glueball_scalar_fit::{correlated_scalar_fit, FitWindow, ScalarFitError, ScalarFitResult};
+use crate::glueball_scalar_fit::{
+    correlated_scalar_fit, FitWindow, ScalarFitError, ScalarFitResult,
+};
 use crate::glueball_smearing::{spatial_stout_smear, GlueballSmearingError, CANONICAL_RHO};
 use crate::su2_ensemble::SplitMix64;
 use crate::su3_ensemble::{
@@ -322,8 +324,7 @@ fn operator_samples(
             .map_err(|_| ProductionError::AllocationFailed)?;
         for time in 0..time_extent {
             let basis = scalar_a1pp_operator_basis(configuration, time)?;
-            if !basis.spatial_plaquette_1x1.is_finite()
-                || !basis.spatial_rectangle_2x1.is_finite()
+            if !basis.spatial_plaquette_1x1.is_finite() || !basis.spatial_rectangle_2x1.is_finite()
             {
                 return Err(ProductionError::NonFiniteStatistic);
             }
@@ -340,12 +341,21 @@ fn connected_from_samples(
     samples: &[Vec<f64>],
     omitted: Option<usize>,
 ) -> Result<Vec<f64>, ProductionError> {
-    let first = samples.first().ok_or(ProductionError::EmptyConfigurationSet)?;
+    let first = samples
+        .first()
+        .ok_or(ProductionError::EmptyConfigurationSet)?;
     let time_extent = first.len();
     if time_extent == 0 || samples.iter().any(|row| row.len() != time_extent) {
         return Err(ProductionError::ConfigurationShapeMismatch);
     }
-    let kept = samples.len() - usize::from(omitted.is_some());
+    let kept = match omitted {
+        Some(index) if index < samples.len() => samples
+            .len()
+            .checked_sub(1)
+            .ok_or(ProductionError::EmptyConfigurationSet)?,
+        Some(_) => return Err(ProductionError::ConfigurationShapeMismatch),
+        None => samples.len(),
+    };
     if kept == 0 {
         return Err(ProductionError::EmptyConfigurationSet);
     }
@@ -469,10 +479,26 @@ fn add_transformation_surfaces(
     configurations: &[Su3Lattice4],
 ) -> Result<(), ProductionError> {
     let (plaquette_samples, rectangle_samples) = operator_samples(configurations)?;
-    let p = correlator_evidence(configurations, &plaquette_samples, OperatorKind::Plaquette1x1)?;
-    let r = correlator_evidence(configurations, &rectangle_samples, OperatorKind::Rectangle2x1)?;
-    surfaces.push(analyze_surface(transformation, OperatorKind::Plaquette1x1, p));
-    surfaces.push(analyze_surface(transformation, OperatorKind::Rectangle2x1, r));
+    let p = correlator_evidence(
+        configurations,
+        &plaquette_samples,
+        OperatorKind::Plaquette1x1,
+    )?;
+    let r = correlator_evidence(
+        configurations,
+        &rectangle_samples,
+        OperatorKind::Rectangle2x1,
+    )?;
+    surfaces.push(analyze_surface(
+        transformation,
+        OperatorKind::Plaquette1x1,
+        p,
+    ));
+    surfaces.push(analyze_surface(
+        transformation,
+        OperatorKind::Rectangle2x1,
+        r,
+    ));
     Ok(())
 }
 
@@ -485,16 +511,12 @@ fn stable_z(first: &ScalarFitResult, second: &ScalarFitResult) -> Option<f64> {
     z.is_finite().then_some(z)
 }
 
-fn maximum_pairwise_z<'a, I>(fits: I) -> (usize, Option<f64>)
-where
-    I: IntoIterator<Item = &'a ScalarFitResult>,
-{
-    let fits: Vec<&ScalarFitResult> = fits.into_iter().collect();
+fn maximum_pairwise_z(fits: &[ScalarFitResult]) -> (usize, Option<f64>) {
     let mut maximum = 0.0_f64;
     let mut pairs = 0usize;
     for first in 0..fits.len() {
         for second in (first + 1)..fits.len() {
-            if let Some(z) = stable_z(fits[first], fits[second]) {
+            if let Some(z) = stable_z(&fits[first], &fits[second]) {
                 pairs += 1;
                 maximum = maximum.max(z);
             }
@@ -503,9 +525,11 @@ where
     (fits.len(), (pairs > 0).then_some(maximum))
 }
 
-fn window_stability(primary: &SurfaceRecord) -> (usize, Option<f64>) {
+fn window_stability(primary: &SurfaceRecord) -> Result<(usize, Option<f64>), ProductionError> {
     let mut successful = Vec::new();
-    successful.reserve(CANDIDATE_WINDOWS.len());
+    successful
+        .try_reserve_exact(CANDIDATE_WINDOWS.len())
+        .map_err(|_| ProductionError::AllocationFailed)?;
     for &window in &CANDIDATE_WINDOWS {
         if let Ok(fit) = correlated_scalar_fit(
             &primary.correlator.full,
@@ -515,7 +539,7 @@ fn window_stability(primary: &SurfaceRecord) -> (usize, Option<f64>) {
             successful.push(fit);
         }
     }
-    maximum_pairwise_z(successful.iter())
+    Ok(maximum_pairwise_z(&successful))
 }
 
 fn surface<'a>(
@@ -556,7 +580,7 @@ pub fn run_production_scalar_analysis() -> Result<ProductionSummary, ProductionE
 
     let primary = surface(&surfaces, "stout-2", OperatorKind::Plaquette1x1)
         .ok_or(ProductionError::ConfigurationShapeMismatch)?;
-    let (primary_window_successes, primary_window_max_z) = window_stability(primary);
+    let (primary_window_successes, primary_window_max_z) = window_stability(primary)?;
 
     let operator_stability_z = match (
         surface(&surfaces, "stout-2", OperatorKind::Plaquette1x1)
@@ -568,14 +592,19 @@ pub fn run_production_scalar_analysis() -> Result<ProductionSummary, ProductionE
         _ => None,
     };
 
-    let transformation_fits = ["raw", "stout-1", "stout-2"]
-        .iter()
-        .filter_map(|label| {
-            surface(&surfaces, label, OperatorKind::Plaquette1x1)
-                .and_then(|record| record.outcome.fit.as_ref())
-        });
+    let mut transformation_fits = Vec::new();
+    transformation_fits
+        .try_reserve_exact(3)
+        .map_err(|_| ProductionError::AllocationFailed)?;
+    for label in ["raw", "stout-1", "stout-2"] {
+        if let Some(fit) = surface(&surfaces, label, OperatorKind::Plaquette1x1)
+            .and_then(|record| record.outcome.fit.as_ref())
+        {
+            transformation_fits.push(fit.clone());
+        }
+    }
     let (transformation_stability_successes, transformation_stability_max_z) =
-        maximum_pairwise_z(transformation_fits);
+        maximum_pairwise_z(&transformation_fits);
 
     let primary_succeeded = primary.outcome.succeeded();
     let scalar_pipeline_validated = sampler_diagnostics_passed
@@ -615,11 +644,14 @@ mod tests {
         assert_eq!(BETA, 5.7);
         assert_eq!(CHAIN_COUNT, 16);
         assert_eq!(TOTAL_SWEEPS_PER_CHAIN, 68);
-        assert_eq!(CANDIDATE_WINDOWS, [
-            FitWindow { start: 1, end: 3 },
-            FitWindow { start: 2, end: 4 },
-            FitWindow { start: 1, end: 4 },
-        ]);
+        assert_eq!(
+            CANDIDATE_WINDOWS,
+            [
+                FitWindow { start: 1, end: 3 },
+                FitWindow { start: 2, end: 4 },
+                FitWindow { start: 1, end: 4 },
+            ]
+        );
     }
 
     #[test]
