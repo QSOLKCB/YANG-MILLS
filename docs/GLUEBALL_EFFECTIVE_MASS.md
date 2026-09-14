@@ -2,14 +2,14 @@
 
 Phase 3D adds a separately versioned analysis surface on top of the Phase 3C connected Euclidean correlator authority. It is deliberately limited to **effective-mass mechanics plus uncertainty propagation** for the scalar `A1++` channel, whose continuum target is `0++`.
 
-The candidate authority is:
+PR #15 merged this authority and froze it as:
 
 ```text
 YM-GLUEBALL-EFFECTIVE-MASS-V1
-status = phase-3d-candidate
+status = phase-3d-frozen
 ```
 
-This phase does **not** select a fit window, perform a correlated spectral fit, solve a variational GEVP, report a physical glueball mass, establish a finite-volume mass gap, establish confinement, construct continuum quantum Yang–Mills theory, or prove a positive continuum mass gap.
+This phase does **not** select a fit window, perform a correlated spectral fit, solve a variational GEVP, report a physical glueball mass, establish a finite-volume mass gap, establish confinement, construct continuum quantum Yang–Mills theory, or prove a positive continuum mass gap. Those remain separately versioned later authorities; Phase 3E now owns plateau/window selection and correlated scalar-fit mechanics.
 
 ## Periodic cosh effective mass
 
@@ -126,4 +126,4 @@ A finite-lattice effective-mass point with a jackknife error bar is not automati
 - a positive continuum mass gap;
 - a Clay Millennium Problem solution.
 
-The next spectroscopy authority should define **predeclared fit-window/plateau criteria and correlated fitting**, still within the scalar channel, before expanding to additional irreducible channels.
+Phase 3E is separately versioned specifically so those later mechanics are not back-propagated into the frozen Phase 3D authority.
