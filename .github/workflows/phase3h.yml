@@ -1,0 +1,33 @@
+name: Phase 3H blocking-capable scalar geometry recovery
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  scalar-geometry-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Rust toolchain
+        run: rustup show
+
+      - name: Strict Rust format
+        run: cargo fmt --all -- --check
+
+      - name: Phase 3H unit tests
+        run: cargo test --locked --bin ym-glueball-scalar-geometry-recovery
+
+      - name: Phase 3H contract checks
+        run: python3 scripts/check_glueball_scalar_geometry_recovery_contracts.py
+
+      - name: Phase 3H negative contract regressions
+        run: python3 scripts/test_glueball_scalar_geometry_recovery_contract_validation.py
+
+      - name: Phase 3H blocking-capable scalar recovery evidence
+        run: cargo run --release --quiet --locked --bin ym-glueball-scalar-geometry-recovery
