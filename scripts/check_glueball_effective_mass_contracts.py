@@ -14,7 +14,7 @@ EXPECTED_CONTRACT: dict[str, Any] = {
     "depends_on": [
         {
             "contract_id": "YM-GLUEBALL-CONNECTED-CORRELATOR-V1",
-            "required_status": "phase-3c-candidate",
+            "required_status": "phase-3c-frozen",
         }
     ],
     "method_origin": {
