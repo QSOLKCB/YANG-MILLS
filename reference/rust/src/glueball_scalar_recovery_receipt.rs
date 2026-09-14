@@ -84,9 +84,7 @@ pub fn observed_phase3g_receipt_matches(summary: &ProductionSummary) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::glueball_scalar_production::{
-        CorrelatorEvidence, SurfaceOutcome, SurfaceRecord,
-    };
+    use crate::glueball_scalar_production::{CorrelatorEvidence, SurfaceOutcome, SurfaceRecord};
 
     fn pinned_chain_evidence() -> Vec<ChainEvidence> {
         (0..CHAIN_COUNT)
