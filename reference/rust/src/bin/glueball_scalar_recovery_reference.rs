@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+use std::fmt;
+
 use yang_mills_reference::{Lattice4, ReferenceError, Su2, DIM};
 
 #[path = "../glueball_correlators.rs"]
@@ -31,7 +33,9 @@ mod su3_ensemble;
 #[path = "../su3_lattice.rs"]
 mod su3_lattice;
 
-use glueball_scalar_production::{OperatorKind, CANDIDATE_WINDOWS, STABILITY_MAX_Z, STOUT_LEVELS};
+use glueball_scalar_production::{
+    OperatorKind, ProductionError, CANDIDATE_WINDOWS, STABILITY_MAX_Z, STOUT_LEVELS,
+};
 use glueball_scalar_recovery::{
     run_scalar_recovery_analysis, BETA, CHAIN_COUNT, EXPECTED_TOTAL_PROPOSALS, EXTENTS,
     MASTER_SEED, PHASE3F_CHAIN_COUNT, PHASE3F_MASTER_SEED, POST_THERMALIZATION_SWEEPS,
@@ -42,6 +46,17 @@ use glueball_scalar_recovery_receipt::{
     observed_phase3g_receipt_matches, OBSERVATION_HEAD, OBSERVATION_WORKFLOW_RUN_ID,
 };
 
+#[derive(Debug)]
+struct Phase3gImplementationError(ProductionError);
+
+impl fmt::Display for Phase3gImplementationError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Phase 3G recovery implementation failure: {:?}", self.0)
+    }
+}
+
+impl std::error::Error for Phase3gImplementationError {}
+
 fn print_optional(label: &str, value: Option<f64>) {
     match value {
         Some(value) => println!("{label}={value:.17e}"),
@@ -50,7 +65,7 @@ fn print_optional(label: &str, value: Option<f64>) {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let summary = run_scalar_recovery_analysis()?;
+    let summary = run_scalar_recovery_analysis().map_err(Phase3gImplementationError)?;
     if !observed_phase3g_receipt_matches(&summary) {
         return Err(
             "Phase 3G deterministic replay no longer matches the pinned observation receipt".into(),
@@ -157,4 +172,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("receipt_replay_matches=true");
     println!("result=completed");
     Ok(())
+}
+
+#[cfg(test)]
+mod binary_tests {
+    use super::*;
+
+    #[test]
+    fn recovery_implementation_errors_are_attributed_to_phase3g() {
+        let message = Phase3gImplementationError(ProductionError::AllocationFailed).to_string();
+        assert!(message.contains("Phase 3G"));
+        assert!(!message.contains("Phase 3F"));
+    }
 }
