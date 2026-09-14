@@ -234,23 +234,43 @@ pub fn scalar_connected_correlators(
     })
 }
 
+fn validate_correlator_result_shape(
+    result: &ScalarConnectedCorrelators,
+) -> Result<(), GlueballCorrelatorError> {
+    if result.configuration_count == 0
+        || result.configuration_count > MAX_CONFIGURATIONS
+        || result.time_extent < 2
+        || result.time_extent > MAX_TIME_EXTENT
+        || result.plaquette_raw.len() != result.time_extent
+        || result.rectangle_raw.len() != result.time_extent
+        || result.plaquette_connected.len() != result.time_extent
+        || result.rectangle_connected.len() != result.time_extent
+    {
+        return Err(GlueballCorrelatorError::CorrelatorShapeMismatch);
+    }
+    Ok(())
+}
+
 pub fn max_correlator_residual(
     first: &ScalarConnectedCorrelators,
     second: &ScalarConnectedCorrelators,
 ) -> Result<f64, GlueballCorrelatorError> {
-    if first.configuration_count != second.configuration_count
-        || first.time_extent != second.time_extent
-        || first.plaquette_raw.len() != second.plaquette_raw.len()
-        || first.rectangle_raw.len() != second.rectangle_raw.len()
-        || first.plaquette_connected.len() != second.plaquette_connected.len()
-        || first.rectangle_connected.len() != second.rectangle_connected.len()
+    validate_correlator_result_shape(first)?;
+    validate_correlator_result_shape(second)?;
+    if first.configuration_count != second.configuration_count || first.time_extent != second.time_extent
     {
         return Err(GlueballCorrelatorError::CorrelatorShapeMismatch);
     }
 
-    let mut maximum = (first.plaquette_vacuum_mean - second.plaquette_vacuum_mean)
-        .abs()
-        .max((first.rectangle_vacuum_mean - second.rectangle_vacuum_mean).abs());
+    let plaquette_mean_residual =
+        (first.plaquette_vacuum_mean - second.plaquette_vacuum_mean).abs();
+    let rectangle_mean_residual =
+        (first.rectangle_vacuum_mean - second.rectangle_vacuum_mean).abs();
+    if !plaquette_mean_residual.is_finite() || !rectangle_mean_residual.is_finite() {
+        return Err(GlueballCorrelatorError::NonFiniteAccumulator);
+    }
+    let mut maximum = plaquette_mean_residual.max(rectangle_mean_residual);
+
     for (left, right) in first
         .plaquette_raw
         .iter()
@@ -374,6 +394,35 @@ mod tests {
         assert!(
             residual <= GAUGE_INVARIANCE_TOLERANCE,
             "residual={residual:.17e}"
+        );
+    }
+
+    #[test]
+    fn residual_rejects_series_lengths_that_do_not_match_time_extent() {
+        let configurations = canonical_shifted_defect_configurations().unwrap();
+        let valid = scalar_connected_correlators(&configurations).unwrap();
+        let mut malformed = valid.clone();
+        malformed.plaquette_raw.pop();
+        malformed.rectangle_raw.pop();
+        malformed.plaquette_connected.pop();
+        malformed.rectangle_connected.pop();
+
+        assert_eq!(
+            max_correlator_residual(&malformed, &malformed).unwrap_err(),
+            GlueballCorrelatorError::CorrelatorShapeMismatch
+        );
+    }
+
+    #[test]
+    fn residual_rejects_non_finite_vacuum_mean_before_maximum() {
+        let configurations = canonical_shifted_defect_configurations().unwrap();
+        let valid = scalar_connected_correlators(&configurations).unwrap();
+        let mut malformed = valid.clone();
+        malformed.plaquette_vacuum_mean = f64::NAN;
+
+        assert_eq!(
+            max_correlator_residual(&malformed, &valid).unwrap_err(),
+            GlueballCorrelatorError::NonFiniteAccumulator
         );
     }
 
