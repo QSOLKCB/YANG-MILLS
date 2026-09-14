@@ -29,5 +29,8 @@ jobs:
       - name: Phase 3H negative contract regressions
         run: python3 scripts/test_glueball_scalar_geometry_recovery_contract_validation.py
 
+      - name: Frozen Phase 3G receipt replay
+        run: cargo run --release --quiet --locked --bin ym-glueball-scalar-recovery
+
       - name: Phase 3H blocking-capable scalar recovery evidence
         run: cargo run --release --quiet --locked --bin ym-glueball-scalar-geometry-recovery
