@@ -14,7 +14,7 @@
 use core::fmt;
 
 pub const EFFECTIVE_MASS_CONTRACT_ID: &str = "YM-GLUEBALL-EFFECTIVE-MASS-V1";
-pub const EFFECTIVE_MASS_STATUS: &str = "phase-3d-candidate";
+pub const EFFECTIVE_MASS_STATUS: &str = "phase-3d-frozen";
 pub const MIN_JACKKNIFE_REPLICATES: usize = 3;
 pub const MAX_JACKKNIFE_REPLICATES: usize = 64;
 pub const MIN_TIME_EXTENT: usize = 4;
@@ -288,7 +288,7 @@ mod tests {
     #[test]
     fn phase3d_identity_is_frozen() {
         assert_eq!(EFFECTIVE_MASS_CONTRACT_ID, "YM-GLUEBALL-EFFECTIVE-MASS-V1");
-        assert_eq!(EFFECTIVE_MASS_STATUS, "phase-3d-candidate");
+        assert_eq!(EFFECTIVE_MASS_STATUS, "phase-3d-frozen");
         assert_eq!(MIN_JACKKNIFE_REPLICATES, 3);
         assert_eq!(MAX_JACKKNIFE_REPLICATES, 64);
         assert_eq!(MIN_TIME_EXTENT, 4);
