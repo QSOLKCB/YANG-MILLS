@@ -257,7 +257,8 @@ pub fn max_correlator_residual(
 ) -> Result<f64, GlueballCorrelatorError> {
     validate_correlator_result_shape(first)?;
     validate_correlator_result_shape(second)?;
-    if first.configuration_count != second.configuration_count || first.time_extent != second.time_extent
+    if first.configuration_count != second.configuration_count
+        || first.time_extent != second.time_extent
     {
         return Err(GlueballCorrelatorError::CorrelatorShapeMismatch);
     }
