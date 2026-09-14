@@ -412,11 +412,7 @@ fn invert_matrix(matrix: &[Vec<f64>]) -> Result<Vec<Vec<f64>>, ScalarFitError> {
     Ok(inverse)
 }
 
-fn quadratic_form(
-    left: &[f64],
-    matrix: &[Vec<f64>],
-    right: &[f64],
-) -> Result<f64, ScalarFitError> {
+fn quadratic_form(left: &[f64], matrix: &[Vec<f64>], right: &[f64]) -> Result<f64, ScalarFitError> {
     if left.len() != matrix.len() || right.len() != matrix.len() {
         return Err(ScalarFitError::NonFiniteStatistic);
     }
@@ -554,19 +550,13 @@ fn jackknife_standard_error(values: &[f64]) -> Result<(f64, f64), ScalarFitError
     }
     let variance = ((n - 1.0) / n) * sum;
     let standard_error = variance.sqrt();
-    if !mean.is_finite()
-        || !variance.is_finite()
-        || variance < 0.0
-        || !standard_error.is_finite()
-    {
+    if !mean.is_finite() || !variance.is_finite() || variance < 0.0 || !standard_error.is_finite() {
         return Err(ScalarFitError::NonFiniteStatistic);
     }
     Ok((mean, standard_error))
 }
 
-fn maximum_off_diagonal_correlation(
-    covariance: &[Vec<f64>],
-) -> Result<f64, ScalarFitError> {
+fn maximum_off_diagonal_correlation(covariance: &[Vec<f64>]) -> Result<f64, ScalarFitError> {
     let mut maximum = 0.0_f64;
     for row in 0..covariance.len() {
         if covariance[row][row] <= 0.0 || !covariance[row][row].is_finite() {
@@ -611,8 +601,7 @@ pub fn correlated_scalar_fit(
         replica_masses.push(fit.mass);
         replica_amplitudes.push(fit.amplitude);
     }
-    let (mass_jackknife_mean, mass_standard_error) =
-        jackknife_standard_error(&replica_masses)?;
+    let (mass_jackknife_mean, mass_standard_error) = jackknife_standard_error(&replica_masses)?;
     let (amplitude_jackknife_mean, amplitude_standard_error) =
         jackknife_standard_error(&replica_amplitudes)?;
     let points = window
