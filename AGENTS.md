@@ -241,19 +241,37 @@ Phase 3B2 freezes `YM-GLUEBALL-SPATIAL-BLOCK-V1` after PR #13 merged. It is a de
 
 The gauge-covariance regression uses the restricted coarse gauge field `G_c(y)=G_f(2y0,2y1,2y2,y3)`. Phase 3B2 does not establish improved overlap, validate combined smear/block tuning, construct connected correlators, extract an effective mass or spectrum, establish confinement, construct continuum QFT, or prove a mass gap.
 
-### Phase 3C connected-correlator candidate authority
+### Phase 3C frozen connected-correlator authority
 
-Phase 3C introduces `YM-GLUEBALL-CONNECTED-CORRELATOR-V1` for the two frozen scalar `A1++` basis elements. It defines bounded periodic finite-sample correlator mechanics and explicit same-sample vacuum subtraction only. For each scalar operator `O`,
+Phase 3C freezes `YM-GLUEBALL-CONNECTED-CORRELATOR-V1` after PR #14 merged for the two frozen scalar `A1++` basis elements. It defines bounded periodic finite-sample correlator mechanics and explicit same-sample vacuum subtraction only. For each scalar operator `O`,
 
 ```text
 O_bar = (1/(N_cfg*N_t)) sum_(c,t) O_c(t)
-G_O(tau) = (1/(N_cfg*N_t)) sum_(c,t) O_c(t) O_c((t+tau) mod N_t)
+G_O(tau) = (1/(N_cfg*N_t))*sum_(c,t) O_c(t) O_c((t+tau) mod N_t)
 C_O(tau) = G_O(tau) - O_bar^2.
 ```
 
 Every supplied configuration and every Euclidean time origin has equal arithmetic weight. The reference admits `1 <= N_cfg <= 64` and `2 <= N_t <= 64`, requires identical lattice extents, and applies no hidden time-reflection symmetrization. Raw, frozen-stout, or frozen-blocked lattices may feed the operator layer, but Phase 3C does not tune those transformations or validate a combined smear/block choice.
 
 The canonical four-configuration shifted-defect fixture is an analytic mechanics regression, **not** a Monte Carlo ensemble and not a physical correlator measurement. Phase 3C attaches no statistical uncertainty to it. It does not extract an effective mass, select a fit window, construct a variational/GEVP spectrum, establish a finite-volume mass gap, establish confinement, construct continuum QFT, or prove a positive continuum mass gap. Those require separately versioned later authorities.
+
+### Phase 3D effective-mass candidate authority
+
+Phase 3D introduces `YM-GLUEBALL-EFFECTIVE-MASS-V1` as a bounded scalar `A1++` / continuum-target `0++` analysis surface. It depends on frozen Phase 3C correlator semantics and evaluates
+
+```text
+m_eff(tau) = acosh((C(tau-1) + C(tau+1)) / (2 C(tau)))
+```
+
+only for predeclared strictly increasing lags with `1 <= tau < N_t/2`. The reference requires `4 <= N_t <= 64`, `C(tau)>0`, and an `acosh` argument at least one; invalid or non-finite inputs fail closed.
+
+Uncertainty is propagated with delete-one-configuration jackknife replicas. Replica `i` must omit configuration `i` and recompute the **complete** connected correlator, including its own vacuum mean and subtraction, before the nonlinear effective-mass transform is applied. Reusing the full-sample vacuum mean inside replicas is outside the authority. The reference admits `3 <= N <= 64` replicas and reports the standard jackknife error
+
+```text
+sqrt((N-1)/N * sum_i (m_i - m_bar)^2).
+```
+
+The canonical periodic single-state fixture is analytic mechanics evidence only, not a Monte Carlo ensemble or physical glueball measurement. Phase 3D does not select a plateau/fit window, perform a correlated spectral fit, solve a variational GEVP, establish a finite-volume mass gap, establish confinement, construct continuum QFT, or prove a positive continuum mass gap.
 
 ## Donor boundary
 
@@ -297,6 +315,7 @@ cargo run --quiet --locked --bin ym-glueball-operators
 cargo run --quiet --locked --bin ym-glueball-smearing
 cargo run --quiet --locked --bin ym-glueball-blocking
 cargo run --quiet --locked --bin ym-glueball-correlator
+cargo run --quiet --locked --bin ym-glueball-effective-mass
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
