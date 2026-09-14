@@ -295,9 +295,9 @@ For each frozen grid mass, amplitude is profiled analytically and the correlated
 
 The canonical Hadamard-perturbed single-state fixture is deterministic mechanics evidence only. It must not be described as production spectroscopy or a physical glueball mass. Production scalar evidence and stability are owned by separately versioned Phase 3F.
 
-### Phase 3F production scalar candidate authority
+### Phase 3F frozen production scalar authority
 
-Phase 3F introduces `YM-GLUEBALL-SCALAR-PRODUCTION-V1` as a finite-lattice production numerical-observation surface. The predeclared experiment uses sixteen independently seeded cold-start `SU(3)` chains on `4 x 4 x 4 x 10` at `beta=5.7`, with master seed `0x3f00202609150001`, 64 thermalisation sweeps, four additional sweeps, proposal angle `0.35`, and one retained configuration per independent chain. These values are frozen before inspection and may not be retuned under the same identifier.
+Phase 3F freezes `YM-GLUEBALL-SCALAR-PRODUCTION-V1` after PR #17 merged. It is the first finite-lattice production numerical-observation surface. The predeclared experiment uses sixteen independently seeded cold-start `SU(3)` chains on `4 x 4 x 4 x 10` at `beta=5.7`, with master seed `0x3f00202609150001`, 64 thermalisation sweeps, four additional sweeps, proposal angle `0.35`, and one retained configuration per independent chain. These values are historical authority and may not be retuned under the frozen identifier.
 
 The retained configurations are analyzed with both frozen scalar operators on `raw`, `stout-1`, and `stout-2` surfaces. Phase 3F does not claim blocking stability because the frozen Phase 3B2 authority requires fine spatial extent at least 6 while this run uses spatial extent 4. Full and delete-one correlators must preserve Phase 3C vacuum-subtraction semantics, and the full correlator is replay-checked against Phase 3C to the declared tolerance.
 
@@ -306,6 +306,27 @@ Phase 3F uses the frozen Phase 3E candidate windows `[1,3]`, `[2,4]`, and `[1,4]
 The first predeclared production observation completed correctly. Sampler diagnostics passed, but every one of the six scalar surfaces was rejected by the frozen effective-mass authority, giving `primary_window_successes=0`, `transformation_stability_successes=0`, and `scalar_pipeline_validated=false`. Agents must preserve this negative result. Any follow-up intended to improve the scalar signal requires a new, independently predeclared contract/stream rather than mutation of Phase 3F. Do not advance to `2++` or `0-+` merely to bypass the failed scalar gate.
 
 Phase 3F still does not establish a physical continuum glueball mass, finite-volume mass gap, confinement, continuum QFT construction, positive continuum mass gap, or Clay solution.
+
+### Phase 3G fresh-stream scalar recovery candidate authority
+
+Phase 3G introduces `YM-GLUEBALL-SCALAR-RECOVERY-V1` as a separately versioned recovery experiment. It tests one predeclared hypothesis only: whether doubling independent retained configurations can recover effective-mass admissibility while the Phase 3F geometry and downstream analysis semantics remain fixed.
+
+The only stochastic changes are:
+
+```text
+master seed        : 0x3f00202609150001 -> 0x3f01202609150001
+independent chains : 16 -> 32
+```
+
+The `4 x 4 x 4 x 10` geometry, `beta=5.7`, cold start, 64+4 sweep schedule, proposal angle `0.35`, one retained configuration per chain, scalar operators, raw/stout transformation surface, `rho=0.10`, candidate windows `[1,3]`, `[2,4]`, `[1,4]`, primary `stout-2/plaquette-1x1` surface, correlator replay tolerance, and `z <= 5` stability rule remain fixed. Blocking remains excluded because the spatial extent is still 4.
+
+The first Phase 3G observation was executed on source head `65dacc9f03cb0fd74826cd211ee7bd586668e08a` in workflow `34875522823`. All 32 chains passed accounting, acceptance, finite-statistic, and SU(3) residual diagnostics. Nevertheless, every one of the six scalar surfaces was again `effective-mass-rejected`, with `primary_window_successes=0`, `transformation_stability_successes=0`, and `scalar_pipeline_validated=false`.
+
+This negative result is machine-pinned and replay-checked. A future deterministic replay that changes the qualitative receipt is an implementation/reproducibility failure; the pinned negative scientific result itself remains valid completed evidence and does not become a CI failure merely because the scalar gate is false.
+
+Agents must **not** respond to this result by increasing the chain count again under the same contract or by repeatedly creating statistics-only retries until a pass appears. The predeclared failure branch now applies: the next recovery authority must change geometry and/or operator overlap under a new identifier and state its hypothesis before observation. A blocking-capable spatial geometry with fine extent at least `6` is the natural next surface because it allows the already-frozen Phase 3B2 transformation to participate. Exact geometry, stream, operator/transformation surface, windows, thresholds, and analysis semantics must be predeclared by that future contract rather than inferred from Phase 3G output.
+
+Do not open `2++` or `0-+` merely to bypass the unresolved scalar gate. Phase 3G does not establish a physical glueball mass, finite-volume mass gap, confinement, continuum QFT construction, positive continuum mass gap, or Clay solution.
 
 ## Donor boundary
 
@@ -352,13 +373,14 @@ cargo run --quiet --locked --bin ym-glueball-correlator
 cargo run --quiet --locked --bin ym-glueball-effective-mass
 cargo run --quiet --locked --bin ym-glueball-scalar-fit
 cargo run --release --quiet --locked --bin ym-glueball-scalar-production
+cargo run --release --quiet --locked --bin ym-glueball-scalar-recovery
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 ```
 
 The unified contract entry points are authoritative. Adding a new contract surface without registering it in those commands is a readiness failure.
 
-Tests must fail closed on invalid lattice extents, invalid group construction, invalid/oversized paths, invalid ensemble schedules, non-finite inputs/statistics, rejection-limit exhaustion, numerically inert or asymmetric stochastic proposals, broken contract structure, weakened benchmark provenance, weakened stationarity/equilibration gates, incomplete runtime evidence, weakened covariance/fit rules, weakened production predeclaration/stability rules, or weakened claim boundaries. Public `Result` APIs may not turn admissible numerical/allocation failures into panics.
+Tests must fail closed on invalid lattice extents, invalid group construction, invalid/oversized paths, invalid ensemble schedules, non-finite inputs/statistics, rejection-limit exhaustion, numerically inert or asymmetric stochastic proposals, broken contract structure, weakened benchmark provenance, weakened stationarity/equilibration gates, incomplete runtime evidence, weakened covariance/fit rules, weakened production/recovery predeclaration or receipt rules, or weakened claim boundaries. Public `Result` APIs may not turn admissible numerical/allocation failures into panics.
 
 Floating-point equality is not assumed. Every numerical/statistical comparison must have an explicit tolerance or uncertainty rule and must not be advertised as bitwise cross-platform identity unless separately established.
 
