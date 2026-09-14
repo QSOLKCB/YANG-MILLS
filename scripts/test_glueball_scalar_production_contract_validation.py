@@ -41,12 +41,24 @@ def main() -> None:
     expect_reject(validate_contract, broken, "sequential within-chain configurations pooled")
 
     broken = copy.deepcopy(contract)
+    broken["ensemble"]["group_residual_violation_is_implementation_failure"] = False
+    expect_reject(validate_contract, broken, "group residual failure downgraded to scientific outcome")
+
+    broken = copy.deepcopy(contract)
     broken["fit"]["candidate_windows"] = [[2, 4]]
     expect_reject(validate_contract, broken, "fit windows changed after predeclaration")
 
     broken = copy.deepcopy(contract)
+    broken["fit"]["computational_fit_failure_is_implementation_failure"] = False
+    expect_reject(validate_contract, broken, "computational fit failure downgraded to scientific rejection")
+
+    broken = copy.deepcopy(contract)
     broken["stability"]["maximum_pairwise_mass_z"] = 10.0
     expect_reject(validate_contract, broken, "stability threshold weakened")
+
+    broken = copy.deepcopy(contract)
+    broken["stability"]["all_successful_fit_pairs_must_be_scorable"] = False
+    expect_reject(validate_contract, broken, "unscorable successful-fit pairs allowed")
 
     broken = copy.deepcopy(contract)
     broken["scientific_gate"]["scientific_gate_failure_causes_ci_failure"] = True
@@ -79,6 +91,18 @@ def main() -> None:
     broken = copy.deepcopy(vectors)
     broken["vectors"][3]["clay_solution_claimed"] = 0
     expect_reject(validate_vectors, broken, "claim boundary boolean replaced by integer")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][4]["scalar_pipeline_validated"] = True
+    expect_reject(validate_vectors, broken, "observed negative receipt rewritten as validated")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][4]["surface_outcomes"][0]["reason"] = "no-accepted-plateau-window"
+    expect_reject(validate_vectors, broken, "observed surface rejection reason drifted")
+
+    broken = copy.deepcopy(vectors)
+    broken["vectors"][4]["primary_window_successes"] = 1
+    expect_reject(validate_vectors, broken, "observed window-success count drifted")
 
     print("Phase 3F production scalar negative contract regressions: passed")
 
