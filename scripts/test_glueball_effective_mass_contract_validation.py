@@ -29,6 +29,14 @@ def main() -> None:
     expect_reject(validate_contract, broken, "frozen status rolled back to candidate")
 
     broken = copy.deepcopy(contract)
+    broken["change_classification"]["classification"] = "semantic"
+    expect_reject(validate_contract, broken, "freeze transition misclassified as semantic")
+
+    broken = copy.deepcopy(contract)
+    del broken["change_classification"]
+    expect_reject(validate_contract, broken, "freeze transition classification removed")
+
+    broken = copy.deepcopy(contract)
     broken["depends_on"][0]["required_status"] = "phase-3c-candidate"
     expect_reject(validate_contract, broken, "frozen correlator dependency weakened")
 
