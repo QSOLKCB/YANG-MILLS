@@ -58,6 +58,8 @@ fn retained_chain_identity_matches(evidence: &[ChainEvidence]) -> bool {
                 && chain.plaquette.is_finite()
                 && chain.unitarity_residual.is_finite()
                 && chain.determinant_residual.is_finite()
+                && chain.unitarity_residual >= 0.0
+                && chain.determinant_residual >= 0.0
                 && chain.unitarity_residual <= LINK_RESIDUAL_LIMIT
                 && chain.determinant_residual <= LINK_RESIDUAL_LIMIT
         })
@@ -218,6 +220,17 @@ mod tests {
 
         let mut summary = pinned_summary();
         summary.chain_evidence[18].determinant_residual = LINK_RESIDUAL_LIMIT * 2.0;
+        assert!(!observed_phase3g_receipt_matches(&summary));
+    }
+
+    #[test]
+    fn pinned_receipt_rejects_negative_group_residuals() {
+        let mut summary = pinned_summary();
+        summary.chain_evidence[20].unitarity_residual = -1.0;
+        assert!(!observed_phase3g_receipt_matches(&summary));
+
+        let mut summary = pinned_summary();
+        summary.chain_evidence[21].determinant_residual = -1.0;
         assert!(!observed_phase3g_receipt_matches(&summary));
     }
 }
