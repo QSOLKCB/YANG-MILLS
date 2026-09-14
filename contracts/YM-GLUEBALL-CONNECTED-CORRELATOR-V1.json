@@ -1,6 +1,6 @@
 {
   "contract_id": "YM-GLUEBALL-CONNECTED-CORRELATOR-V1",
-  "status": "phase-3c-candidate",
+  "status": "phase-3c-frozen",
   "scope": "bounded periodic connected Euclidean two-point estimator with vacuum subtraction for the frozen Phase 3A scalar A1++ operator basis",
   "depends_on": [
     {

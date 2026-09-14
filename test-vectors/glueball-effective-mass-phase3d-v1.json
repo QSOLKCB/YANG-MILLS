@@ -1,0 +1,87 @@
+{
+  "contract_id": "YM-GLUEBALL-EFFECTIVE-MASS-V1",
+  "vector_set": "GLUEBALL-EFFECTIVE-MASS-PHASE3D-V1",
+  "status": "phase-3d-candidate",
+  "vectors": [
+    {
+      "id": "periodic-single-state-cosh-mass",
+      "time_extent": 16,
+      "correlator_formula": "C(tau)=A*(exp(-m*tau)+exp(-m*(N_t-tau)))",
+      "full_mass": 0.5,
+      "amplitude": 1.0,
+      "analysis_lags": [1, 2, 3, 4, 5, 6, 7],
+      "expected_effective_mass_each_lag": 0.5,
+      "absolute_tolerance": 2e-12,
+      "claim_class": "C1"
+    },
+    {
+      "id": "delete-one-jackknife-propagation",
+      "replica_masses": [0.48, 0.49, 0.5, 0.51, 0.52],
+      "replica_count": 5,
+      "expected_jackknife_mean_each_lag": 0.5,
+      "expected_standard_error_each_lag": 0.0282842712474619,
+      "standard_error_formula": "sqrt((N-1)/N*sum_i (m_i-m_bar)^2)",
+      "absolute_tolerance": 2e-12,
+      "claim_class": "C1"
+    },
+    {
+      "id": "amplitude-cancellation",
+      "full_mass": 0.5,
+      "full_amplitude": 7.25,
+      "replica_amplitude": 3.5,
+      "analysis_lag": 3,
+      "expected_effective_mass": 0.5,
+      "absolute_tolerance": 2e-12,
+      "claim_class": "C1"
+    },
+    {
+      "id": "non-positive-center-rejected",
+      "mutation": "set C(2)=0",
+      "analysis_lag": 2,
+      "expected": "NonPositiveCentralCorrelator",
+      "claim_class": "C0"
+    },
+    {
+      "id": "acosh-domain-rejected",
+      "mutation": "inflate C(2) so neighbor ratio is below one",
+      "analysis_lag": 2,
+      "expected": "AcoshDomainViolation",
+      "claim_class": "C0"
+    },
+    {
+      "id": "jackknife-shape-mismatch-rejected",
+      "mutation": "remove one time sample from one replica",
+      "expected": "ShapeMismatch",
+      "claim_class": "C0"
+    },
+    {
+      "id": "too-few-jackknife-replicas-rejected",
+      "replica_count": 2,
+      "expected": "TooFewJackknifeReplicates",
+      "claim_class": "C0"
+    },
+    {
+      "id": "midpoint-or-unsorted-lags-rejected",
+      "time_extent": 16,
+      "invalid_lag_sets": [[0], [8], [2, 2], [3, 2]],
+      "expected": "InvalidAnalysisLag",
+      "claim_class": "C0"
+    },
+    {
+      "id": "claim-boundary",
+      "canonical_fixture_is_physical_ensemble": false,
+      "uncertainty_propagation_defined": true,
+      "effective_mass_estimator_evaluated": true,
+      "fit_window_selected": false,
+      "spectral_fit_performed": false,
+      "variational_gevp_solved": false,
+      "glueball_mass_measured": false,
+      "finite_volume_mass_gap_established": false,
+      "confinement_established": false,
+      "continuum_qft_constructed": false,
+      "positive_continuum_mass_gap_proved": false,
+      "clay_solution_claimed": false,
+      "claim_class": "C0"
+    }
+  ]
+}

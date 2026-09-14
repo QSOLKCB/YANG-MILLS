@@ -13,6 +13,7 @@ from check_glueball_operator_contracts import main as check_glueball_operator_co
 from check_glueball_smearing_contracts import main as check_glueball_smearing_contracts
 from check_glueball_blocking_contracts import main as check_glueball_blocking_contracts
 from check_glueball_correlator_contracts import main as check_glueball_correlator_contracts
+from check_glueball_effective_mass_contracts import main as check_glueball_effective_mass_contracts
 
 
 def main() -> None:
@@ -28,6 +29,7 @@ def main() -> None:
     check_glueball_smearing_contracts()
     check_glueball_blocking_contracts()
     check_glueball_correlator_contracts()
+    check_glueball_effective_mass_contracts()
     print("All YANG-MILLS contract checks: passed")
 
 

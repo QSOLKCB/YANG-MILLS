@@ -9,7 +9,7 @@ from check_contracts import load, validate_exact
 
 EXPECTED_CONTRACT: dict[str, Any] = {
     "contract_id": "YM-GLUEBALL-CONNECTED-CORRELATOR-V1",
-    "status": "phase-3c-candidate",
+    "status": "phase-3c-frozen",
     "scope": "bounded periodic connected Euclidean two-point estimator with vacuum subtraction for the frozen Phase 3A scalar A1++ operator basis",
     "depends_on": [
         {"contract_id": "YM-GLUEBALL-OPERATORS-V1", "required_status": "phase-3a-frozen"},
@@ -89,7 +89,7 @@ EXPECTED_CONTRACT: dict[str, Any] = {
 EXPECTED_VECTORS: dict[str, Any] = {
     "contract_id": "YM-GLUEBALL-CONNECTED-CORRELATOR-V1",
     "vector_set": "GLUEBALL-CONNECTED-CORRELATOR-PHASE3C-V1",
-    "status": "phase-3c-candidate",
+    "status": "phase-3c-frozen",
     "vectors": [
         {
             "id": "identity-connected-zero",

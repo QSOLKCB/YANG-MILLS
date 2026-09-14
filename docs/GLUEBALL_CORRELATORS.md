@@ -2,14 +2,14 @@
 
 Phase 3C introduces the first time-separated observable-analysis surface in the glueball laboratory. It defines **periodic connected Euclidean two-point estimators with vacuum subtraction** for the two frozen Phase 3A scalar `A1++` basis elements.
 
-The candidate authority is:
+The frozen authority is:
 
 ```text
 YM-GLUEBALL-CONNECTED-CORRELATOR-V1
-status = phase-3c-candidate
+status = phase-3c-frozen
 ```
 
-This phase freezes correlator mechanics only. It does **not** estimate statistical uncertainty, extract an effective mass, select a fit window, solve a variational generalized eigenvalue problem, or claim a glueball spectrum.
+Phase 3C was frozen after PR #14 merged. It freezes correlator mechanics only. It does **not** estimate statistical uncertainty, extract an effective mass, select a fit window, solve a variational generalized eigenvalue problem, or claim a glueball spectrum.
 
 ## Input surface
 
@@ -117,4 +117,4 @@ A connected correlator is not a glueball mass. Phase 3C does not establish:
 - a positive continuum mass gap;
 - a Clay Millennium Problem solution.
 
-The next roadmap surface is effective-mass analysis **with uncertainty propagation**, under a new separately versioned authority.
+Phase 3D owns effective-mass analysis **with uncertainty propagation** under the separately versioned `YM-GLUEBALL-EFFECTIVE-MASS-V1` authority. Fit-window selection and spectral fitting remain later surfaces.

@@ -1,0 +1,89 @@
+{
+  "contract_id": "YM-GLUEBALL-EFFECTIVE-MASS-V1",
+  "status": "phase-3d-candidate",
+  "scope": "bounded scalar A1++ periodic cosh effective-mass estimator with delete-one-configuration jackknife uncertainty propagation",
+  "depends_on": [
+    {
+      "contract_id": "YM-GLUEBALL-CONNECTED-CORRELATOR-V1",
+      "required_status": "phase-3c-frozen"
+    }
+  ],
+  "method_origin": {
+    "classification": "standard periodic cosh effective-mass estimator with standard delete-one jackknife uncertainty propagation",
+    "canonical_fixture_is_physical_ensemble": false,
+    "physical_mass_measurement_claimed": false
+  },
+  "input_surface": {
+    "channel": "scalar A1++ / continuum-target 0++",
+    "full_connected_correlator_required": true,
+    "jackknife_replicas_required": true,
+    "jackknife_replica_origin": "for N configurations, replica i omits configuration i and recomputes the complete connected correlator including vacuum subtraction from the retained configurations",
+    "replicas_may_not_reuse_full_sample_vacuum_mean": true,
+    "time_reflection_symmetrization_applied": false,
+    "fit_window_selected": false
+  },
+  "bounds": {
+    "minimum_jackknife_replicates": 3,
+    "maximum_jackknife_replicates": 64,
+    "minimum_time_extent": 4,
+    "maximum_time_extent": 64,
+    "analysis_lag_rule": "strictly increasing integer tau with 1 <= tau < N_t/2",
+    "periodic_euclidean_time": true
+  },
+  "estimator": {
+    "name": "periodic-nearest-neighbour-cosh",
+    "formula": "m_eff(tau)=acosh((C(tau-1)+C(tau+1))/(2*C(tau)))",
+    "central_correlator_rule": "C(tau)>0",
+    "acosh_domain_rule": "(C(tau-1)+C(tau+1))/(2*C(tau))>=1",
+    "point_estimate": "evaluate the non-linear estimator on the full connected correlator",
+    "hidden_symmetrization": false
+  },
+  "uncertainty": {
+    "scheme": "delete-one-configuration jackknife",
+    "replica_transform": "evaluate the same cosh effective-mass estimator independently on every recomputed jackknife connected correlator",
+    "jackknife_mean": "m_bar=(1/N)*sum_i m_i",
+    "standard_error": "sqrt((N-1)/N*sum_i (m_i-m_bar)^2)",
+    "nonlinear_transform_recomputed_per_replica": true,
+    "correlator_covariance_fit_performed": false
+  },
+  "canonical_fixture": {
+    "time_extent": 16,
+    "full_single_state_mass": 0.5,
+    "full_amplitude": 1.0,
+    "jackknife_replica_masses": [0.48, 0.49, 0.5, 0.51, 0.52],
+    "jackknife_replica_amplitude": 1.0,
+    "analysis_lags": [1, 2, 3, 4, 5, 6, 7],
+    "correlator_formula": "C(tau)=A*(exp(-m*tau)+exp(-m*(N_t-tau)))",
+    "expected_full_effective_mass": 0.5,
+    "expected_jackknife_mean": 0.5,
+    "expected_standard_error": 0.0282842712474619,
+    "analytic_replay_tolerance": 2e-12,
+    "fixture_is_physical_ensemble": false
+  },
+  "validation": {
+    "shape_mismatch_rule": "reject",
+    "non_finite_correlator_rule": "reject",
+    "non_positive_central_correlator_rule": "reject",
+    "acosh_domain_violation_rule": "reject",
+    "invalid_analysis_lag_rule": "reject",
+    "allocation_failure_rule": "propagate through Result"
+  },
+  "future_surfaces": {
+    "fit_window_selection_defined": false,
+    "correlated_spectral_fit_defined": false,
+    "variational_gevp_defined": false,
+    "tensor_2pp_channel_defined": false,
+    "pseudoscalar_0mp_channel_defined": false,
+    "finite_volume_spectrum_extracted": false
+  },
+  "claim_boundary": {
+    "analytic_fixture_is_physical_measurement": false,
+    "effective_mass_point_is_fitted_glueball_mass": false,
+    "scalar_pipeline_fully_validated": false,
+    "finite_volume_mass_gap_established": false,
+    "confinement_established": false,
+    "continuum_qft_constructed": false,
+    "positive_continuum_mass_gap_proved": false,
+    "clay_solution_claimed": false
+  }
+}

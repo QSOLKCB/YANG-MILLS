@@ -25,8 +25,8 @@ def main() -> None:
     vectors = load("test-vectors/glueball-connected-correlator-phase3c-v1.json")
 
     broken = copy.deepcopy(contract)
-    broken["status"] = "phase-3c-frozen"
-    expect_reject(validate_contract, broken, "candidate status silently promoted")
+    broken["status"] = "phase-3c-candidate"
+    expect_reject(validate_contract, broken, "frozen status regressed to candidate")
 
     broken = copy.deepcopy(contract)
     broken["depends_on"][2]["required_status"] = "phase-3b2-candidate"
@@ -62,7 +62,7 @@ def main() -> None:
 
     broken = copy.deepcopy(contract)
     broken["future_surfaces"]["effective_mass_extracted"] = True
-    expect_reject(validate_contract, broken, "effective mass claimed early")
+    expect_reject(validate_contract, broken, "effective mass claimed inside frozen Phase 3C")
 
     broken = copy.deepcopy(contract)
     broken["claim_boundary"]["positive_continuum_mass_gap_proved"] = True
@@ -71,6 +71,10 @@ def main() -> None:
     broken = copy.deepcopy(contract)
     broken["clay_solution_proved"] = True
     expect_reject(validate_contract, broken, "undeclared top-level overclaim field")
+
+    broken = copy.deepcopy(vectors)
+    broken["status"] = "phase-3c-candidate"
+    expect_reject(validate_vectors, broken, "vector-set frozen status regressed")
 
     broken = copy.deepcopy(vectors)
     broken["vectors"][1]["expected"]["rectangle_connected"][1] = 0.0
