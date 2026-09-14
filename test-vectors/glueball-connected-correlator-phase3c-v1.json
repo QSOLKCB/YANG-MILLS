@@ -1,7 +1,7 @@
 {
   "contract_id": "YM-GLUEBALL-CONNECTED-CORRELATOR-V1",
   "vector_set": "GLUEBALL-CONNECTED-CORRELATOR-PHASE3C-V1",
-  "status": "phase-3c-candidate",
+  "status": "phase-3c-frozen",
   "vectors": [
     {
       "id": "identity-connected-zero",
