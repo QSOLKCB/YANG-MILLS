@@ -9,7 +9,8 @@
 //! matches the recorded observation into a reproducibility failure.
 
 use crate::glueball_scalar_production::{
-    ChainEvidence, OperatorKind, ProductionSummary, EXPECTED_PROPOSALS_PER_CHAIN,
+    ChainEvidence, OperatorKind, ProductionSummary, EXPECTED_PROPOSALS_PER_CHAIN, MAX_ACCEPTANCE,
+    MIN_ACCEPTANCE,
 };
 use crate::glueball_scalar_recovery::{CHAIN_COUNT, MASTER_SEED};
 use crate::su3_ensemble::derive_su3_chain_seed;
@@ -52,6 +53,7 @@ fn retained_chain_identity_matches(evidence: &[ChainEvidence]) -> bool {
                 && chain.derived_seed == derive_su3_chain_seed(MASTER_SEED, chain_id)
                 && chain.proposals == EXPECTED_PROPOSALS_PER_CHAIN
                 && chain.accepts <= chain.proposals
+                && (MIN_ACCEPTANCE..=MAX_ACCEPTANCE).contains(&expected_acceptance)
                 && chain.acceptance.to_bits() == expected_acceptance.to_bits()
         })
 }
@@ -175,6 +177,19 @@ mod tests {
 
         let mut summary = pinned_summary();
         summary.chain_evidence[5].accepts = EXPECTED_PROPOSALS_PER_CHAIN + 1;
+        assert!(!observed_phase3g_receipt_matches(&summary));
+    }
+
+    #[test]
+    fn pinned_receipt_recomputes_each_chain_acceptance_gate() {
+        let mut summary = pinned_summary();
+        summary.chain_evidence[4].accepts = 0;
+        summary.chain_evidence[4].acceptance = 0.0;
+        assert!(!observed_phase3g_receipt_matches(&summary));
+
+        let mut summary = pinned_summary();
+        summary.chain_evidence[9].accepts = EXPECTED_PROPOSALS_PER_CHAIN;
+        summary.chain_evidence[9].acceptance = 1.0;
         assert!(!observed_phase3g_receipt_matches(&summary));
     }
 }
