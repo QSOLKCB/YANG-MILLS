@@ -1,6 +1,6 @@
 {
   "contract_id": "YM-GLUEBALL-EFFECTIVE-MASS-V1",
-  "status": "phase-3d-candidate",
+  "status": "phase-3d-frozen",
   "scope": "bounded scalar A1++ periodic cosh effective-mass estimator with delete-one-configuration jackknife uncertainty propagation",
   "depends_on": [
     {
