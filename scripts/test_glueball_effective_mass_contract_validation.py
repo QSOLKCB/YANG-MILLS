@@ -29,8 +29,8 @@ def main() -> None:
     expect_reject(validate_contract, broken, "candidate status silently promoted")
 
     broken = copy.deepcopy(contract)
-    broken["depends_on"][0]["required_status"] = "phase-3c-frozen"
-    expect_reject(validate_contract, broken, "dependency lifecycle changed without authority update")
+    broken["depends_on"][0]["required_status"] = "phase-3c-candidate"
+    expect_reject(validate_contract, broken, "frozen correlator dependency weakened")
 
     broken = copy.deepcopy(contract)
     broken["input_surface"]["replicas_may_not_reuse_full_sample_vacuum_mean"] = False
