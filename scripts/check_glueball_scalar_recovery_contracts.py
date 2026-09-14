@@ -9,7 +9,7 @@ from check_contracts import load, validate_exact
 
 EXPECTED_CONTRACT: dict[str, Any] = {
     "contract_id": "YM-GLUEBALL-SCALAR-RECOVERY-V1",
-    "status": "phase-3g-candidate",
+    "status": "phase-3g-frozen",
     "scope": "fresh-stream scalar A1++ recovery confirmation testing increased independent statistics while preserving the frozen Phase 3F geometry and analysis semantics",
     "depends_on": [
         {"contract_id": "YM-SU3-ENSEMBLE-V1", "required_status": "phase-2c1-frozen"},
@@ -111,7 +111,7 @@ EXPECTED_CONTRACT: dict[str, Any] = {
 EXPECTED_VECTORS: dict[str, Any] = {
     "contract_id": "YM-GLUEBALL-SCALAR-RECOVERY-V1",
     "vector_set": "GLUEBALL-SCALAR-RECOVERY-PHASE3G-V1",
-    "status": "phase-3g-candidate",
+    "status": "phase-3g-frozen",
     "vectors": [
         {
             "id": "phase3f-frozen-negative-baseline",

@@ -11,6 +11,7 @@ permissions:
 jobs:
   reference:
     runs-on: ubuntu-latest
+    timeout-minutes: 360
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -86,3 +87,6 @@ jobs:
 
       - name: All negative contract regressions
         run: python3 scripts/test_all_contract_validation.py
+
+      - name: Phase 3H blocking-capable scalar geometry recovery evidence
+        run: cargo run --release --quiet --locked --bin ym-glueball-scalar-geometry-recovery

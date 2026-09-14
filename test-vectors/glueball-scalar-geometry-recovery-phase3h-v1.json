@@ -1,0 +1,57 @@
+{
+  "contract_id": "YM-GLUEBALL-SCALAR-GEOMETRY-RECOVERY-V1",
+  "vector_set": "GLUEBALL-SCALAR-GEOMETRY-RECOVERY-PHASE3H-V1",
+  "status": "phase-3h-candidate",
+  "vectors": [
+    {
+      "id": "phase3g-frozen-negative-baseline",
+      "phase3g_contract_id": "YM-GLUEBALL-SCALAR-RECOVERY-V1",
+      "phase3g_observation_head": "65dacc9f03cb0fd74826cd211ee7bd586668e08a",
+      "phase3g_workflow_run_id": 34875522823,
+      "phase3g_independent_chains": 32,
+      "phase3g_scalar_pipeline_validated": false,
+      "phase3g_all_six_surfaces_effective_mass_rejected": true,
+      "claim_class": "C2"
+    },
+    {
+      "id": "blocking-capable-fresh-stream-geometry",
+      "extents": [6, 6, 6, 10],
+      "beta": 5.7,
+      "master_seed_hex": "0x3f02202609150001",
+      "phase3g_master_seed_hex": "0x3f01202609150001",
+      "chain_count": 32,
+      "thermalization_sweeps": 64,
+      "post_thermalization_sweeps": 4,
+      "proposal_angle": 0.35,
+      "retained_configurations_per_chain": 1,
+      "expected_proposals_per_chain": 4700160,
+      "expected_total_proposals": 150405120,
+      "claim_class": "C0"
+    },
+    {
+      "id": "geometry-overlap-analysis-surface",
+      "operators": ["plaquette-1x1", "rectangle-2x1"],
+      "transformations": ["raw", "stout-1", "stout-2", "block-1"],
+      "block_factor": 2,
+      "blocked_extents": [3, 3, 3, 10],
+      "stout_rho": 0.1,
+      "candidate_windows": [[1, 3], [2, 4], [1, 4]],
+      "primary_surface": "block-1/plaquette-1x1",
+      "maximum_pairwise_mass_z": 5.0,
+      "correlator_replay_absolute_tolerance": 2e-12,
+      "claim_class": "C0"
+    },
+    {
+      "id": "scientific-integrity-boundary",
+      "no_outcome_by_construction": true,
+      "same_contract_may_not_be_retuned_after_observation": true,
+      "scientific_gate_failure_causes_ci_failure": false,
+      "tensor_2pp_channel_enabled": false,
+      "pseudoscalar_0mp_channel_enabled": false,
+      "physical_glueball_mass_claimed": false,
+      "positive_continuum_mass_gap_proved": false,
+      "clay_solution_claimed": false,
+      "claim_class": "C0"
+    }
+  ]
+}

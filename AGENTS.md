@@ -307,7 +307,7 @@ The first predeclared production observation completed correctly. Sampler diagno
 
 Phase 3F still does not establish a physical continuum glueball mass, finite-volume mass gap, confinement, continuum QFT construction, positive continuum mass gap, or Clay solution.
 
-### Phase 3G fresh-stream scalar recovery candidate authority
+### Phase 3G fresh-stream scalar recovery frozen authority
 
 Phase 3G introduces `YM-GLUEBALL-SCALAR-RECOVERY-V1` as a separately versioned recovery experiment. It tests one predeclared hypothesis only: whether doubling independent retained configurations can recover effective-mass admissibility while the Phase 3F geometry and downstream analysis semantics remain fixed.
 
@@ -376,6 +376,7 @@ cargo run --release --quiet --locked --bin ym-glueball-scalar-production
 cargo run --release --quiet --locked --bin ym-glueball-scalar-recovery
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
+cargo run --release --quiet --locked --bin ym-glueball-scalar-geometry-recovery
 ```
 
 The unified contract entry points are authoritative. Adding a new contract surface without registering it in those commands is a readiness failure.

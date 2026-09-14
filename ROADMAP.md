@@ -2,6 +2,23 @@
 
 The roadmap is ordered to keep implementation validation, numerical evidence, physical inference, classical continuum geometry, and mathematical proof claims distinct.
 
+## Scientific integrity invariants
+
+Every phase is governed by [`docs/SCIENTIFIC_INTEGRITY_INVARIANTS.md`](docs/SCIENTIFIC_INTEGRITY_INVARIANTS.md). These rules were distilled from YANG-MILLS review history and cross-domain QSOL-IMC audit/stress-test work; they are methodological authority only and do not import non-Yang-Mills physics.
+
+- [x] **SI-1 — No outcome by construction.** A scientific observable must emerge from frozen dynamics/analysis and the pipeline must be able to return a negative result.
+- [x] **SI-2 — Claim ↔ implementation ↔ evidence traceability.** Every computational claim maps to an actual mathematical/code object, evidence object, and discriminating test.
+- [x] **SI-3 — Adversarial invariant regressions.** Gauge invariance, covariance, conservation, accounting, group membership, replay, and other invariants require tests designed to break them, not only happy-path examples.
+- [x] **SI-4 — Approximation obligations.** Every approximation declares its validity domain, neglected remainder, quantitative bound/tolerance or unresolved proof obligation, and the conclusions invalid outside that domain.
+- [x] **SI-5 — Regulator obligations.** Every cutoff, lattice spacing, finite volume, smoothing scale, projection kernel, or regulator records which observables depend on it and what limit would be required to remove that dependence.
+- [x] **SI-6 — No silent claim-class promotion.** Finite-lattice facts, numerical observations, physical inferences, continuum theorems, and Clay claims remain distinct regardless of numerical precision.
+- [x] **SI-7 — Preserve failure as evidence.** A failed predeclared gate is retained; seeds, windows, thresholds, models, operators, or geometry are not changed under the same authority to manufacture a pass.
+- [x] **SI-8 — Sufficient is not necessary.** A successful mechanism is not declared necessary, unique, or fundamental without a separate argument.
+- [x] **SI-9 — Decorative mathematics is not physical structure.** Cross-domain algebras, lattices, fields, entropies, curvatures, or operators may donate tests/fixtures/architecture only after independent derivation; notation resemblance is not physical evidence.
+- [x] **SI-10 — New interpretation requires new authority.** A semantic change in observable, transformation, recovery hypothesis, physical interpretation, or theorem bridge receives a new versioned contract rather than retroactive relabeling.
+
+The reusable lessons from the QSOL-IMC bundle are therefore explicit: claim-to-implementation stress testing, “no outcome by construction,” proof obligations for singular/regularized/approximate models, and independently re-derived `A2/SU(3)` algebra fixtures. The surrounding speculative ontologies remain quarantined from Yang-Mills physical authority.
+
 ## Phase 0 — constitution + minimal `SU(2)` reference core
 
 **Status: completed and merged in PR #1.**
@@ -234,7 +251,7 @@ The successful V2 confirmation (Actions run `34761701867`, evidence head `f5a221
 
 ## Phase 3 — glueball laboratory
 
-Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and is frozen. Phase 3B2 was merged in PR #13 and is frozen. Phase 3C was merged in PR #14 and is frozen. Phase 3D was merged in PR #15 and is frozen. Phase 3E was merged in PR #16 and is frozen. Phase 3F was merged in PR #17 and is frozen with its first negative production receipt preserved. Phase 3G is the candidate fresh-stream recovery authority in PR #18.
+Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and is frozen. Phase 3B2 was merged in PR #13 and is frozen. Phase 3C was merged in PR #14 and is frozen. Phase 3D was merged in PR #15 and is frozen. Phase 3E was merged in PR #16 and is frozen. Phase 3F was merged in PR #17 and is frozen with its first negative production receipt preserved. Phase 3G was merged in PR #18 and is frozen with its negative fresh-stream recovery receipt preserved. Phase 3H is the candidate blocking-capable geometry/operator-overlap recovery authority.
 
 - [x] Define gauge-invariant spatial loop operator bases (`YM-GLUEBALL-OPERATORS-V1`, frozen).
 - [x] Add smearing/blocking as separately versioned transformations.
@@ -246,12 +263,15 @@ Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and 
 - [x] Start with the scalar `0++` channel through frozen finite-lattice `A1++` mechanics.
 - [x] Predeclare, execute, and preserve the first production scalar evidence/stability run (`YM-GLUEBALL-SCALAR-PRODUCTION-V1`, Phase 3F frozen after PR #17 merge).
 - [x] Preserve the Phase 3F negative result without weakening seeds, windows, thresholds, or rejection semantics.
-- [x] Predeclare a fresh-stream/new-contract independent-statistics recovery test rather than retuning Phase 3F (`YM-GLUEBALL-SCALAR-RECOVERY-V1`, Phase 3G candidate).
-- [x] Execute the first Phase 3G observation with 32 fresh independent retained chains while holding the Phase 3F geometry and analysis surface fixed.
-- [x] Preserve the Phase 3G result: sampler diagnostics passed, all six scalar surfaces were again `effective-mass-rejected`, zero primary windows succeeded, and `scalar_pipeline_validated=false`.
-- [ ] Freeze the observed Phase 3G receipt after PR #18 merges without changing its fresh stream, chain count, geometry, windows, thresholds, or scientific classification.
-- [ ] Predeclare a new scalar recovery authority that changes geometry and/or operator overlap instead of simply increasing the chain count again.
-- [ ] Prefer a blocking-capable spatial geometry with fine extent at least `6` so the frozen Phase 3B2 transformation can participate in the overlap/stability study, while declaring the exact geometry and new stream before observation.
+- [x] Predeclare, execute, and preserve the fresh-stream independent-statistics recovery (`YM-GLUEBALL-SCALAR-RECOVERY-V1`, Phase 3G frozen after PR #18 merge).
+- [x] Freeze the observed Phase 3G receipt without changing its fresh stream, chain count, geometry, windows, thresholds, or scientific classification.
+- [x] Predeclare a new scalar recovery authority that changes geometry/operator overlap rather than increasing chain count again (`YM-GLUEBALL-SCALAR-GEOMETRY-RECOVERY-V1`, Phase 3H candidate).
+- [x] Freeze Phase 3H before observation at `6 x 6 x 6 x 10`, 32 fresh independent chains, `beta=5.7`, the unchanged 68-sweep schedule, and master seed `0x3f02202609150001`.
+- [x] Add the frozen Phase 3B2 stride-2 `block-1` transformation, producing `3 x 3 x 3 x 10` coarse configurations, and predeclare `block-1/plaquette-1x1` as the primary surface.
+- [x] Keep the Phase 3E windows, full-covariance fit mechanics, correlator replay tolerance, and `z <= 5` stability threshold unchanged.
+- [ ] Execute the first Phase 3H observation and preserve its outcome without post-observation tuning.
+- [ ] If Phase 3H passes, run a fresh-stream independent confirmation of the same blocking-capable surface before opening new irreducible channels.
+- [ ] If Phase 3H fails, predeclare a new scalar authority changing time extent and/or variational operator basis rather than retuning Phase 3H.
 - [ ] Add `2++` and `0-+` only after the scalar production pipeline has passed an independently reviewed stability gate.
 - [ ] Keep finite-volume spectral masses explicitly distinct from the continuum Clay gap.
 
@@ -259,7 +279,9 @@ Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and 
 
 **Phase 3G evidence boundary:** the independently predeclared recovery run retained the same `4 x 4 x 4 x 10`, `beta=5.7`, 68-sweep-per-chain geometry/schedule and all Phase 3F analysis semantics, changed to fresh master seed `0x3f01202609150001`, and doubled the independent chain count from 16 to 32. The observation on head `65dacc9f03cb0fd74826cd211ee7bd586668e08a` / workflow `34875522823` again rejected all six scalar surfaces. Therefore this specific independent-statistics-only recovery hypothesis failed. The negative result is machine-pinned and must not be converted into a pass by later threshold or stream changes under the same identifier.
 
-**Current scalar direction:** because both the 16-chain Phase 3F run and the fresh 32-chain Phase 3G run fail at the same effective-mass admissibility boundary, the next scientific variable should be geometry/operator overlap rather than another chain-count escalation. This conclusion is local to these predeclared tests; it is not a theorem that additional statistics can never matter.
+**Phase 3H predeclaration boundary:** the geometry/operator-overlap recovery keeps the Phase 3G chain count and all scalar-fit thresholds fixed, changes to fresh stream `0x3f02202609150001`, uses fine extents `6 x 6 x 6 x 10`, and evaluates eight surfaces across raw, stout-1, stout-2, and frozen stride-2 block-1 transformations. The exact workload is `4,700,160` proposals per chain and `150,405,120` proposals across 32 chains. The primary surface is frozen as `block-1/plaquette-1x1`. Because geometry and blocking are introduced together, any successful Phase 3H observation is evidence for the composite intervention and does not by itself establish which component caused improvement.
+
+**Current scalar direction:** Phase 3H now tests geometry/operator overlap rather than another chain-count escalation. Its first observation must be accepted whether positive or negative. This conclusion is local to the predeclared Phase 3F/3G evidence and is not a theorem that additional statistics can never matter.
 
 **Graduation gate:** a complete scalar production analysis can be reproduced from sealed ensemble evidence and produces stable finite-lattice estimates under predeclared fit-window/operator/transformation scans, followed by an independently reviewed confirmation on a deliberately declared recovery/confirmation surface. Passing this finite-lattice gate still does not establish a continuum mass gap.
 
@@ -303,6 +325,8 @@ This phase asks what is still missing between controlled lattice results and the
 - [ ] Study rigorous literature on lattice-to-continuum constructions and known obstructions.
 - [ ] State candidate lemmas as conjectures until proved.
 - [ ] Never infer a theorem from finite numerical sampling.
+- [ ] Build a machine-readable proof-obligation graph from finite lattice → uniform bounds → thermodynamic limit → continuum limit → OS/reconstruction → spectral gap.
+- [ ] Treat conditional or heuristic literature results as route maps, not established bridge lemmas, until every hypothesis is discharged.
 
 ## Phase 8 — formalisation of stable theorem surfaces
 
