@@ -10,6 +10,10 @@ from check_contracts import load, validate_exact
 EXPECTED_CONTRACT: dict[str, Any] = {
     "contract_id": "YM-GLUEBALL-EFFECTIVE-MASS-V1",
     "status": "phase-3d-frozen",
+    "change_classification": {
+        "classification": "implementation-only",
+        "reason": "candidate-to-frozen lifecycle/provenance transition after merged PR #15; estimator, uncertainty, bounds, canonical fixture, and claim semantics are unchanged",
+    },
     "scope": "bounded scalar A1++ periodic cosh effective-mass estimator with delete-one-configuration jackknife uncertainty propagation",
     "depends_on": [
         {
