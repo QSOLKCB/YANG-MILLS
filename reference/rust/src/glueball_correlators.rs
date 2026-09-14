@@ -12,9 +12,7 @@
 use core::fmt;
 
 use crate::glueball_operators::{scalar_a1pp_operator_basis, GlueballOperatorError};
-use crate::su3_lattice::{
-    traceless_cycle_link, Su3Lattice4, Su3LatticeError,
-};
+use crate::su3_lattice::{traceless_cycle_link, Su3Lattice4, Su3LatticeError};
 
 pub const CORRELATOR_CONTRACT_ID: &str = "YM-GLUEBALL-CONNECTED-CORRELATOR-V1";
 pub const CORRELATOR_STATUS: &str = "phase-3c-candidate";
@@ -25,30 +23,14 @@ pub const ANALYTIC_REPLAY_TOLERANCE: f64 = 2.0e-12;
 
 pub const CANONICAL_PLAQUETTE_MEAN: f64 = 80.0 / 81.0;
 pub const CANONICAL_RECTANGLE_MEAN: f64 = 53.0 / 54.0;
-pub const CANONICAL_PLAQUETTE_RAW: [f64; 4] = [
-    6403.0 / 6561.0,
-    79.0 / 81.0,
-    79.0 / 81.0,
-    79.0 / 81.0,
-];
-pub const CANONICAL_RECTANGLE_RAW: [f64; 4] = [
-    703.0 / 729.0,
-    26.0 / 27.0,
-    26.0 / 27.0,
-    26.0 / 27.0,
-];
-pub const CANONICAL_PLAQUETTE_CONNECTED: [f64; 4] = [
-    1.0 / 2187.0,
-    -1.0 / 6561.0,
-    -1.0 / 6561.0,
-    -1.0 / 6561.0,
-];
-pub const CANONICAL_RECTANGLE_CONNECTED: [f64; 4] = [
-    1.0 / 972.0,
-    -1.0 / 2916.0,
-    -1.0 / 2916.0,
-    -1.0 / 2916.0,
-];
+pub const CANONICAL_PLAQUETTE_RAW: [f64; 4] =
+    [6403.0 / 6561.0, 79.0 / 81.0, 79.0 / 81.0, 79.0 / 81.0];
+pub const CANONICAL_RECTANGLE_RAW: [f64; 4] =
+    [703.0 / 729.0, 26.0 / 27.0, 26.0 / 27.0, 26.0 / 27.0];
+pub const CANONICAL_PLAQUETTE_CONNECTED: [f64; 4] =
+    [1.0 / 2187.0, -1.0 / 6561.0, -1.0 / 6561.0, -1.0 / 6561.0];
+pub const CANONICAL_RECTANGLE_CONNECTED: [f64; 4] =
+    [1.0 / 972.0, -1.0 / 2916.0, -1.0 / 2916.0, -1.0 / 2916.0];
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ScalarConnectedCorrelators {
@@ -80,10 +62,18 @@ pub enum GlueballCorrelatorError {
 impl fmt::Display for GlueballCorrelatorError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let message = match self {
-            Self::EmptyConfigurationSet => "Phase 3C correlators require at least one configuration",
-            Self::TooManyConfigurations => "Phase 3C configuration count exceeds the bounded reference limit",
-            Self::TimeExtentTooLarge => "Phase 3C Euclidean time extent exceeds the bounded reference limit",
-            Self::LatticeExtentsMismatch => "Phase 3C configurations must have identical lattice extents",
+            Self::EmptyConfigurationSet => {
+                "Phase 3C correlators require at least one configuration"
+            }
+            Self::TooManyConfigurations => {
+                "Phase 3C configuration count exceeds the bounded reference limit"
+            }
+            Self::TimeExtentTooLarge => {
+                "Phase 3C Euclidean time extent exceeds the bounded reference limit"
+            }
+            Self::LatticeExtentsMismatch => {
+                "Phase 3C configurations must have identical lattice extents"
+            }
             Self::SampleCountOverflow => "Phase 3C sample-count arithmetic overflowed",
             Self::AllocationFailed => "Phase 3C correlator allocation failed",
             Self::NonFiniteObservable => "Phase 3C operator input became non-finite",
@@ -218,8 +208,7 @@ pub fn scalar_connected_correlators(
     for configuration in configurations {
         for time_slice in 0..time_extent {
             let basis = scalar_a1pp_operator_basis(configuration, time_slice)?;
-            if !basis.spatial_plaquette_1x1.is_finite()
-                || !basis.spatial_rectangle_2x1.is_finite()
+            if !basis.spatial_plaquette_1x1.is_finite() || !basis.spatial_rectangle_2x1.is_finite()
             {
                 return Err(GlueballCorrelatorError::NonFiniteObservable);
             }
@@ -292,8 +281,8 @@ pub fn max_correlator_residual(
 /// Four deterministic `3^3 x 4` configurations. Configuration `c` carries one
 /// exact traceless-cycle spatial link at Euclidean time `c`. This is a mechanics
 /// fixture, not a Monte Carlo ensemble or a physical correlator measurement.
-pub fn canonical_shifted_defect_configurations(
-) -> Result<Vec<Su3Lattice4>, GlueballCorrelatorError> {
+pub fn canonical_shifted_defect_configurations() -> Result<Vec<Su3Lattice4>, GlueballCorrelatorError>
+{
     let mut configurations = Vec::new();
     configurations
         .try_reserve_exact(4)
@@ -363,14 +352,8 @@ mod tests {
         assert_close(result.rectangle_vacuum_mean, CANONICAL_RECTANGLE_MEAN);
         assert_series_close(&result.plaquette_raw, &CANONICAL_PLAQUETTE_RAW);
         assert_series_close(&result.rectangle_raw, &CANONICAL_RECTANGLE_RAW);
-        assert_series_close(
-            &result.plaquette_connected,
-            &CANONICAL_PLAQUETTE_CONNECTED,
-        );
-        assert_series_close(
-            &result.rectangle_connected,
-            &CANONICAL_RECTANGLE_CONNECTED,
-        );
+        assert_series_close(&result.plaquette_connected, &CANONICAL_PLAQUETTE_CONNECTED);
+        assert_series_close(&result.rectangle_connected, &CANONICAL_RECTANGLE_CONNECTED);
     }
 
     #[test]
