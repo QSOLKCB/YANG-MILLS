@@ -35,10 +35,9 @@ mod su3_lattice;
 
 use glueball_scalar_geometry_recovery::{
     run_scalar_geometry_recovery_analysis, BETA, BLOCKED_EXTENTS, CHAIN_COUNT,
-    EXPECTED_PROPOSALS_PER_CHAIN, EXPECTED_TOTAL_PROPOSALS, EXTENTS,
-    GEOMETRY_RECOVERY_CONTRACT_ID, GEOMETRY_RECOVERY_STATUS, MASTER_SEED,
-    POST_THERMALIZATION_SWEEPS, PRIMARY_TRANSFORMATION, PROPOSAL_ANGLE,
-    THERMALIZATION_SWEEPS, TOTAL_SWEEPS_PER_CHAIN, TRANSFORMATION_LABELS,
+    EXPECTED_PROPOSALS_PER_CHAIN, EXPECTED_TOTAL_PROPOSALS, EXTENTS, GEOMETRY_RECOVERY_CONTRACT_ID,
+    GEOMETRY_RECOVERY_STATUS, MASTER_SEED, POST_THERMALIZATION_SWEEPS, PRIMARY_TRANSFORMATION,
+    PROPOSAL_ANGLE, THERMALIZATION_SWEEPS, TOTAL_SWEEPS_PER_CHAIN, TRANSFORMATION_LABELS,
 };
 use glueball_scalar_production::{OperatorKind, CANDIDATE_WINDOWS, STABILITY_MAX_Z, STOUT_LEVELS};
 
@@ -124,8 +123,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    println!("sampler_diagnostics_passed={}", summary.sampler_diagnostics_passed);
-    println!("primary_window_successes={}", summary.primary_window_successes);
+    println!(
+        "sampler_diagnostics_passed={}",
+        summary.sampler_diagnostics_passed
+    );
+    println!(
+        "primary_window_successes={}",
+        summary.primary_window_successes
+    );
     print_optional("primary_window_max_z", summary.primary_window_max_z);
     print_optional("operator_stability_z", summary.operator_stability_z);
     println!(
@@ -136,7 +141,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "transformation_stability_max_z",
         summary.transformation_stability_max_z,
     );
-    println!("scalar_pipeline_validated={}", summary.scalar_pipeline_validated);
+    println!(
+        "scalar_pipeline_validated={}",
+        summary.scalar_pipeline_validated
+    );
     println!("physical_glueball_mass_claimed=false");
     println!("finite_volume_mass_gap_established=false");
     println!("confinement_established=false");
