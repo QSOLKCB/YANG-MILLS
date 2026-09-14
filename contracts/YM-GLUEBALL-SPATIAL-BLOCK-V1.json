@@ -1,6 +1,6 @@
 {
   "contract_id": "YM-GLUEBALL-SPATIAL-BLOCK-V1",
-  "status": "phase-3b2-candidate",
+  "status": "phase-3b2-frozen",
   "scope": "deterministic stride-2 spatial coarse-link blocking for finite periodic SU(3) lattices compatible with the frozen Phase 3A scalar operator surface",
   "depends_on": [
     {
