@@ -1,0 +1,32 @@
+name: Phase 3E scalar correlated fit
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  scalar-fit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Rust toolchain
+        run: rustup show
+
+      - name: Strict Rust format
+        run: cargo fmt --all -- --check
+
+      - name: Phase 3E unit tests
+        run: cargo test --locked --bin ym-glueball-scalar-fit
+
+      - name: Phase 3E deterministic reference vectors
+        run: cargo run --quiet --locked --bin ym-glueball-scalar-fit
+
+      - name: Phase 3E contract checks
+        run: python3 scripts/check_glueball_scalar_fit_contracts.py
+
+      - name: Phase 3E negative contract regressions
+        run: python3 scripts/test_glueball_scalar_fit_contract_validation.py

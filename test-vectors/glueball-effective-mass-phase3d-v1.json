@@ -1,7 +1,7 @@
 {
   "contract_id": "YM-GLUEBALL-EFFECTIVE-MASS-V1",
   "vector_set": "GLUEBALL-EFFECTIVE-MASS-PHASE3D-V1",
-  "status": "phase-3d-candidate",
+  "status": "phase-3d-frozen",
   "vectors": [
     {
       "id": "periodic-single-state-cosh-mass",

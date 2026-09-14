@@ -72,6 +72,9 @@ jobs:
       - name: Phase 3D effective-mass reference vectors
         run: cargo run --quiet --locked --bin ym-glueball-effective-mass
 
+      - name: Phase 3E scalar correlated-fit reference vectors
+        run: cargo run --quiet --locked --bin ym-glueball-scalar-fit
+
       - name: All contract checks
         run: python3 scripts/check_all_contracts.py
 

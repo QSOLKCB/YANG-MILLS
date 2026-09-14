@@ -25,8 +25,16 @@ def main() -> None:
     vectors = load("test-vectors/glueball-effective-mass-phase3d-v1.json")
 
     broken = copy.deepcopy(contract)
-    broken["status"] = "phase-3d-frozen"
-    expect_reject(validate_contract, broken, "candidate status silently promoted")
+    broken["status"] = "phase-3d-candidate"
+    expect_reject(validate_contract, broken, "frozen status rolled back to candidate")
+
+    broken = copy.deepcopy(contract)
+    broken["change_classification"]["classification"] = "semantic"
+    expect_reject(validate_contract, broken, "freeze transition misclassified as semantic")
+
+    broken = copy.deepcopy(contract)
+    del broken["change_classification"]
+    expect_reject(validate_contract, broken, "freeze transition classification removed")
 
     broken = copy.deepcopy(contract)
     broken["depends_on"][0]["required_status"] = "phase-3c-candidate"
@@ -58,7 +66,7 @@ def main() -> None:
 
     broken = copy.deepcopy(contract)
     broken["future_surfaces"]["fit_window_selection_defined"] = True
-    expect_reject(validate_contract, broken, "fit-window authority claimed early")
+    expect_reject(validate_contract, broken, "later fit-window authority back-propagated into Phase 3D")
 
     broken = copy.deepcopy(contract)
     broken["claim_boundary"]["effective_mass_point_is_fitted_glueball_mass"] = True
@@ -67,6 +75,10 @@ def main() -> None:
     broken = copy.deepcopy(contract)
     broken["claim_boundary"]["positive_continuum_mass_gap_proved"] = True
     expect_reject(validate_contract, broken, "continuum mass-gap overclaim")
+
+    broken = copy.deepcopy(vectors)
+    broken["status"] = "phase-3d-candidate"
+    expect_reject(validate_vectors, broken, "vector lifecycle rolled back to candidate")
 
     broken = copy.deepcopy(vectors)
     broken["vectors"][0]["expected_effective_mass_each_lag"] = 0.6
