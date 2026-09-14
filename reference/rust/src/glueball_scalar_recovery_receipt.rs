@@ -8,7 +8,11 @@
 //! receipt guard only turns a later deterministic replay that no longer
 //! matches the recorded observation into a reproducibility failure.
 
-use crate::glueball_scalar_production::{OperatorKind, ProductionSummary};
+use crate::glueball_scalar_production::{
+    ChainEvidence, OperatorKind, ProductionSummary, EXPECTED_PROPOSALS_PER_CHAIN,
+};
+use crate::glueball_scalar_recovery::{CHAIN_COUNT, MASTER_SEED};
+use crate::su3_ensemble::derive_su3_chain_seed;
 
 pub const OBSERVATION_HEAD: &str = "65dacc9f03cb0fd74826cd211ee7bd586668e08a";
 pub const OBSERVATION_WORKFLOW_RUN_ID: u64 = 34_875_522_823;
@@ -39,6 +43,19 @@ pub const OBSERVED_SURFACE_OUTCOMES: [(&str, OperatorKind, &str); 6] = [
     ),
 ];
 
+fn retained_chain_identity_matches(evidence: &[ChainEvidence]) -> bool {
+    evidence.len() == CHAIN_COUNT
+        && evidence.iter().enumerate().all(|(index, chain)| {
+            let chain_id = index as u64;
+            let expected_acceptance = chain.accepts as f64 / EXPECTED_PROPOSALS_PER_CHAIN as f64;
+            chain.chain_id == chain_id
+                && chain.derived_seed == derive_su3_chain_seed(MASTER_SEED, chain_id)
+                && chain.proposals == EXPECTED_PROPOSALS_PER_CHAIN
+                && chain.accepts <= chain.proposals
+                && chain.acceptance.to_bits() == expected_acceptance.to_bits()
+        })
+}
+
 pub fn observed_phase3g_receipt_matches(summary: &ProductionSummary) -> bool {
     let surfaces_match = summary.surfaces.len() == OBSERVED_SURFACE_OUTCOMES.len()
         && summary
@@ -54,7 +71,7 @@ pub fn observed_phase3g_receipt_matches(summary: &ProductionSummary) -> bool {
             });
 
     summary.sampler_diagnostics_passed
-        && summary.chain_evidence.len() == 32
+        && retained_chain_identity_matches(&summary.chain_evidence)
         && surfaces_match
         && summary.primary_window_successes == 0
         && summary.primary_window_max_z.is_none()
@@ -68,21 +85,29 @@ pub fn observed_phase3g_receipt_matches(summary: &ProductionSummary) -> bool {
 mod tests {
     use super::*;
     use crate::glueball_scalar_production::{
-        ChainEvidence, CorrelatorEvidence, SurfaceOutcome, SurfaceRecord,
+        CorrelatorEvidence, SurfaceOutcome, SurfaceRecord,
     };
 
+    fn pinned_chain_evidence() -> Vec<ChainEvidence> {
+        (0..CHAIN_COUNT)
+            .map(|index| {
+                let chain_id = index as u64;
+                let accepts = EXPECTED_PROPOSALS_PER_CHAIN / 2 + index as u64;
+                ChainEvidence {
+                    chain_id,
+                    derived_seed: derive_su3_chain_seed(MASTER_SEED, chain_id),
+                    proposals: EXPECTED_PROPOSALS_PER_CHAIN,
+                    accepts,
+                    acceptance: accepts as f64 / EXPECTED_PROPOSALS_PER_CHAIN as f64,
+                    plaquette: 0.5,
+                    unitarity_residual: 0.0,
+                    determinant_residual: 0.0,
+                }
+            })
+            .collect()
+    }
+
     fn pinned_summary() -> ProductionSummary {
-        let chain = ChainEvidence {
-            chain_id: 0,
-            derived_seed: 1,
-            proposals: 1,
-            accepts: 1,
-            acceptance: 0.5,
-            plaquette: 0.5,
-            unitarity_residual: 0.0,
-            determinant_residual: 0.0,
-        };
-        let chain_evidence = vec![chain; 32];
         let surfaces = OBSERVED_SURFACE_OUTCOMES
             .iter()
             .map(
@@ -102,7 +127,7 @@ mod tests {
             .collect();
 
         ProductionSummary {
-            chain_evidence,
+            chain_evidence: pinned_chain_evidence(),
             surfaces,
             sampler_diagnostics_passed: true,
             primary_window_successes: 0,
@@ -126,6 +151,32 @@ mod tests {
     fn pinned_receipt_requires_all_32_independent_units() {
         let mut summary = pinned_summary();
         summary.chain_evidence.pop();
+        assert!(!observed_phase3g_receipt_matches(&summary));
+    }
+
+    #[test]
+    fn pinned_receipt_rejects_duplicate_or_drifted_chain_identity() {
+        let mut summary = pinned_summary();
+        summary.chain_evidence[1] = summary.chain_evidence[0];
+        assert!(!observed_phase3g_receipt_matches(&summary));
+
+        let mut summary = pinned_summary();
+        summary.chain_evidence[7].derived_seed ^= 1;
+        assert!(!observed_phase3g_receipt_matches(&summary));
+
+        let mut summary = pinned_summary();
+        summary.chain_evidence[12].proposals -= 1;
+        assert!(!observed_phase3g_receipt_matches(&summary));
+    }
+
+    #[test]
+    fn pinned_receipt_rejects_acceptance_accounting_drift() {
+        let mut summary = pinned_summary();
+        summary.chain_evidence[3].acceptance = 0.5;
+        assert!(!observed_phase3g_receipt_matches(&summary));
+
+        let mut summary = pinned_summary();
+        summary.chain_evidence[5].accepts = EXPECTED_PROPOSALS_PER_CHAIN + 1;
         assert!(!observed_phase3g_receipt_matches(&summary));
     }
 }
