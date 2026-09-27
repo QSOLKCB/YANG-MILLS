@@ -161,6 +161,21 @@ fn quadratic_form(vector: [f64; 2], matrix: &Matrix2) -> f64 {
         + vector[1] * (matrix[1][0] * vector[0] + matrix[1][1] * vector[1])
 }
 
+fn cholesky_metric_norm(
+    vector: [f64; 2],
+    l00: f64,
+    l10: f64,
+    l11: f64,
+) -> Result<f64, VariationalError> {
+    let first = l00 * vector[0] + l10 * vector[1];
+    let second = l11 * vector[1];
+    let norm = first.hypot(second);
+    if !first.is_finite() || !second.is_finite() || !norm.is_finite() || norm <= 0.0 {
+        return Err(VariationalError::ProjectionNormalizationFailure);
+    }
+    Ok(norm)
+}
+
 fn matmul(first: Matrix2, second: Matrix2) -> Matrix2 {
     let mut out = [[0.0; 2]; 2];
     for row in 0..2 {
@@ -398,7 +413,7 @@ pub fn principal_generalized_projection(
     if !midpoint.is_finite() || !radius.is_finite() {
         return Err(VariationalError::NonFiniteAccumulator);
     }
-    if radius <= POSITIVE_DEFINITE_PIVOT_TOLERANCE {
+    if radius == 0.0 {
         return Err(VariationalError::DegeneratePrincipalEigenvector);
     }
 
@@ -418,7 +433,7 @@ pub fn principal_generalized_projection(
     }
 
     let scaled_principal_for_vector = principal_eigenvalue / eigen_scale;
-    let off_diagonal_is_resolved = scaled_b.abs() > POSITIVE_DEFINITE_PIVOT_TOLERANCE;
+    let off_diagonal_is_resolved = scaled_b != 0.0;
     let mut eigenvector = if off_diagonal_is_resolved {
         let first = [scaled_b, scaled_principal_for_vector - scaled_a];
         let second = [scaled_principal_for_vector - scaled_d, scaled_b];
@@ -444,13 +459,9 @@ pub fn principal_generalized_projection(
         inv_lt[0][0] * eigenvector[0] + inv_lt[0][1] * eigenvector[1],
         inv_lt[1][0] * eigenvector[0] + inv_lt[1][1] * eigenvector[1],
     ];
-    let metric_norm = quadratic_form(coefficients, &c0);
-    if !metric_norm.is_finite() || metric_norm <= 0.0 {
-        return Err(VariationalError::ProjectionNormalizationFailure);
-    }
-    let scale = metric_norm.sqrt();
-    coefficients[0] /= scale;
-    coefficients[1] /= scale;
+    let metric_norm = cholesky_metric_norm(coefficients, l00, l10, l11)?;
+    coefficients[0] /= metric_norm;
+    coefficients[1] /= metric_norm;
 
     if coefficients[0].abs() > POSITIVE_DEFINITE_PIVOT_TOLERANCE {
         if coefficients[0] < 0.0 {
@@ -458,23 +469,32 @@ pub fn principal_generalized_projection(
             coefficients[1] = -coefficients[1];
         }
     } else if coefficients[1] < 0.0 {
+        coefficients[0] = -coefficients[0];
         coefficients[1] = -coefficients[1];
+    }
+
+    let normalized_metric_norm = cholesky_metric_norm(coefficients, l00, l10, l11)?;
+    let reference_projection = normalized_metric_norm * normalized_metric_norm;
+    if !reference_projection.is_finite()
+        || (reference_projection - 1.0).abs() > NORMALIZATION_TOLERANCE
+    {
+        return Err(VariationalError::ProjectionNormalizationFailure);
     }
 
     let mut projected_correlator = Vec::new();
     projected_correlator
         .try_reserve_exact(matrices.len())
         .map_err(|_| VariationalError::AllocationFailed)?;
-    for matrix in matrices {
-        let value = quadratic_form(coefficients, matrix);
+    for (time, matrix) in matrices.iter().enumerate() {
+        let value = if time == reference_time {
+            reference_projection
+        } else {
+            quadratic_form(coefficients, matrix)
+        };
         if !value.is_finite() {
             return Err(VariationalError::NonFiniteAccumulator);
         }
         projected_correlator.push(value);
-    }
-
-    if (projected_correlator[reference_time] - 1.0).abs() > NORMALIZATION_TOLERANCE {
-        return Err(VariationalError::ProjectionNormalizationFailure);
     }
 
     Ok(PrincipalProjection {
@@ -684,6 +704,27 @@ mod tests {
         {
             assert_close(left, right, 2.0e-11);
         }
+
+        let huge_scaled: Vec<_> = matrices
+            .iter()
+            .copied()
+            .map(|matrix| matrix_scale_basis(matrix, [1.0e16, 1.0]))
+            .collect();
+        let huge =
+            principal_generalized_projection(&huge_scaled, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
+        assert_close(
+            first.principal_eigenvalue,
+            huge.principal_eigenvalue,
+            2.0e-12,
+        );
+        for (&left, &right) in first
+            .projected_correlator
+            .iter()
+            .zip(&huge.projected_correlator)
+        {
+            assert_close(left, right, 2.0e-11);
+        }
     }
 
     #[test]
@@ -750,6 +791,40 @@ mod tests {
         assert_eq!(projection.principal_eigenvalue, 1.0);
         assert_eq!(projection.coefficients, [0.0, 1.0]);
         assert_eq!(projection.projected_correlator, vec![1.0, 1.0, 1.0]);
+    }
+
+    #[test]
+    fn distinct_representable_eigenvalues_below_pivot_tolerance_are_solved() {
+        let identity = [[1.0, 0.0], [0.0, 1.0]];
+        let principal = 1.0 + 1.0e-14;
+        let matrices = vec![identity, identity, [[principal, 0.0], [0.0, 1.0]]];
+
+        let projection =
+            principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
+
+        assert_eq!(projection.principal_eigenvalue, principal);
+        assert_eq!(projection.coefficients, [1.0, 0.0]);
+        assert_eq!(projection.projected_correlator, vec![1.0, 1.0, principal]);
+    }
+
+    #[test]
+    fn ill_conditioned_positive_definite_reference_uses_stable_normalization() {
+        let c0 = [[1.0, 0.999_999], [0.999_999, 1.0]];
+        let c1 = [[2.0, 0.3], [0.3, 1.0]];
+        let matrices = vec![c0, c0, c1];
+
+        let projection =
+            principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
+
+        assert!(projection.principal_eigenvalue.is_finite());
+        assert!(projection.principal_eigenvalue > 0.0);
+        assert_close(
+            projection.projected_correlator[REFERENCE_TIME],
+            1.0,
+            NORMALIZATION_TOLERANCE,
+        );
     }
 
     #[test]
