@@ -41,7 +41,7 @@ use crate::su3_ensemble::{
 use crate::su3_lattice::{Su3Lattice4, DIM};
 
 pub const GEOMETRY_RECOVERY_CONTRACT_ID: &str = "YM-GLUEBALL-SCALAR-GEOMETRY-RECOVERY-V1";
-pub const GEOMETRY_RECOVERY_STATUS: &str = "phase-3h-candidate";
+pub const GEOMETRY_RECOVERY_STATUS: &str = "phase-3h-frozen";
 pub const EXTENTS: [usize; DIM] = [6, 6, 6, 10];
 pub const BLOCKED_EXTENTS: [usize; DIM] = [3, 3, 3, 10];
 pub const BETA: f64 = PHASE3F_BETA;
@@ -575,7 +575,7 @@ mod tests {
             GEOMETRY_RECOVERY_CONTRACT_ID,
             "YM-GLUEBALL-SCALAR-GEOMETRY-RECOVERY-V1"
         );
-        assert_eq!(GEOMETRY_RECOVERY_STATUS, "phase-3h-candidate");
+        assert_eq!(GEOMETRY_RECOVERY_STATUS, "phase-3h-frozen");
         assert_eq!(PHASE3G_STATUS, "phase-3g-frozen");
         assert_eq!(SAMPLER_ID, "YM-SU3-ENSEMBLE-V1");
         assert_eq!(PROPOSAL_ID, "YM-SU3-GENERATOR-METROPOLIS-V1");

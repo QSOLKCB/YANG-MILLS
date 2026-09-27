@@ -16,6 +16,8 @@ mod glueball_operators;
 mod glueball_scalar_fit;
 #[path = "../glueball_scalar_geometry_recovery.rs"]
 mod glueball_scalar_geometry_recovery;
+#[path = "../glueball_scalar_geometry_recovery_receipt.rs"]
+mod glueball_scalar_geometry_recovery_receipt;
 #[path = "../glueball_scalar_production.rs"]
 mod glueball_scalar_production;
 #[path = "../glueball_scalar_recovery.rs"]
@@ -39,6 +41,9 @@ use glueball_scalar_geometry_recovery::{
     GEOMETRY_RECOVERY_STATUS, MASTER_SEED, POST_THERMALIZATION_SWEEPS, PRIMARY_TRANSFORMATION,
     PROPOSAL_ANGLE, THERMALIZATION_SWEEPS, TOTAL_SWEEPS_PER_CHAIN, TRANSFORMATION_LABELS,
 };
+use glueball_scalar_geometry_recovery_receipt::{
+    observed_phase3h_receipt_matches, OBSERVATION_HEAD, OBSERVATION_WORKFLOW_RUN_ID,
+};
 use glueball_scalar_production::{OperatorKind, CANDIDATE_WINDOWS, STABILITY_MAX_Z, STOUT_LEVELS};
 
 fn print_optional(label: &str, value: Option<f64>) {
@@ -50,11 +55,18 @@ fn print_optional(label: &str, value: Option<f64>) {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let summary = run_scalar_geometry_recovery_analysis()?;
+    if !observed_phase3h_receipt_matches(&summary) {
+        return Err(
+            "Phase 3H deterministic replay no longer matches the pinned observation receipt".into(),
+        );
+    }
 
     println!("contract={GEOMETRY_RECOVERY_CONTRACT_ID}");
     println!("status={GEOMETRY_RECOVERY_STATUS}");
     println!("evidence_class=blocking-capable-finite-lattice-geometry-recovery-observation");
     println!("recovery_hypothesis=blocking-geometry-overlap-recovery");
+    println!("observation_head={OBSERVATION_HEAD}");
+    println!("observation_workflow_run_id={OBSERVATION_WORKFLOW_RUN_ID}");
     println!("phase3g_scalar_pipeline_validated=false");
     println!("sampler=YM-SU3-ENSEMBLE-V1");
     println!("proposal=YM-SU3-GENERATOR-METROPOLIS-V1");
@@ -151,6 +163,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("continuum_qft_constructed=false");
     println!("positive_continuum_mass_gap_proved=false");
     println!("clay_solution_claimed=false");
+    println!("receipt_replay_matches=true");
     println!("result=completed");
     Ok(())
 }

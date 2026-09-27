@@ -108,11 +108,15 @@ Phase 3H explicitly adopts [`SCIENTIFIC_INTEGRITY_INVARIANTS.md`](SCIENTIFIC_INT
 - success of one mechanism is not treated as proof of necessity;
 - finite-lattice evidence remains below physical/theorem claim classes.
 
+## Observed outcome
+
+The first predeclared Phase 3H observation completed on source head `c241991e58860795d247f70d7f92b9e984c96a64` in Actions workflow `34901768744`. All 32 chains passed sampler/accounting/group diagnostics, but all eight raw/stout/block scalar surfaces were `effective-mass-rejected`. The recorded summary is `primary_window_successes=0`, `transformation_stability_successes=0`, and `scalar_pipeline_validated=false`.
+
+This negative result is frozen and machine-replay guarded. It may not be converted into a pass by changing the seed, thresholds, windows, geometry, or interpretation under the Phase 3H identifier.
+
 ## Decision boundary
 
-If Phase 3H passes, freeze it and run a fresh-stream independent confirmation of the **same** blocking-capable geometry before opening `2++` or `0-+`.
-
-If Phase 3H fails, freeze the negative result and predeclare a new scalar authority that changes time extent and/or the variational operator basis. Do not retune this contract and do not return to repeated chain-count escalation until it passes.
+The predeclared failure branch applied. Phase 3I therefore changes only the temporal extent under a fresh contract/stream while keeping the Phase 3H spatial geometry and analysis surface fixed. If that controlled intervention also fails, the next scalar authority is variational-operator-basis work rather than another statistics-only retry.
 
 ## Claim boundary
 

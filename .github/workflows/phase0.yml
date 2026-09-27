@@ -88,5 +88,8 @@ jobs:
       - name: All negative contract regressions
         run: python3 scripts/test_all_contract_validation.py
 
-      - name: Phase 3H blocking-capable scalar geometry recovery evidence
+      - name: Frozen Phase 3H blocking-capable scalar geometry recovery replay
         run: cargo run --release --quiet --locked --bin ym-glueball-scalar-geometry-recovery
+
+      - name: Phase 3I temporal-extent scalar recovery evidence
+        run: cargo run --release --quiet --locked --bin ym-glueball-scalar-temporal-recovery

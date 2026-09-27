@@ -251,7 +251,7 @@ The successful V2 confirmation (Actions run `34761701867`, evidence head `f5a221
 
 ## Phase 3 — glueball laboratory
 
-Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and is frozen. Phase 3B2 was merged in PR #13 and is frozen. Phase 3C was merged in PR #14 and is frozen. Phase 3D was merged in PR #15 and is frozen. Phase 3E was merged in PR #16 and is frozen. Phase 3F was merged in PR #17 and is frozen with its first negative production receipt preserved. Phase 3G was merged in PR #18 and is frozen with its negative fresh-stream recovery receipt preserved. Phase 3H is the candidate blocking-capable geometry/operator-overlap recovery authority.
+Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and is frozen. Phase 3B2 was merged in PR #13 and is frozen. Phase 3C was merged in PR #14 and is frozen. Phase 3D was merged in PR #15 and is frozen. Phase 3E was merged in PR #16 and is frozen. Phase 3F was merged in PR #17 and is frozen with its first negative production receipt preserved. Phase 3G was merged in PR #18 and is frozen with its negative fresh-stream recovery receipt preserved. Phase 3H was merged in PR #19 and is frozen with its negative blocking-capable geometry receipt preserved. Phase 3I is the candidate temporal-extent recovery authority.
 
 - [x] Define gauge-invariant spatial loop operator bases (`YM-GLUEBALL-OPERATORS-V1`, frozen).
 - [x] Add smearing/blocking as separately versioned transformations.
@@ -269,9 +269,13 @@ Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and 
 - [x] Freeze Phase 3H before observation at `6 x 6 x 6 x 10`, 32 fresh independent chains, `beta=5.7`, the unchanged 68-sweep schedule, and master seed `0x3f02202609150001`.
 - [x] Add the frozen Phase 3B2 stride-2 `block-1` transformation, producing `3 x 3 x 3 x 10` coarse configurations, and predeclare `block-1/plaquette-1x1` as the primary surface.
 - [x] Keep the Phase 3E windows, full-covariance fit mechanics, correlator replay tolerance, and `z <= 5` stability threshold unchanged.
-- [ ] Execute the first Phase 3H observation and preserve its outcome without post-observation tuning.
-- [ ] If Phase 3H passes, run a fresh-stream independent confirmation of the same blocking-capable surface before opening new irreducible channels.
-- [ ] If Phase 3H fails, predeclare a new scalar authority changing time extent and/or variational operator basis rather than retuning Phase 3H.
+- [x] Execute the first Phase 3H observation and preserve its outcome without post-observation tuning: all eight scalar surfaces were `effective-mass-rejected`; `scalar_pipeline_validated=false`.
+- [x] Freeze the Phase 3H negative receipt from head `c241991e58860795d247f70d7f92b9e984c96a64` / workflow `34901768744` and enforce deterministic replay.
+- [x] Apply the Phase 3H failure branch by predeclaring `YM-GLUEBALL-SCALAR-TEMPORAL-RECOVERY-V1` (Phase 3I candidate).
+- [x] Change only temporal extent `N_t: 10 -> 16` plus a fresh master stream; preserve spatial geometry, chain count, operators, transformations, windows, fit semantics, and thresholds.
+- [ ] Execute the first Phase 3I observation and preserve its outcome without post-observation tuning.
+- [ ] If Phase 3I passes, run a fresh-stream independent confirmation of the same temporal surface before opening new irreducible channels.
+- [ ] If Phase 3I fails, predeclare a variational scalar operator-basis authority rather than retuning Phase 3I.
 - [ ] Add `2++` and `0-+` only after the scalar production pipeline has passed an independently reviewed stability gate.
 - [ ] Keep finite-volume spectral masses explicitly distinct from the continuum Clay gap.
 
@@ -279,9 +283,11 @@ Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and 
 
 **Phase 3G evidence boundary:** the independently predeclared recovery run retained the same `4 x 4 x 4 x 10`, `beta=5.7`, 68-sweep-per-chain geometry/schedule and all Phase 3F analysis semantics, changed to fresh master seed `0x3f01202609150001`, and doubled the independent chain count from 16 to 32. The observation on head `65dacc9f03cb0fd74826cd211ee7bd586668e08a` / workflow `34875522823` again rejected all six scalar surfaces. Therefore this specific independent-statistics-only recovery hypothesis failed. The negative result is machine-pinned and must not be converted into a pass by later threshold or stream changes under the same identifier.
 
-**Phase 3H predeclaration boundary:** the geometry/operator-overlap recovery keeps the Phase 3G chain count and all scalar-fit thresholds fixed, changes to fresh stream `0x3f02202609150001`, uses fine extents `6 x 6 x 6 x 10`, and evaluates eight surfaces across raw, stout-1, stout-2, and frozen stride-2 block-1 transformations. The exact workload is `4,700,160` proposals per chain and `150,405,120` proposals across 32 chains. The primary surface is frozen as `block-1/plaquette-1x1`. Because geometry and blocking are introduced together, any successful Phase 3H observation is evidence for the composite intervention and does not by itself establish which component caused improvement.
+**Phase 3H evidence boundary:** the geometry/operator-overlap recovery kept the Phase 3G chain count and scalar-fit thresholds fixed, changed to fresh stream `0x3f02202609150001`, used fine extents `6 x 6 x 6 x 10`, and evaluated eight raw/stout/block surfaces. The observation on head `c241991e58860795d247f70d7f92b9e984c96a64` / workflow `34901768744` passed sampler diagnostics but all eight surfaces were `effective-mass-rejected`, leaving `scalar_pipeline_validated=false`. The negative result is frozen and replay-checked.
 
-**Current scalar direction:** Phase 3H now tests geometry/operator overlap rather than another chain-count escalation. Its first observation must be accepted whether positive or negative. This conclusion is local to the predeclared Phase 3F/3G evidence and is not a theorem that additional statistics can never matter.
+**Phase 3I predeclaration boundary:** the temporal recovery changes only `N_t` from 10 to 16 and the fresh master stream to `0x3f03202609270001`. Spatial extent remains `6^3`, the blocked surface remains `3^3`, chain count remains 32, and all operators, transformations, windows, covariance/fit mechanics, replay tolerance, and `z <= 5` thresholds remain unchanged. The exact workload is `7,520,256` proposals per chain and `240,648,192` proposals total.
+
+**Current scalar direction:** Phase 3I isolates temporal extent before introducing a new variational-analysis authority. Its first observation must be accepted whether positive or negative. This is a controlled finite-lattice experiment, not a theorem about the cause of the previous failures.
 
 **Graduation gate:** a complete scalar production analysis can be reproduced from sealed ensemble evidence and produces stable finite-lattice estimates under predeclared fit-window/operator/transformation scans, followed by an independently reviewed confirmation on a deliberately declared recovery/confirmation surface. Passing this finite-lattice gate still does not establish a continuum mass gap.
 
