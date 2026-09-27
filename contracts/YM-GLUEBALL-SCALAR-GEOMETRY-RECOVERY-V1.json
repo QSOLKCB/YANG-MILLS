@@ -1,6 +1,6 @@
 {
   "contract_id": "YM-GLUEBALL-SCALAR-GEOMETRY-RECOVERY-V1",
-  "status": "phase-3h-candidate",
+  "status": "phase-3h-frozen",
   "scope": "blocking-capable scalar A1++ geometry/operator-overlap recovery after the preserved Phase 3F and Phase 3G negative observations",
   "depends_on": [
     {"contract_id": "YM-SU3-ENSEMBLE-V1", "required_status": "phase-2c1-frozen"},
