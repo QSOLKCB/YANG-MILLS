@@ -1091,7 +1091,10 @@ mod tests {
             .map(|matrix| matrix_scale_basis(matrix, scale))
             .collect();
 
-        assert_eq!(scaled[REFERENCE_TIME][0][0].to_bits(), f64::from_bits(1).to_bits());
+        assert_eq!(
+            scaled[REFERENCE_TIME][0][0].to_bits(),
+            f64::from_bits(1).to_bits()
+        );
         assert!(scaled[REFERENCE_TIME][0][1].is_finite());
         assert!(scaled[REFERENCE_TIME][1][1].is_finite());
 
