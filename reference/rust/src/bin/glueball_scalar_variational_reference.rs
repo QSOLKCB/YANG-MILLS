@@ -20,9 +20,9 @@ use glueball_scalar_variational::{
     canonical_two_state_matrices, max_matrix_series_residual, principal_generalized_projection,
     scalar_variational_connected_correlator, PrincipalProjection, CANONICAL_EXCITED_AMPLITUDE,
     CANONICAL_EXCITED_COUPLING, CANONICAL_EXCITED_MASS, CANONICAL_GROUND_AMPLITUDE,
-    CANONICAL_GROUND_COUPLING, CANONICAL_GROUND_MASS, CANONICAL_TIME_EXTENT,
-    DIAGONALIZATION_TIME, GAUGE_INVARIANCE_TOLERANCE, GOLDEN_CANONICAL_PRINCIPAL_EIGENVALUE,
-    REFERENCE_TIME, VARIATIONAL_CONTRACT_ID, VARIATIONAL_STATUS,
+    CANONICAL_GROUND_COUPLING, CANONICAL_GROUND_MASS, CANONICAL_TIME_EXTENT, DIAGONALIZATION_TIME,
+    GAUGE_INVARIANCE_TOLERANCE, GOLDEN_CANONICAL_PRINCIPAL_EIGENVALUE, REFERENCE_TIME,
+    VARIATIONAL_CONTRACT_ID, VARIATIONAL_STATUS,
 };
 use su3_lattice::deterministic_su3_site_gauge;
 
@@ -52,9 +52,7 @@ struct FrozenFixtureSnapshot {
     principal_eigenvalue: f64,
 }
 
-fn validate_frozen_fixture_snapshot(
-    snapshot: FrozenFixtureSnapshot,
-) -> Result<(), &'static str> {
+fn validate_frozen_fixture_snapshot(snapshot: FrozenFixtureSnapshot) -> Result<(), &'static str> {
     if snapshot.time_extent != FROZEN_CANONICAL_TIME_EXTENT
         || snapshot.ground_mass.to_bits() != FROZEN_CANONICAL_GROUND_MASS.to_bits()
         || snapshot.excited_mass.to_bits() != FROZEN_CANONICAL_EXCITED_MASS.to_bits()
@@ -75,12 +73,8 @@ fn validate_frozen_fixture_snapshot(
     Ok(())
 }
 
-fn validate_frozen_canonical_fixture(
-    projection: &PrincipalProjection,
-) -> Result<(), &'static str> {
-    if GOLDEN_CANONICAL_PRINCIPAL_EIGENVALUE.to_bits()
-        != FROZEN_PRINCIPAL_EIGENVALUE.to_bits()
-    {
+fn validate_frozen_canonical_fixture(projection: &PrincipalProjection) -> Result<(), &'static str> {
+    if GOLDEN_CANONICAL_PRINCIPAL_EIGENVALUE.to_bits() != FROZEN_PRINCIPAL_EIGENVALUE.to_bits() {
         return Err("Phase 3J source golden eigenvalue drifted");
     }
 
@@ -172,7 +166,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("result=passed");
     Ok(())
 }
-
 
 #[cfg(test)]
 mod receipt_tests {
