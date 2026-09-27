@@ -1205,9 +1205,10 @@ mod tests {
         let naive = a * d - b * b;
         let compensated = compensated_symmetric_determinant(a, d, b).unwrap();
 
-        assert_eq!(naive, 0.0);
+        assert_eq!(naive, -1.110_223_024_625_156_5e-16);
         assert!(compensated < 0.0);
         assert!(compensated.is_finite());
+        assert!(compensated.abs() < naive.abs());
     }
 
     #[test]
