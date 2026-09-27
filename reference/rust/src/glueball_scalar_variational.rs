@@ -863,10 +863,7 @@ mod tests {
 
         assert_eq!(projection.principal_eigenvalue, 1.0e-308);
         assert_eq!(projection.coefficients, [0.0, 1.0]);
-        assert_eq!(
-            projection.projected_correlator,
-            vec![1.0, 1.0, 1.0e-308]
-        );
+        assert_eq!(projection.projected_correlator, vec![1.0, 1.0, 1.0e-308]);
     }
 
     #[test]
