@@ -353,6 +353,51 @@ fn transpose(matrix: Matrix2) -> Matrix2 {
     [[matrix[0][0], matrix[1][0]], [matrix[0][1], matrix[1][1]]]
 }
 
+fn stable_scaled_quadratic_value(
+    vector: [f64; 2],
+    matrix: Matrix2,
+) -> Result<f64, VariationalError> {
+    if !vector[0].is_finite() || !vector[1].is_finite() || !matrix_finite(&matrix) {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+
+    let vector_scale = vector[0].abs().max(vector[1].abs());
+    if !vector_scale.is_finite() || vector_scale <= 0.0 {
+        return Err(VariationalError::ProjectionNormalizationFailure);
+    }
+    let matrix_scale = matrix
+        .iter()
+        .flatten()
+        .map(|value| value.abs())
+        .fold(0.0_f64, f64::max);
+    if !matrix_scale.is_finite() {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+    if matrix_scale == 0.0 {
+        return Ok(0.0);
+    }
+
+    let x = vector[0] / vector_scale;
+    let y = vector[1] / vector_scale;
+    let a = matrix[0][0] / matrix_scale;
+    let b = stable_average(matrix[0][1], matrix[1][0])? / matrix_scale;
+    let d = matrix[1][1] / matrix_scale;
+
+    let xx = x * x;
+    let xy = x * y;
+    let yy = y * y;
+    if !xx.is_finite() || !xy.is_finite() || !yy.is_finite() {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+
+    let first = a.mul_add(xx, 2.0 * b * xy);
+    let value = d.mul_add(yy, first);
+    if !first.is_finite() || !value.is_finite() {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+    Ok(value)
+}
+
 fn stable_whitened_projection(
     matrix: Matrix2,
     reference_matrix: &Matrix2,
@@ -683,6 +728,11 @@ pub fn principal_generalized_projection(
     } else if coefficients[1] < 0.0 {
         coefficients[0] = -coefficients[0];
         coefficients[1] = -coefficients[1];
+    }
+
+    let principal_rayleigh = stable_scaled_quadratic_value(coefficients, c1)?;
+    if principal_rayleigh <= 0.0 {
+        return Err(VariationalError::NonPositivePrincipalEigenvalue);
     }
 
     let metric_vector = [
@@ -1299,6 +1349,29 @@ mod tests {
         assert_close(root, 2.000_000_000_000_000_2e307, 4.0e292);
         assert!(root.is_finite());
         assert!(root > 0.0);
+    }
+
+    #[test]
+    fn negative_definite_diagonalization_matrix_rejects_spurious_positive_root() {
+        let c0 = [[1.0, 0.5], [0.5, 1.0]];
+        let c1 = [[-1.0e10, 0.0], [0.0, -1.0e-10]];
+        let matrices = vec![c0, c0, c1];
+
+        assert_eq!(
+            principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap_err(),
+            VariationalError::NonPositivePrincipalEigenvalue
+        );
+    }
+
+    #[test]
+    fn stable_rayleigh_check_detects_negative_principal_direction() {
+        let c1 = [[-1.0e10, 0.0], [0.0, -1.0e-10]];
+        let vector = [8.712_997_7e-18, 1.0];
+        let value = stable_scaled_quadratic_value(vector, c1).unwrap();
+
+        assert!(value.is_finite());
+        assert!(value < 0.0);
     }
 
     #[test]
