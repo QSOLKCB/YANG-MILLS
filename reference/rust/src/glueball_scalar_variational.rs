@@ -371,6 +371,10 @@ fn stable_generalized_principal_eigenvalue(
         return Err(VariationalError::NonFiniteAccumulator);
     }
 
+    if reference_off_diagonal == 0.0 && off_diagonal == 0.0 {
+        return Ok(diagonal_first.max(diagonal_second));
+    }
+
     if let Ok(root) = solve_scaled_generalized_characteristic(
         reference_determinant,
         reference_off_diagonal,
@@ -1079,6 +1083,15 @@ mod tests {
             1.0,
             NORMALIZATION_TOLERANCE,
         );
+    }
+
+    #[test]
+    fn diagonal_generalized_solver_preserves_subnormal_positive_root() {
+        let identity = [[1.0, 0.0], [0.0, 1.0]];
+        let diagonal = [[-1.0e308, 0.0], [0.0, 1.0e-308]];
+        let root = stable_generalized_principal_eigenvalue(identity, diagonal).unwrap();
+
+        assert_eq!(root, 1.0e-308);
     }
 
     #[test]
