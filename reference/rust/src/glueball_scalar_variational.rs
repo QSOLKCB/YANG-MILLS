@@ -1319,7 +1319,7 @@ mod tests {
     #[test]
     fn scaled_generalized_recovery_survives_product_overflow() {
         let identity = [[1.0, 0.0], [0.0, 1.0]];
-        let matrix = [[-8.0e307, 1.0e308], [1.0e308, -8.0e307]];
+        let matrix: Matrix2 = [[-8.0e307_f64, 1.0e308_f64], [1.0e308_f64, -8.0e307_f64]];
         assert!((matrix[0][0] * matrix[1][1]).is_infinite());
         assert!((matrix[0][1] * matrix[0][1]).is_infinite());
 
