@@ -132,6 +132,18 @@ fn symmetry_residual(matrix: &Matrix2) -> f64 {
     (matrix[0][1] - matrix[1][0]).abs()
 }
 
+fn symmetry_within_tolerance(matrix: &Matrix2) -> bool {
+    let residual = symmetry_residual(matrix);
+    if !residual.is_finite() {
+        return false;
+    }
+    let scale = matrix[0][1]
+        .abs()
+        .max(matrix[1][0].abs())
+        .max(1.0);
+    scale.is_finite() && residual <= SYMMETRY_TOLERANCE * scale
+}
+
 fn validate_matrix_series(matrices: &[Matrix2]) -> Result<(), VariationalError> {
     if matrices.len() < 3 || matrices.len() > MAX_TIME_EXTENT {
         return Err(VariationalError::CorrelatorShapeMismatch);
@@ -140,7 +152,7 @@ fn validate_matrix_series(matrices: &[Matrix2]) -> Result<(), VariationalError> 
         if !matrix_finite(matrix) {
             return Err(VariationalError::NonFiniteAccumulator);
         }
-        if symmetry_residual(matrix) > SYMMETRY_TOLERANCE {
+        if !symmetry_within_tolerance(matrix) {
             return Err(VariationalError::MatrixNotSymmetric);
         }
     }
@@ -361,24 +373,68 @@ pub fn principal_generalized_projection(
     if !matrix_finite(&whitened) {
         return Err(VariationalError::NonFiniteAccumulator);
     }
-    if symmetry_residual(&whitened) > SYMMETRY_TOLERANCE {
+    if !symmetry_within_tolerance(&whitened) {
         return Err(VariationalError::MatrixNotSymmetric);
     }
 
-    let half_difference = 0.5 * (whitened[0][0] - whitened[1][1]);
+    let whitened_a = whitened[0][0];
+    let whitened_d = whitened[1][1];
     let off_diagonal = 0.5 * (whitened[0][1] + whitened[1][0]);
-    let discriminant = half_difference.hypot(off_diagonal);
-    if !discriminant.is_finite() || discriminant <= POSITIVE_DEFINITE_PIVOT_TOLERANCE {
+    let eigen_scale = whitened_a
+        .abs()
+        .max(whitened_d.abs())
+        .max(off_diagonal.abs());
+    if !eigen_scale.is_finite() || eigen_scale <= 0.0 {
         return Err(VariationalError::DegeneratePrincipalEigenvector);
     }
-    let principal_eigenvalue = 0.5 * (whitened[0][0] + whitened[1][1]) + discriminant;
+
+    // Work on a unit-scaled symmetric 2x2 matrix so the largest eigenvalue
+    // can be recovered without overflow. When the midpoint is negative,
+    // computing midpoint + radius can catastrophically cancel; use the
+    // determinant/product identity against the well-resolved smaller root.
+    let scaled_a = whitened_a / eigen_scale;
+    let scaled_d = whitened_d / eigen_scale;
+    let scaled_b = off_diagonal / eigen_scale;
+    let midpoint = 0.5 * (scaled_a + scaled_d);
+    let half_difference = 0.5 * (scaled_a - scaled_d);
+    let radius = half_difference.hypot(scaled_b);
+    if !midpoint.is_finite() || !radius.is_finite() {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+    if radius <= POSITIVE_DEFINITE_PIVOT_TOLERANCE {
+        return Err(VariationalError::DegeneratePrincipalEigenvector);
+    }
+
+    let scaled_principal = if midpoint >= 0.0 {
+        midpoint + radius
+    } else {
+        let scaled_smaller = midpoint - radius;
+        let scaled_determinant = scaled_a * scaled_d - scaled_b * scaled_b;
+        if !scaled_smaller.is_finite()
+            || scaled_smaller == 0.0
+            || !scaled_determinant.is_finite()
+        {
+            return Err(VariationalError::NonFiniteAccumulator);
+        }
+        scaled_determinant / scaled_smaller
+    };
+    let principal_eigenvalue = scaled_principal * eigen_scale;
     if !principal_eigenvalue.is_finite() || principal_eigenvalue <= 0.0 {
         return Err(VariationalError::NonPositivePrincipalEigenvalue);
     }
 
-    let mut eigenvector = if off_diagonal.abs() > POSITIVE_DEFINITE_PIVOT_TOLERANCE {
-        [off_diagonal, principal_eigenvalue - whitened[0][0]]
-    } else if whitened[0][0] > whitened[1][1] {
+    let scaled_principal_for_vector = principal_eigenvalue / eigen_scale;
+    let off_diagonal_is_resolved =
+        scaled_b.abs() > POSITIVE_DEFINITE_PIVOT_TOLERANCE;
+    let mut eigenvector = if off_diagonal_is_resolved {
+        let first = [scaled_b, scaled_principal_for_vector - scaled_a];
+        let second = [scaled_principal_for_vector - scaled_d, scaled_b];
+        if first[0].hypot(first[1]) >= second[0].hypot(second[1]) {
+            first
+        } else {
+            second
+        }
+    } else if scaled_a > scaled_d {
         [1.0, 0.0]
     } else {
         [0.0, 1.0]
@@ -500,6 +556,15 @@ mod tests {
         assert!(
             residual <= tolerance,
             "actual={actual:.17e} expected={expected:.17e} residual={residual:.17e} tolerance={tolerance:.17e}"
+        );
+    }
+
+    fn assert_relative_close(actual: f64, expected: f64, tolerance: f64) {
+        let residual = (actual - expected).abs();
+        let scale = actual.abs().max(expected.abs()).max(1.0);
+        assert!(
+            residual <= tolerance * scale,
+            "actual={actual:.17e} expected={expected:.17e} residual={residual:.17e} relative_tolerance={tolerance:.17e}"
         );
     }
 
@@ -650,6 +715,48 @@ mod tests {
         {
             assert_close(left, right, 2.0e-11);
         }
+    }
+
+    #[test]
+    fn whitened_symmetry_check_is_basis_permutation_invariant_at_large_scale() {
+        let c0 = [[1.0e8, 0.25], [0.25, 1.0e-8]];
+        let c1 = [[1.0e10, -1.0e10], [-1.0e10, 1.0e10]];
+        let matrices = vec![c0, c0, c1];
+        let swapped: Vec<_> = matrices.iter().copied().map(matrix_swap_basis).collect();
+
+        let first =
+            principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
+        let second =
+            principal_generalized_projection(&swapped, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
+
+        assert_relative_close(
+            first.principal_eigenvalue,
+            second.principal_eigenvalue,
+            2.0e-12,
+        );
+        for (&left, &right) in first
+            .projected_correlator
+            .iter()
+            .zip(&second.projected_correlator)
+        {
+            assert_relative_close(left, right, 2.0e-12);
+        }
+    }
+
+    #[test]
+    fn principal_eigenvalue_avoids_negative_midpoint_cancellation() {
+        let identity = [[1.0, 0.0], [0.0, 1.0]];
+        let matrices = vec![identity, identity, [[-1.0e16, 0.0], [0.0, 1.0]]];
+
+        let projection =
+            principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
+
+        assert_eq!(projection.principal_eigenvalue, 1.0);
+        assert_eq!(projection.coefficients, [0.0, 1.0]);
+        assert_eq!(projection.projected_correlator, vec![1.0, 1.0, 1.0]);
     }
 
     #[test]
