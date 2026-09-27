@@ -362,12 +362,15 @@ fn solve_scaled_generalized_characteristic(
     if !smaller.is_finite() || smaller == 0.0 {
         return Err(VariationalError::NonFiniteAccumulator);
     }
-    let determinant = compensated_symmetric_determinant(
-        transformed_first,
-        transformed_second,
-        transformed_off_diagonal,
-    )?;
-    let principal = determinant / smaller;
+
+    // When the midpoint is negative the principal root can be tiny and
+    // midpoint + radius is cancellation-prone. Recover it from the product of
+    // the generalized roots instead. Compute det(C1) in the original
+    // normalized basis rather than after the +/- rotation: the latter can
+    // lose the sign of a near-singular determinant while forming sums.
+    let determinant =
+        compensated_symmetric_determinant(diagonal_first, diagonal_second, off_diagonal)?;
+    let principal = stable_divide_by_product(determinant, reference_determinant, smaller)?;
     if !principal.is_finite() {
         return Err(VariationalError::NonFiniteAccumulator);
     }
@@ -419,6 +422,23 @@ fn stable_generalized_principal_eigenvalue(
             return Err(VariationalError::DegeneratePrincipalEigenvector);
         }
         return Ok(diagonal_first.max(diagonal_second));
+    }
+
+    // Prefer the unscaled characteristic whenever its arithmetic remains
+    // representable. Scaling before the solve can erase the sign of an
+    // extremely small determinant, which changes an indefinite matrix into a
+    // false negative-definite one. Fall back to a unit-scale solve only when
+    // the unscaled path genuinely overflows.
+    match solve_scaled_generalized_characteristic(
+        reference_determinant,
+        reference_off_diagonal,
+        diagonal_first,
+        diagonal_second,
+        off_diagonal,
+    ) {
+        Ok(root) => return Ok(root),
+        Err(VariationalError::NonFiniteAccumulator) => {}
+        Err(error) => return Err(error),
     }
 
     let scale = diagonal_first
@@ -857,17 +877,27 @@ pub fn principal_generalized_projection(
     projected_correlator
         .try_reserve_exact(matrices.len())
         .map_err(|_| VariationalError::AllocationFailed)?;
-    for &matrix in matrices {
-        projected_correlator.push(stable_whitened_projection(
-            matrix,
-            &c0,
-            a,
-            d,
-            diagonal_scale,
-            normalized_off_diagonal,
-            normalized_determinant,
-            metric_vector,
-        )?);
+    for (time, &matrix) in matrices.iter().enumerate() {
+        // The normalized GEVP identity fixes the projected values at the
+        // reference and diagonalization times exactly. Reusing the solved
+        // eigenvalue at t1 also avoids losing a representable subnormal mode
+        // when a much larger orthogonal mode forces matrix-wide scaling.
+        if time == reference_time {
+            projected_correlator.push(1.0);
+        } else if time == diagonalization_time {
+            projected_correlator.push(principal_eigenvalue);
+        } else {
+            projected_correlator.push(stable_whitened_projection(
+                matrix,
+                &c0,
+                a,
+                d,
+                diagonal_scale,
+                normalized_off_diagonal,
+                normalized_determinant,
+                metric_vector,
+            )?);
+        }
     }
 
     Ok(PrincipalProjection {
