@@ -24,6 +24,7 @@ pub const BASIS_DIMENSION: usize = 2;
 pub const REFERENCE_TIME: usize = 1;
 pub const DIAGONALIZATION_TIME: usize = 2;
 pub const SYMMETRY_TOLERANCE: f64 = 2.0e-12;
+pub const GAUGE_INVARIANCE_TOLERANCE: f64 = 5.0e-11;
 pub const NORMALIZATION_TOLERANCE: f64 = 2.0e-12;
 pub const POSITIVE_DEFINITE_PIVOT_TOLERANCE: f64 = 1.0e-14;
 pub const CANONICAL_TIME_EXTENT: usize = 16;
@@ -313,7 +314,10 @@ pub fn principal_generalized_projection(
     diagonalization_time: usize,
 ) -> Result<PrincipalProjection, VariationalError> {
     validate_matrix_series(matrices)?;
-    if reference_time >= diagonalization_time || diagonalization_time >= matrices.len() {
+    if reference_time != REFERENCE_TIME
+        || diagonalization_time != DIAGONALIZATION_TIME
+        || diagonalization_time >= matrices.len()
+    {
         return Err(VariationalError::InvalidReferenceTimes);
     }
 
@@ -321,13 +325,33 @@ pub fn principal_generalized_projection(
     let c1 = matrices[diagonalization_time];
 
     let a = c0[0][0];
-    if !a.is_finite() || a <= POSITIVE_DEFINITE_PIVOT_TOLERANCE {
+    let d = c0[1][1];
+    if !a.is_finite() || !d.is_finite() || a <= 0.0 || d <= 0.0 {
         return Err(VariationalError::ReferenceMatrixNotPositiveDefinite);
     }
+
+    // Positive-definiteness is tested through the dimensionless correlation
+    // coefficient, so an invertible independent rescaling of either basis
+    // operator cannot change admissibility merely by changing its units.
+    let diagonal_scale = a.sqrt() * d.sqrt();
+    if !diagonal_scale.is_finite() || diagonal_scale <= 0.0 {
+        return Err(VariationalError::ReferenceMatrixNotPositiveDefinite);
+    }
+    let normalized_off_diagonal = c0[0][1] / diagonal_scale;
+    if !normalized_off_diagonal.is_finite() {
+        return Err(VariationalError::ReferenceMatrixNotPositiveDefinite);
+    }
+    let normalized_determinant = 1.0 - normalized_off_diagonal * normalized_off_diagonal;
+    if !normalized_determinant.is_finite()
+        || normalized_determinant <= POSITIVE_DEFINITE_PIVOT_TOLERANCE
+    {
+        return Err(VariationalError::ReferenceMatrixNotPositiveDefinite);
+    }
+
     let l00 = a.sqrt();
     let l10 = c0[1][0] / l00;
-    let second_pivot = c0[1][1] - l10 * l10;
-    if !second_pivot.is_finite() || second_pivot <= POSITIVE_DEFINITE_PIVOT_TOLERANCE {
+    let second_pivot = d * normalized_determinant;
+    if !second_pivot.is_finite() || second_pivot <= 0.0 {
         return Err(VariationalError::ReferenceMatrixNotPositiveDefinite);
     }
     let l11 = second_pivot.sqrt();
@@ -454,7 +478,11 @@ pub fn max_matrix_series_residual(
     for (left, right) in first.iter().zip(second) {
         for row in 0..2 {
             for column in 0..2 {
-                maximum = maximum.max((left[row][column] - right[row][column]).abs());
+                let residual = (left[row][column] - right[row][column]).abs();
+                if !residual.is_finite() {
+                    return Err(VariationalError::NonFiniteAccumulator);
+                }
+                maximum = maximum.max(residual);
             }
         }
     }
@@ -485,6 +513,7 @@ mod tests {
         assert_eq!(BASIS_DIMENSION, 2);
         assert_eq!(REFERENCE_TIME, 1);
         assert_eq!(DIAGONALIZATION_TIME, 2);
+        assert_eq!(GAUGE_INVARIANCE_TOLERANCE, 5.0e-11);
         assert_eq!(CANONICAL_TIME_EXTENT, 16);
     }
 
@@ -525,7 +554,7 @@ mod tests {
             .collect();
         let after = scalar_variational_connected_correlator(&transformed).unwrap();
         let residual = max_matrix_series_residual(&before.matrices, &after.matrices).unwrap();
-        assert!(residual <= 5.0e-11);
+        assert!(residual <= GAUGE_INVARIANCE_TOLERANCE);
     }
 
     #[test]
@@ -576,6 +605,27 @@ mod tests {
         {
             assert_close(left, right, 2.0e-11);
         }
+
+        let tiny_scaled: Vec<_> = matrices
+            .iter()
+            .copied()
+            .map(|matrix| matrix_scale_basis(matrix, [1.0e-8, 1.0]))
+            .collect();
+        let tiny =
+            principal_generalized_projection(&tiny_scaled, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
+        assert_close(
+            first.principal_eigenvalue,
+            tiny.principal_eigenvalue,
+            2.0e-12,
+        );
+        for (&left, &right) in first
+            .projected_correlator
+            .iter()
+            .zip(&tiny.projected_correlator)
+        {
+            assert_close(left, right, 2.0e-11);
+        }
     }
 
     #[test]
@@ -622,10 +672,32 @@ mod tests {
     }
 
     #[test]
+    fn residual_subtraction_overflow_fails_closed() {
+        let first = vec![
+            [[f64::MAX, 0.0], [0.0, 1.0]],
+            [[f64::MAX, 0.0], [0.0, 1.0]],
+            [[f64::MAX, 0.0], [0.0, 1.0]],
+        ];
+        let second = vec![
+            [[-f64::MAX, 0.0], [0.0, 1.0]],
+            [[-f64::MAX, 0.0], [0.0, 1.0]],
+            [[-f64::MAX, 0.0], [0.0, 1.0]],
+        ];
+        assert_eq!(
+            max_matrix_series_residual(&first, &second).unwrap_err(),
+            VariationalError::NonFiniteAccumulator
+        );
+    }
+
+    #[test]
     fn invalid_times_and_nonfinite_inputs_fail_closed() {
         let matrices = canonical_two_state_matrices();
         assert_eq!(
             principal_generalized_projection(&matrices, 2, 2).unwrap_err(),
+            VariationalError::InvalidReferenceTimes
+        );
+        assert_eq!(
+            principal_generalized_projection(&matrices, 0, 1).unwrap_err(),
             VariationalError::InvalidReferenceTimes
         );
 
