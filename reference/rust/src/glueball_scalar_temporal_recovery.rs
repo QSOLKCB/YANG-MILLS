@@ -29,7 +29,7 @@ use crate::glueball_scalar_production::{
     TOTAL_SWEEPS_PER_CHAIN as PHASE3F_TOTAL_SWEEPS_PER_CHAIN,
 };
 use crate::glueball_scalar_geometry_recovery::{
-    CHAIN_COUNT as PHASE3H_CHAIN_COUNT, TEMPORAL_RECOVERY_STATUS as PHASE3H_STATUS,
+    CHAIN_COUNT as PHASE3H_CHAIN_COUNT, GEOMETRY_RECOVERY_STATUS as PHASE3H_STATUS,
     MASTER_SEED as PHASE3H_MASTER_SEED,
 };
 use crate::glueball_smearing::{spatial_stout_smear, CANONICAL_RHO};
@@ -576,7 +576,7 @@ mod tests {
             "YM-GLUEBALL-SCALAR-TEMPORAL-RECOVERY-V1"
         );
         assert_eq!(TEMPORAL_RECOVERY_STATUS, "phase-3i-candidate");
-        assert_eq!(PHASE3H_STATUS, "phase-3g-frozen");
+        assert_eq!(PHASE3H_STATUS, "phase-3h-frozen");
         assert_eq!(SAMPLER_ID, "YM-SU3-ENSEMBLE-V1");
         assert_eq!(PROPOSAL_ID, "YM-SU3-GENERATOR-METROPOLIS-V1");
         assert_eq!(RNG_ID, "SPLITMIX64-V1");
@@ -597,10 +597,10 @@ mod tests {
         assert_eq!(TOTAL_SWEEPS_PER_CHAIN, 68);
         assert_eq!(PROPOSAL_ANGLE, 0.35);
         assert_eq!(RETAINED_CONFIGURATIONS_PER_CHAIN, 1);
-        assert_eq!(LINKS_PER_SWEEP, 8_640);
+        assert_eq!(LINKS_PER_SWEEP, 13_824);
         assert_eq!(PROPOSALS_PER_LINK, 8);
-        assert_eq!(EXPECTED_PROPOSALS_PER_CHAIN, 4_700_160);
-        assert_eq!(EXPECTED_TOTAL_PROPOSALS, 150_405_120);
+        assert_eq!(EXPECTED_PROPOSALS_PER_CHAIN, 7_520_256);
+        assert_eq!(EXPECTED_TOTAL_PROPOSALS, 240_648_192);
     }
 
     #[test]
