@@ -204,6 +204,41 @@ fn cholesky_metric_norm(
     Ok(norm)
 }
 
+fn stable_divide_by_product(
+    numerator: f64,
+    first_denominator: f64,
+    second_denominator: f64,
+) -> Result<f64, VariationalError> {
+    if !numerator.is_finite()
+        || !first_denominator.is_finite()
+        || !second_denominator.is_finite()
+        || first_denominator == 0.0
+        || second_denominator == 0.0
+    {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+
+    let product = first_denominator * second_denominator;
+    if product.is_finite() && product != 0.0 {
+        let value = numerator / product;
+        if value.is_finite() {
+            return Ok(value);
+        }
+    }
+
+    let (large, small) = if first_denominator.abs() >= second_denominator.abs() {
+        (first_denominator, second_denominator)
+    } else {
+        (second_denominator, first_denominator)
+    };
+    let intermediate = numerator / large;
+    let value = intermediate / small;
+    if !intermediate.is_finite() || !value.is_finite() {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+    Ok(value)
+}
+
 fn matmul(first: Matrix2, second: Matrix2) -> Matrix2 {
     let mut out = [[0.0; 2]; 2];
     for row in 0..2 {
@@ -436,7 +471,8 @@ pub fn principal_generalized_projection(
         return Err(VariationalError::ReferenceMatrixNotPositiveDefinite);
     }
 
-    let inv_l = [[1.0 / l00, 0.0], [-(l10 / l00) / l11, 1.0 / l11]];
+    let inverse_lower = -stable_divide_by_product(l10, l00, l11)?;
+    let inv_l = [[1.0 / l00, 0.0], [inverse_lower, 1.0 / l11]];
     let whitened = matmul(matmul(inv_l, c1), transpose(inv_l));
     if !matrix_finite(&whitened) {
         return Err(VariationalError::NonFiniteAccumulator);
@@ -1036,6 +1072,59 @@ mod tests {
         {
             assert_relative_close(left, right, 2.0e-12);
         }
+    }
+
+    #[test]
+    fn extreme_nonuniform_basis_rescaling_preserves_projection() {
+        let c0 = [[1.0, 0.5], [0.5, 1.0]];
+        let c1 = [[2.0, 0.3], [0.3, 1.0]];
+        let matrices = vec![c0, c0, c1];
+
+        let baseline =
+            principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
+
+        let scale = [f64::from_bits(1).sqrt(), 1.0e154];
+        let scaled: Vec<_> = matrices
+            .iter()
+            .copied()
+            .map(|matrix| matrix_scale_basis(matrix, scale))
+            .collect();
+
+        assert_eq!(scaled[REFERENCE_TIME][0][0].to_bits(), f64::from_bits(1).to_bits());
+        assert!(scaled[REFERENCE_TIME][0][1].is_finite());
+        assert!(scaled[REFERENCE_TIME][1][1].is_finite());
+
+        let rescaled =
+            principal_generalized_projection(&scaled, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
+
+        assert_relative_close(
+            baseline.principal_eigenvalue,
+            rescaled.principal_eigenvalue,
+            2.0e-12,
+        );
+        for (&left, &right) in baseline
+            .projected_correlator
+            .iter()
+            .zip(&rescaled.projected_correlator)
+        {
+            assert_relative_close(left, right, 2.0e-12);
+        }
+    }
+
+    #[test]
+    fn inverse_cholesky_product_division_avoids_intermediate_overflow() {
+        let minimum_subnormal = f64::from_bits(1);
+        let l00 = minimum_subnormal.sqrt();
+        let l10 = 0.5 * 1.0e154;
+        let l11 = 0.5_f64.sqrt() * 1.0e154;
+
+        assert!((l10 / l00).is_infinite());
+
+        let stable = stable_divide_by_product(l10, l00, l11).unwrap();
+        assert!(stable.is_finite());
+        assert!(stable > 0.0);
     }
 
     #[test]
