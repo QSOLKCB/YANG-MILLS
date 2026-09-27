@@ -30,6 +30,10 @@ pub const POSITIVE_DEFINITE_PIVOT_TOLERANCE: f64 = 1.0e-14;
 pub const CANONICAL_TIME_EXTENT: usize = 16;
 pub const CANONICAL_GROUND_MASS: f64 = 0.4;
 pub const CANONICAL_EXCITED_MASS: f64 = 0.9;
+pub const CANONICAL_GROUND_AMPLITUDE: f64 = 1.2;
+pub const CANONICAL_EXCITED_AMPLITUDE: f64 = 0.8;
+pub const CANONICAL_GROUND_COUPLING: [f64; 2] = [1.0, 0.5];
+pub const CANONICAL_EXCITED_COUPLING: [f64; 2] = [0.25, 1.0];
 pub const GOLDEN_CANONICAL_PRINCIPAL_EIGENVALUE: f64 = 0.673_346_666_250_657;
 
 pub type Matrix2 = [[f64; BASIS_DIMENSION]; BASIS_DIMENSION];
@@ -588,22 +592,21 @@ fn periodic_weight(mass: f64, time: usize, time_extent: usize) -> f64 {
 }
 
 pub fn canonical_two_state_matrices() -> Vec<Matrix2> {
-    let ground_coupling = [1.0_f64, 0.5_f64];
-    let excited_coupling = [0.25_f64, 1.0_f64];
-    let ground_amplitude = 1.2_f64;
-    let excited_amplitude = 0.8_f64;
-
     (0..CANONICAL_TIME_EXTENT)
         .map(|time| {
-            let ground = ground_amplitude
+            let ground = CANONICAL_GROUND_AMPLITUDE
                 * periodic_weight(CANONICAL_GROUND_MASS, time, CANONICAL_TIME_EXTENT);
-            let excited = excited_amplitude
+            let excited = CANONICAL_EXCITED_AMPLITUDE
                 * periodic_weight(CANONICAL_EXCITED_MASS, time, CANONICAL_TIME_EXTENT);
             let mut matrix = [[0.0_f64; 2]; 2];
             for row in 0..2 {
                 for column in 0..2 {
-                    matrix[row][column] = ground * ground_coupling[row] * ground_coupling[column]
-                        + excited * excited_coupling[row] * excited_coupling[column];
+                    matrix[row][column] = ground
+                        * CANONICAL_GROUND_COUPLING[row]
+                        * CANONICAL_GROUND_COUPLING[column]
+                        + excited
+                            * CANONICAL_EXCITED_COUPLING[row]
+                            * CANONICAL_EXCITED_COUPLING[column];
                 }
             }
             matrix
@@ -672,6 +675,10 @@ mod tests {
         assert_eq!(CANONICAL_TIME_EXTENT, 16);
         assert_eq!(CANONICAL_GROUND_MASS.to_bits(), 0.4_f64.to_bits());
         assert_eq!(CANONICAL_EXCITED_MASS.to_bits(), 0.9_f64.to_bits());
+        assert_eq!(CANONICAL_GROUND_AMPLITUDE.to_bits(), 1.2_f64.to_bits());
+        assert_eq!(CANONICAL_EXCITED_AMPLITUDE.to_bits(), 0.8_f64.to_bits());
+        assert_eq!(CANONICAL_GROUND_COUPLING, [1.0, 0.5]);
+        assert_eq!(CANONICAL_EXCITED_COUPLING, [0.25, 1.0]);
         assert_eq!(
             GOLDEN_CANONICAL_PRINCIPAL_EIGENVALUE.to_bits(),
             0.673_346_666_250_657_f64.to_bits()
