@@ -32,5 +32,5 @@ jobs:
       - name: Frozen Phase 3G receipt replay
         run: cargo run --release --quiet --locked --bin ym-glueball-scalar-recovery
 
-      - name: Phase 3H blocking-capable scalar recovery evidence
+      - name: Frozen Phase 3H blocking-capable scalar recovery replay
         run: cargo run --release --quiet --locked --bin ym-glueball-scalar-geometry-recovery
