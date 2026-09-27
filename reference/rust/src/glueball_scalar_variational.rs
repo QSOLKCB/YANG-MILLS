@@ -525,14 +525,8 @@ fn stable_cholesky_whitened(
     }
 
     let out = [
-        [
-            whitened_first * scale,
-            whitened_off_diagonal * scale,
-        ],
-        [
-            whitened_off_diagonal * scale,
-            whitened_second * scale,
-        ],
+        [whitened_first * scale, whitened_off_diagonal * scale],
+        [whitened_off_diagonal * scale, whitened_second * scale],
     ];
     if !matrix_finite(&out) {
         return Err(VariationalError::NonFiniteAccumulator);
@@ -1602,10 +1596,7 @@ mod tests {
     #[test]
     fn near_degenerate_generalized_gap_avoids_discriminant_cancellation() {
         let c0 = [[1.0, 0.623_468], [0.623_468, 1.0]];
-        let c1 = [
-            [1.000_000_000_000_003_8, 0.623_468],
-            [0.623_468, 1.0],
-        ];
+        let c1 = [[1.000_000_000_000_003_8, 0.623_468], [0.623_468, 1.0]];
         let matrices = vec![c0, c0, c1];
 
         let projection =
