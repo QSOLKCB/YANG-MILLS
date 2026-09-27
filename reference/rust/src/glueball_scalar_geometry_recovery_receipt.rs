@@ -23,12 +23,36 @@ pub const OBSERVED_REJECTION_CODE: &str = "effective-mass-rejected";
 pub const OBSERVED_SURFACE_OUTCOMES: [(&str, OperatorKind, &str); 8] = [
     ("raw", OperatorKind::Plaquette1x1, OBSERVED_REJECTION_CODE),
     ("raw", OperatorKind::Rectangle2x1, OBSERVED_REJECTION_CODE),
-    ("stout-1", OperatorKind::Plaquette1x1, OBSERVED_REJECTION_CODE),
-    ("stout-1", OperatorKind::Rectangle2x1, OBSERVED_REJECTION_CODE),
-    ("stout-2", OperatorKind::Plaquette1x1, OBSERVED_REJECTION_CODE),
-    ("stout-2", OperatorKind::Rectangle2x1, OBSERVED_REJECTION_CODE),
-    ("block-1", OperatorKind::Plaquette1x1, OBSERVED_REJECTION_CODE),
-    ("block-1", OperatorKind::Rectangle2x1, OBSERVED_REJECTION_CODE),
+    (
+        "stout-1",
+        OperatorKind::Plaquette1x1,
+        OBSERVED_REJECTION_CODE,
+    ),
+    (
+        "stout-1",
+        OperatorKind::Rectangle2x1,
+        OBSERVED_REJECTION_CODE,
+    ),
+    (
+        "stout-2",
+        OperatorKind::Plaquette1x1,
+        OBSERVED_REJECTION_CODE,
+    ),
+    (
+        "stout-2",
+        OperatorKind::Rectangle2x1,
+        OBSERVED_REJECTION_CODE,
+    ),
+    (
+        "block-1",
+        OperatorKind::Plaquette1x1,
+        OBSERVED_REJECTION_CODE,
+    ),
+    (
+        "block-1",
+        OperatorKind::Rectangle2x1,
+        OBSERVED_REJECTION_CODE,
+    ),
 ];
 
 fn retained_chain_identity_matches(evidence: &[ChainEvidence]) -> bool {
@@ -104,18 +128,20 @@ mod tests {
     fn pinned_summary() -> ProductionSummary {
         let surfaces = OBSERVED_SURFACE_OUTCOMES
             .iter()
-            .map(|&(transformation, operator, rejection_code)| SurfaceRecord {
-                outcome: SurfaceOutcome {
-                    transformation,
-                    operator,
-                    fit: None,
-                    error_code: Some(rejection_code),
+            .map(
+                |&(transformation, operator, rejection_code)| SurfaceRecord {
+                    outcome: SurfaceOutcome {
+                        transformation,
+                        operator,
+                        fit: None,
+                        error_code: Some(rejection_code),
+                    },
+                    correlator: CorrelatorEvidence {
+                        full: Vec::new(),
+                        jackknife: Vec::new(),
+                    },
                 },
-                correlator: CorrelatorEvidence {
-                    full: Vec::new(),
-                    jackknife: Vec::new(),
-                },
-            })
+            )
             .collect();
 
         ProductionSummary {
