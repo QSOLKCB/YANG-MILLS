@@ -417,19 +417,11 @@ pub fn principal_generalized_projection(
     let l00 = a.sqrt();
     let l10 = c0[1][0] / l00;
     let l11 = d.sqrt() * normalized_determinant.sqrt();
-    if !l00.is_finite()
-        || !l10.is_finite()
-        || !l11.is_finite()
-        || l00 <= 0.0
-        || l11 <= 0.0
-    {
+    if !l00.is_finite() || !l10.is_finite() || !l11.is_finite() || l00 <= 0.0 || l11 <= 0.0 {
         return Err(VariationalError::ReferenceMatrixNotPositiveDefinite);
     }
 
-    let inv_l = [
-        [1.0 / l00, 0.0],
-        [-(l10 / l00) / l11, 1.0 / l11],
-    ];
+    let inv_l = [[1.0 / l00, 0.0], [-(l10 / l00) / l11, 1.0 / l11]];
     let whitened = matmul(matmul(inv_l, c1), transpose(inv_l));
     if !matrix_finite(&whitened) {
         return Err(VariationalError::NonFiniteAccumulator);
@@ -601,12 +593,11 @@ pub fn canonical_two_state_matrices() -> Vec<Matrix2> {
             let mut matrix = [[0.0_f64; 2]; 2];
             for row in 0..2 {
                 for column in 0..2 {
-                    matrix[row][column] = ground
-                        * CANONICAL_GROUND_COUPLING[row]
-                        * CANONICAL_GROUND_COUPLING[column]
-                        + excited
-                            * CANONICAL_EXCITED_COUPLING[row]
-                            * CANONICAL_EXCITED_COUPLING[column];
+                    matrix[row][column] =
+                        ground * CANONICAL_GROUND_COUPLING[row] * CANONICAL_GROUND_COUPLING[column]
+                            + excited
+                                * CANONICAL_EXCITED_COUPLING[row]
+                                * CANONICAL_EXCITED_COUPLING[column];
                 }
             }
             matrix
@@ -945,11 +936,7 @@ mod tests {
     #[test]
     fn tiny_off_diagonal_preserves_unique_principal_direction() {
         let identity = [[1.0, 0.0], [0.0, 1.0]];
-        let matrices = vec![
-            identity,
-            identity,
-            [[1.0, 1.0e-16], [1.0e-16, 1.0]],
-        ];
+        let matrices = vec![identity, identity, [[1.0, 1.0e-16], [1.0e-16, 1.0]]];
 
         let projection =
             principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
@@ -972,8 +959,16 @@ mod tests {
         let projection =
             principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
                 .unwrap();
-        assert_close(projection.projected_correlator[0], 1.0, NORMALIZATION_TOLERANCE);
-        assert_close(projection.projected_correlator[1], 1.0, NORMALIZATION_TOLERANCE);
+        assert_close(
+            projection.projected_correlator[0],
+            1.0,
+            NORMALIZATION_TOLERANCE,
+        );
+        assert_close(
+            projection.projected_correlator[1],
+            1.0,
+            NORMALIZATION_TOLERANCE,
+        );
         assert_eq!(
             projection.projected_correlator[0].to_bits(),
             projection.projected_correlator[1].to_bits()
