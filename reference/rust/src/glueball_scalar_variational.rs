@@ -281,51 +281,110 @@ fn compensated_symmetric_determinant(
     Ok(determinant)
 }
 
-fn symmetric_negative_definite(matrix: Matrix2) -> Result<bool, VariationalError> {
-    let matrix = symmetrized_matrix(matrix)?;
-    let scale = matrix
-        .iter()
-        .flatten()
-        .map(|value| value.abs())
-        .fold(0.0_f64, f64::max);
-    if !scale.is_finite() {
-        return Err(VariationalError::NonFiniteAccumulator);
-    }
-    if scale == 0.0 {
-        return Ok(false);
-    }
-
-    let a = matrix[0][0] / scale;
-    let d = matrix[1][1] / scale;
-    let b = matrix[0][1] / scale;
-    let determinant = compensated_symmetric_determinant(a, d, b)?;
-    Ok(a < 0.0 && determinant > 0.0)
-}
-
-fn stable_negative_midpoint_principal_root(
+fn solve_scaled_generalized_characteristic(
+    reference_determinant: f64,
+    reference_off_diagonal: f64,
     diagonal_first: f64,
     diagonal_second: f64,
     off_diagonal: f64,
-    midpoint: f64,
-    radius: f64,
 ) -> Result<f64, VariationalError> {
-    let smaller = midpoint - radius;
-    if smaller.is_finite() && smaller != 0.0 {
-        if let Ok(determinant) =
-            compensated_symmetric_determinant(diagonal_first, diagonal_second, off_diagonal)
-        {
-            let value = determinant / smaller;
-            if value.is_finite() && value > 0.0 {
-                return Ok(value);
-            }
-        }
+    if !reference_determinant.is_finite()
+        || reference_determinant <= 0.0
+        || !reference_off_diagonal.is_finite()
+        || !diagonal_first.is_finite()
+        || !diagonal_second.is_finite()
+        || !off_diagonal.is_finite()
+    {
+        return Err(VariationalError::NonFiniteAccumulator);
     }
 
-    // If the unscaled products or the smaller eigenvalue overflow, normalize
-    // the entire symmetric matrix first. The scaled entries stay within
-    // [-1,1], so the determinant products and smaller root are representable.
-    // Multiplying the recovered dimensionless principal root by the single
-    // matrix scale avoids ever materializing an O(scale^2) determinant.
+    let trace_coefficient = diagonal_first + diagonal_second
+        - 2.0 * reference_off_diagonal * off_diagonal;
+    let determinant =
+        compensated_symmetric_determinant(diagonal_first, diagonal_second, off_diagonal)?;
+    if !trace_coefficient.is_finite() || !determinant.is_finite() {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+
+    let discriminant_correction = -4.0 * reference_determinant * determinant;
+    let discriminant = trace_coefficient.mul_add(trace_coefficient, discriminant_correction);
+    if !discriminant.is_finite() || discriminant < 0.0 {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+
+    let discriminant_root = discriminant.sqrt();
+    let denominator = 2.0 * reference_determinant;
+    if !discriminant_root.is_finite() || !denominator.is_finite() || denominator <= 0.0 {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+
+    if trace_coefficient >= 0.0 {
+        let root = (trace_coefficient + discriminant_root) / denominator;
+        if !root.is_finite() {
+            return Err(VariationalError::NonFiniteAccumulator);
+        }
+        return Ok(root);
+    }
+
+    let smaller = (trace_coefficient - discriminant_root) / denominator;
+    if !smaller.is_finite() || smaller == 0.0 {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+    stable_divide_by_product(determinant, reference_determinant, smaller)
+}
+
+fn stable_generalized_principal_eigenvalue(
+    reference: Matrix2,
+    diagonalization: Matrix2,
+) -> Result<f64, VariationalError> {
+    let reference = symmetrized_matrix(reference)?;
+    let diagonalization = symmetrized_matrix(diagonalization)?;
+
+    let reference_first = reference[0][0];
+    let reference_second = reference[1][1];
+    if !reference_first.is_finite()
+        || !reference_second.is_finite()
+        || reference_first <= 0.0
+        || reference_second <= 0.0
+    {
+        return Err(VariationalError::ReferenceMatrixNotPositiveDefinite);
+    }
+
+    let reference_scale = reference_first.sqrt() * reference_second.sqrt();
+    if !reference_scale.is_finite() || reference_scale <= 0.0 {
+        return Err(VariationalError::ReferenceMatrixNotPositiveDefinite);
+    }
+
+    let reference_off_diagonal = reference[0][1] / reference_scale;
+    let reference_determinant =
+        1.0 - reference_off_diagonal * reference_off_diagonal;
+    if !reference_off_diagonal.is_finite()
+        || !reference_determinant.is_finite()
+        || reference_determinant <= POSITIVE_DEFINITE_PIVOT_TOLERANCE
+    {
+        return Err(VariationalError::ReferenceMatrixNotPositiveDefinite);
+    }
+
+    let diagonal_first = diagonalization[0][0] / reference_first;
+    let diagonal_second = diagonalization[1][1] / reference_second;
+    let off_diagonal = diagonalization[0][1] / reference_scale;
+    if !diagonal_first.is_finite()
+        || !diagonal_second.is_finite()
+        || !off_diagonal.is_finite()
+    {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+
+    if let Ok(root) = solve_scaled_generalized_characteristic(
+        reference_determinant,
+        reference_off_diagonal,
+        diagonal_first,
+        diagonal_second,
+        off_diagonal,
+    ) {
+        return Ok(root);
+    }
+
     let scale = diagonal_first
         .abs()
         .max(diagonal_second.abs())
@@ -334,29 +393,18 @@ fn stable_negative_midpoint_principal_root(
         return Err(VariationalError::NonFiniteAccumulator);
     }
 
-    let scaled_first = diagonal_first / scale;
-    let scaled_second = diagonal_second / scale;
-    let scaled_off_diagonal = off_diagonal / scale;
-    let scaled_midpoint = 0.5 * scaled_first + 0.5 * scaled_second;
-    let scaled_half_difference = 0.5 * scaled_first - 0.5 * scaled_second;
-    let scaled_radius = scaled_half_difference.hypot(scaled_off_diagonal);
-    let scaled_smaller = scaled_midpoint - scaled_radius;
-    if !scaled_midpoint.is_finite()
-        || !scaled_radius.is_finite()
-        || !scaled_smaller.is_finite()
-        || scaled_smaller == 0.0
-    {
+    let scaled_root = solve_scaled_generalized_characteristic(
+        reference_determinant,
+        reference_off_diagonal,
+        diagonal_first / scale,
+        diagonal_second / scale,
+        off_diagonal / scale,
+    )?;
+    let root = scale * scaled_root;
+    if !root.is_finite() {
         return Err(VariationalError::NonFiniteAccumulator);
     }
-
-    let scaled_determinant =
-        compensated_symmetric_determinant(scaled_first, scaled_second, scaled_off_diagonal)?;
-    let scaled_principal = scaled_determinant / scaled_smaller;
-    let principal = scale * scaled_principal;
-    if !scaled_principal.is_finite() || !principal.is_finite() || principal <= 0.0 {
-        return Err(VariationalError::NonPositivePrincipalEigenvalue);
-    }
-    Ok(principal)
+    Ok(root)
 }
 
 fn matmul(first: Matrix2, second: Matrix2) -> Matrix2 {
@@ -559,9 +607,6 @@ pub fn principal_generalized_projection(
 
     let c0 = symmetrized_matrix(matrices[reference_time])?;
     let c1 = symmetrized_matrix(matrices[diagonalization_time])?;
-    if symmetric_negative_definite(c1)? {
-        return Err(VariationalError::NonPositivePrincipalEigenvalue);
-    }
 
     let a = c0[0][0];
     let d = c0[1][1];
@@ -612,40 +657,7 @@ pub fn principal_generalized_projection(
         return Err(VariationalError::NonFiniteAccumulator);
     }
 
-    // Compute the symmetric 2x2 spectrum without first dividing small,
-    // representable entries by the largest matrix scale. Half-sums avoid
-    // overflow in the trace/difference, and hypot supplies its own scaling.
-    // When the midpoint is negative, midpoint + radius can catastrophically
-    // cancel; recover the larger root from determinant / smaller_root using
-    // a quotient ordering that preserves extreme diagonal dynamic ranges.
-    let principal_eigenvalue = if off_diagonal == 0.0 {
-        if whitened_a == whitened_d {
-            return Err(VariationalError::DegeneratePrincipalEigenvector);
-        }
-        whitened_a.max(whitened_d)
-    } else {
-        let midpoint = 0.5 * whitened_a + 0.5 * whitened_d;
-        let half_difference = 0.5 * whitened_a - 0.5 * whitened_d;
-        let radius = half_difference.hypot(off_diagonal);
-        if !midpoint.is_finite() || !radius.is_finite() {
-            return Err(VariationalError::NonFiniteAccumulator);
-        }
-        if radius == 0.0 {
-            return Err(VariationalError::DegeneratePrincipalEigenvector);
-        }
-
-        if midpoint >= 0.0 {
-            midpoint + radius
-        } else {
-            stable_negative_midpoint_principal_root(
-                whitened_a,
-                whitened_d,
-                off_diagonal,
-                midpoint,
-                radius,
-            )?
-        }
-    };
+    let principal_eigenvalue = stable_generalized_principal_eigenvalue(c0, c1)?;
     if !principal_eigenvalue.is_finite() || principal_eigenvalue <= 0.0 {
         return Err(VariationalError::NonPositivePrincipalEigenvalue);
     }
@@ -1309,17 +1321,13 @@ mod tests {
     }
 
     #[test]
-    fn scaled_negative_midpoint_recovery_survives_product_overflow() {
-        let a = -8.0e307_f64;
-        let d = -8.0e307_f64;
-        let b = 1.0e308_f64;
-        assert!((a * d).is_infinite());
-        assert!((b * b).is_infinite());
+    fn scaled_generalized_recovery_survives_product_overflow() {
+        let identity = [[1.0, 0.0], [0.0, 1.0]];
+        let matrix = [[-8.0e307, 1.0e308], [1.0e308, -8.0e307]];
+        assert!((matrix[0][0] * matrix[1][1]).is_infinite());
+        assert!((matrix[0][1] * matrix[0][1]).is_infinite());
 
-        let midpoint = 0.5 * a + 0.5 * d;
-        let radius = (0.5 * a - 0.5 * d).hypot(b);
-        let root = stable_negative_midpoint_principal_root(a, d, b, midpoint, radius).unwrap();
-
+        let root = stable_generalized_principal_eigenvalue(identity, matrix).unwrap();
         assert_close(root, 2.000_000_000_000_000_2e307, 4.0e292);
         assert!(root.is_finite());
         assert!(root > 0.0);
@@ -1339,15 +1347,75 @@ mod tests {
     }
 
     #[test]
-    fn scaled_inertia_check_detects_negative_definite_matrix() {
-        let c1 = [[-1.0e10, 0.0], [0.0, -1.0e-10]];
-        assert!(symmetric_negative_definite(c1).unwrap());
+    fn generalized_characteristic_preserves_inertia_signs() {
+        let identity = [[1.0, 0.0], [0.0, 1.0]];
+        let negative_definite = [[-1.0e10, 0.0], [0.0, -1.0e-10]];
+        let negative_root =
+            stable_generalized_principal_eigenvalue(identity, negative_definite).unwrap();
+        assert!(negative_root < 0.0);
 
         let indefinite = [
             [-0.1, 0.761_577_310_586_390_9],
             [0.761_577_310_586_390_9, -5.8],
         ];
-        assert!(!symmetric_negative_definite(indefinite).unwrap());
+        let positive_root =
+            stable_generalized_principal_eigenvalue(identity, indefinite).unwrap();
+        assert!(positive_root > 0.0);
+    }
+
+    #[test]
+    fn near_zero_positive_mode_is_permutation_invariant() {
+        let c0 = [
+            [9.999_999_999_999_992e-301, 4.999_999_999_999_997e-295],
+            [4.999_999_999_999_997e-295, 9.999_999_999_999_997e-289],
+        ];
+        let c1 = [
+            [-9.999_999_999_999_992e-302, 7.615_773_105_863_904e-295],
+            [7.615_773_105_863_904e-295, -5.799_999_999_999_998e-288],
+        ];
+        let matrices = vec![c0, c0, c1];
+        let swapped: Vec<_> = matrices.iter().copied().map(matrix_swap_basis).collect();
+
+        let first =
+            principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
+        let second =
+            principal_generalized_projection(&swapped, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
+
+        assert!(first.principal_eigenvalue > 0.0);
+        assert_eq!(
+            first.principal_eigenvalue.to_bits(),
+            second.principal_eigenvalue.to_bits()
+        );
+        for (&left, &right) in first
+            .projected_correlator
+            .iter()
+            .zip(&second.projected_correlator)
+        {
+            assert_relative_close(left, right, 2.0e-12);
+        }
+    }
+
+    #[test]
+    fn near_singular_indefinite_matrix_preserves_positive_mode() {
+        let identity = [[1.0, 0.0], [0.0, 1.0]];
+        let c1 = [
+            [-9.999_999_999_999_994e-301, 3.162_277_660_168_378_4e-150],
+            [3.162_277_660_168_378_4e-150, -10.0],
+        ];
+        let matrices = vec![identity, identity, c1];
+
+        let projection =
+            principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
+
+        assert!(projection.principal_eigenvalue > 0.0);
+        assert_close(
+            projection.principal_eigenvalue,
+            5.872_016_694_893_03e-317,
+            5.0e-320,
+        );
     }
 
     #[test]
