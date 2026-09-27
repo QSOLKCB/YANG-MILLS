@@ -252,10 +252,7 @@ fn compensated_symmetric_determinant(
     diagonal_second: f64,
     off_diagonal: f64,
 ) -> Result<f64, VariationalError> {
-    if !diagonal_first.is_finite()
-        || !diagonal_second.is_finite()
-        || !off_diagonal.is_finite()
-    {
+    if !diagonal_first.is_finite() || !diagonal_second.is_finite() || !off_diagonal.is_finite() {
         return Err(VariationalError::NonFiniteAccumulator);
     }
 
