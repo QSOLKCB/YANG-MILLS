@@ -93,3 +93,6 @@ jobs:
 
       - name: Phase 3I temporal-extent scalar recovery evidence
         run: cargo run --release --quiet --locked --bin ym-glueball-scalar-temporal-recovery
+
+      - name: Phase 3J scalar variational mechanics reference
+        run: cargo run --quiet --locked --bin ym-glueball-scalar-variational
