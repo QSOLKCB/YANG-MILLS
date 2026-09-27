@@ -410,34 +410,41 @@ pub fn principal_generalized_projection(
     // When the midpoint is negative, midpoint + radius can catastrophically
     // cancel; recover the larger root from determinant / smaller_root using
     // a quotient ordering that preserves extreme diagonal dynamic ranges.
-    let midpoint = 0.5 * whitened_a + 0.5 * whitened_d;
-    let half_difference = 0.5 * whitened_a - 0.5 * whitened_d;
-    let radius = half_difference.hypot(off_diagonal);
-    if !midpoint.is_finite() || !radius.is_finite() {
-        return Err(VariationalError::NonFiniteAccumulator);
-    }
-    if radius == 0.0 {
-        return Err(VariationalError::DegeneratePrincipalEigenvector);
-    }
-
-    let principal_eigenvalue = if midpoint >= 0.0 {
-        midpoint + radius
+    let principal_eigenvalue = if off_diagonal == 0.0 {
+        if whitened_a == whitened_d {
+            return Err(VariationalError::DegeneratePrincipalEigenvector);
+        }
+        whitened_a.max(whitened_d)
     } else {
-        let smaller = midpoint - radius;
-        if !smaller.is_finite() || smaller == 0.0 {
+        let midpoint = 0.5 * whitened_a + 0.5 * whitened_d;
+        let half_difference = 0.5 * whitened_a - 0.5 * whitened_d;
+        let radius = half_difference.hypot(off_diagonal);
+        if !midpoint.is_finite() || !radius.is_finite() {
             return Err(VariationalError::NonFiniteAccumulator);
         }
-        let diagonal_term = if whitened_a.abs() >= whitened_d.abs() {
-            whitened_d * (whitened_a / smaller)
+        if radius == 0.0 {
+            return Err(VariationalError::DegeneratePrincipalEigenvector);
+        }
+
+        if midpoint >= 0.0 {
+            midpoint + radius
         } else {
-            whitened_a * (whitened_d / smaller)
-        };
-        let off_diagonal_term = off_diagonal * (off_diagonal / smaller);
-        let value = diagonal_term - off_diagonal_term;
-        if !value.is_finite() {
-            return Err(VariationalError::NonFiniteAccumulator);
+            let smaller = midpoint - radius;
+            if !smaller.is_finite() || smaller == 0.0 {
+                return Err(VariationalError::NonFiniteAccumulator);
+            }
+            let diagonal_term = if whitened_a.abs() >= whitened_d.abs() {
+                whitened_d * (whitened_a / smaller)
+            } else {
+                whitened_a * (whitened_d / smaller)
+            };
+            let off_diagonal_term = off_diagonal * (off_diagonal / smaller);
+            let value = diagonal_term - off_diagonal_term;
+            if !value.is_finite() {
+                return Err(VariationalError::NonFiniteAccumulator);
+            }
+            value
         }
-        value
     };
     if !principal_eigenvalue.is_finite() || principal_eigenvalue <= 0.0 {
         return Err(VariationalError::NonPositivePrincipalEigenvalue);
