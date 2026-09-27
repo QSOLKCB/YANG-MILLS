@@ -19,6 +19,10 @@ use crate::glueball_correlators::{scalar_connected_correlators, GlueballCorrelat
 use crate::glueball_effective_mass::EffectiveMassError;
 use crate::glueball_operators::{scalar_a1pp_operator_basis, GlueballOperatorError};
 use crate::glueball_scalar_fit::{correlated_scalar_fit, ScalarFitError, ScalarFitResult};
+use crate::glueball_scalar_geometry_recovery::{
+    CHAIN_COUNT as PHASE3H_CHAIN_COUNT, GEOMETRY_RECOVERY_STATUS as PHASE3H_STATUS,
+    MASTER_SEED as PHASE3H_MASTER_SEED,
+};
 use crate::glueball_scalar_production::{
     ChainEvidence, CorrelatorEvidence, OperatorKind, ProductionError, ProductionSummary,
     SurfaceOutcome, SurfaceRecord, BETA as PHASE3F_BETA, CANDIDATE_WINDOWS,
@@ -27,10 +31,6 @@ use crate::glueball_scalar_production::{
     PROPOSAL_ANGLE as PHASE3F_PROPOSAL_ANGLE, STABILITY_MAX_Z, STOUT_LEVELS,
     THERMALIZATION_SWEEPS as PHASE3F_THERMALIZATION_SWEEPS,
     TOTAL_SWEEPS_PER_CHAIN as PHASE3F_TOTAL_SWEEPS_PER_CHAIN,
-};
-use crate::glueball_scalar_geometry_recovery::{
-    CHAIN_COUNT as PHASE3H_CHAIN_COUNT, GEOMETRY_RECOVERY_STATUS as PHASE3H_STATUS,
-    MASTER_SEED as PHASE3H_MASTER_SEED,
 };
 use crate::glueball_smearing::{spatial_stout_smear, CANONICAL_RHO};
 use crate::su2_ensemble::SplitMix64;
