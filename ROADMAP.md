@@ -251,7 +251,7 @@ The successful V2 confirmation (Actions run `34761701867`, evidence head `f5a221
 
 ## Phase 3 — glueball laboratory
 
-Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and is frozen. Phase 3B2 was merged in PR #13 and is frozen. Phase 3C was merged in PR #14 and is frozen. Phase 3D was merged in PR #15 and is frozen. Phase 3E was merged in PR #16 and is frozen. Phase 3F was merged in PR #17 and is frozen with its first negative production receipt preserved. Phase 3G was merged in PR #18 and is frozen with its negative fresh-stream recovery receipt preserved. Phase 3H was merged in PR #19 and is frozen with its negative blocking-capable geometry receipt preserved. Phase 3I is the candidate temporal-extent recovery authority.
+Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and is frozen. Phase 3B2 was merged in PR #13 and is frozen. Phase 3C was merged in PR #14 and is frozen. Phase 3D was merged in PR #15 and is frozen. Phase 3E was merged in PR #16 and is frozen. Phase 3F was merged in PR #17 and is frozen with its first negative production receipt preserved. Phase 3G was merged in PR #18 and is frozen with its negative fresh-stream recovery receipt preserved. Phase 3H was merged in PR #19 and is frozen with its negative blocking-capable geometry receipt preserved. Phase 3I is the candidate temporal-extent recovery authority. Phase 3J is a mechanics-only scalar variational/GEVP authority that deliberately assumes no Phase 3I outcome.
 
 - [x] Define gauge-invariant spatial loop operator bases (`YM-GLUEBALL-OPERATORS-V1`, frozen).
 - [x] Add smearing/blocking as separately versioned transformations.
@@ -274,8 +274,10 @@ Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and 
 - [x] Apply the Phase 3H failure branch by predeclaring `YM-GLUEBALL-SCALAR-TEMPORAL-RECOVERY-V1` (Phase 3I candidate).
 - [x] Change only temporal extent `N_t: 10 -> 16` plus a fresh master stream; preserve spatial geometry, chain count, operators, transformations, windows, fit semantics, and thresholds.
 - [ ] Execute the first Phase 3I observation and preserve its outcome without post-observation tuning.
-- [ ] If Phase 3I passes, run a fresh-stream independent confirmation of the same temporal surface before opening new irreducible channels.
-- [ ] If Phase 3I fails, predeclare a variational scalar operator-basis authority rather than retuning Phase 3I.
+- [x] Build a separately versioned mechanics-only two-operator scalar variational/GEVP authority (`YM-GLUEBALL-SCALAR-VARIATIONAL-BASIS-V1`, Phase 3J candidate) without assuming the Phase 3I outcome.
+- [x] Freeze the Phase 3J candidate mechanics to a symmetric connected `2 x 2` cross-correlator matrix, `t0=1`, `t1=2`, positive-definite `C(t0)`, Cholesky whitening, largest generalized eigenvalue, and `v^T C(t0) v = 1` normalization.
+- [ ] If Phase 3I passes, run a fresh-stream independent confirmation of the same temporal surface before any production variational reinterpretation or new irreducible channels.
+- [ ] If Phase 3I fails, use frozen/reviewed Phase 3J mechanics only as a prerequisite for a new separately predeclared variational scalar recovery authority rather than retuning Phase 3I.
 - [ ] Add `2++` and `0-+` only after the scalar production pipeline has passed an independently reviewed stability gate.
 - [ ] Keep finite-volume spectral masses explicitly distinct from the continuum Clay gap.
 
@@ -287,7 +289,9 @@ Phase 3A was merged in PR #11 and is frozen. Phase 3B1 was merged in PR #12 and 
 
 **Phase 3I predeclaration boundary:** the temporal recovery changes only `N_t` from 10 to 16 and the fresh master stream to `0x3f03202609270001`. Spatial extent remains `6^3`, the blocked surface remains `3^3`, chain count remains 32, and all operators, transformations, windows, covariance/fit mechanics, replay tolerance, and `z <= 5` thresholds remain unchanged. The exact workload is `7,520,256` proposals per chain and `240,648,192` proposals total.
 
-**Current scalar direction:** Phase 3I isolates temporal extent before introducing a new variational-analysis authority. Its first observation must be accepted whether positive or negative. This is a controlled finite-lattice experiment, not a theorem about the cause of the previous failures.
+**Phase 3J mechanics boundary:** the two frozen scalar `A1++` operators are now admitted jointly through a symmetric connected cross-correlator matrix and bounded `2 x 2` GEVP mechanics candidate. Phase 3J assumes neither a Phase 3I pass nor failure and activates no production recovery. Its deterministic two-state fixture, gauge-invariance check, basis-permutation invariance, and independent basis-rescaling invariance are mechanics evidence only.
+
+**Current scalar direction:** Phase 3I remains the unresolved production observation. Phase 3J can mature in parallel as analysis mechanics without contaminating that observation. After Phase 3I is frozen, the roadmap still branches exactly as predeclared: confirmation if it passes; a new variational recovery authority built on Phase 3J if it fails.
 
 **Graduation gate:** a complete scalar production analysis can be reproduced from sealed ensemble evidence and produces stable finite-lattice estimates under predeclared fit-window/operator/transformation scans, followed by an independently reviewed confirmation on a deliberately declared recovery/confirmation surface. Passing this finite-lattice gate still does not establish a continuum mass gap.
 
