@@ -1,0 +1,32 @@
+name: Phase 3J scalar variational mechanics
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  scalar-variational:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Rust toolchain
+        run: rustup show
+
+      - name: Strict Rust format
+        run: cargo fmt --all -- --check
+
+      - name: Phase 3J unit tests
+        run: cargo test --locked --bin ym-glueball-scalar-variational
+
+      - name: Phase 3J contract checks
+        run: python3 scripts/check_glueball_scalar_variational_contracts.py
+
+      - name: Phase 3J negative contract regressions
+        run: python3 scripts/test_glueball_scalar_variational_contract_validation.py
+
+      - name: Phase 3J variational mechanics reference
+        run: cargo run --quiet --locked --bin ym-glueball-scalar-variational
