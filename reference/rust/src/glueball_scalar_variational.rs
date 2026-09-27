@@ -298,8 +298,8 @@ fn solve_scaled_generalized_characteristic(
         return Err(VariationalError::NonFiniteAccumulator);
     }
 
-    let trace_coefficient = diagonal_first + diagonal_second
-        - 2.0 * reference_off_diagonal * off_diagonal;
+    let trace_coefficient =
+        diagonal_first + diagonal_second - 2.0 * reference_off_diagonal * off_diagonal;
     let determinant =
         compensated_symmetric_determinant(diagonal_first, diagonal_second, off_diagonal)?;
     if !trace_coefficient.is_finite() || !determinant.is_finite() {
@@ -356,8 +356,7 @@ fn stable_generalized_principal_eigenvalue(
     }
 
     let reference_off_diagonal = reference[0][1] / reference_scale;
-    let reference_determinant =
-        1.0 - reference_off_diagonal * reference_off_diagonal;
+    let reference_determinant = 1.0 - reference_off_diagonal * reference_off_diagonal;
     if !reference_off_diagonal.is_finite()
         || !reference_determinant.is_finite()
         || reference_determinant <= POSITIVE_DEFINITE_PIVOT_TOLERANCE
@@ -368,10 +367,7 @@ fn stable_generalized_principal_eigenvalue(
     let diagonal_first = diagonalization[0][0] / reference_first;
     let diagonal_second = diagonalization[1][1] / reference_second;
     let off_diagonal = diagonalization[0][1] / reference_scale;
-    if !diagonal_first.is_finite()
-        || !diagonal_second.is_finite()
-        || !off_diagonal.is_finite()
-    {
+    if !diagonal_first.is_finite() || !diagonal_second.is_finite() || !off_diagonal.is_finite() {
         return Err(VariationalError::NonFiniteAccumulator);
     }
 
@@ -1358,8 +1354,7 @@ mod tests {
             [-0.1, 0.761_577_310_586_390_9],
             [0.761_577_310_586_390_9, -5.8],
         ];
-        let positive_root =
-            stable_generalized_principal_eigenvalue(identity, indefinite).unwrap();
+        let positive_root = stable_generalized_principal_eigenvalue(identity, indefinite).unwrap();
         assert!(positive_root > 0.0);
     }
 
