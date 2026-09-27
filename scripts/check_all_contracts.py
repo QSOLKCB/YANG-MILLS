@@ -19,6 +19,7 @@ from check_glueball_scalar_production_contracts import main as check_glueball_sc
 from check_glueball_scalar_recovery_contracts import main as check_glueball_scalar_recovery_contracts
 from check_glueball_scalar_geometry_recovery_contracts import main as check_glueball_scalar_geometry_recovery_contracts
 from check_glueball_scalar_temporal_recovery_contracts import main as check_glueball_scalar_temporal_recovery_contracts
+from check_glueball_scalar_variational_contracts import main as check_glueball_scalar_variational_contracts
 
 
 def main() -> None:
@@ -40,6 +41,7 @@ def main() -> None:
     check_glueball_scalar_recovery_contracts()
     check_glueball_scalar_geometry_recovery_contracts()
     check_glueball_scalar_temporal_recovery_contracts()
+    check_glueball_scalar_variational_contracts()
     print("All YANG-MILLS contract checks: passed")
 
 
