@@ -352,6 +352,41 @@ The 32-chain count, `beta=5.7`, cold start, 64+4 sweep schedule, proposal angle 
 
 The exact workload is `7,520,256` proposals per chain and `240,648,192` proposals across 32 chains. A negative Phase 3I spectroscopy gate must be preserved, not “fixed.” If Phase 3I fails, the next authority is a separately versioned variational scalar operator-basis experiment. Do not open `2++` or `0-+` to bypass the scalar gate.
 
+### Phase 3J scalar variational/GEVP mechanics candidate authority
+
+Phase 3J introduces `YM-GLUEBALL-SCALAR-VARIATIONAL-BASIS-V1` as a mechanics-only authority. It may be implemented and reviewed while the Phase 3I production observation remains unresolved because it assumes no Phase 3I outcome and activates no production recovery.
+
+The ordered finite-lattice `A1++` basis is:
+
+```text
+O0 = plaquette-1x1
+O1 = rectangle-2x1
+```
+
+Phase 3J freezes the symmetric connected cross-correlator estimator
+
+```text
+C_ij(tau)
+  = 1/2 [ <O_i(t) O_j(t+tau)> + <O_j(t) O_i(t+tau)> ]
+    - <O_i><O_j>.
+```
+
+Every supplied configuration and periodic Euclidean time origin receives equal arithmetic weight. The matrix diagonal must replay the frozen Phase 3C connected correlators within `2e-12`.
+
+The candidate GEVP mechanics are frozen at
+
+```text
+t0 = 1
+t1 = 2
+C(t1) v = lambda C(t0) v
+```
+
+with positive-definite `C(t0)`, Cholesky whitening, largest-generalized-eigenvalue selection, canonical eigenvector sign, and normalization `v^T C(t0) v = 1`.
+
+Agents must preserve basis-permutation invariance, independent basis-rescaling invariance, matrix symmetry, gauge invariance, and fail-closed rejection of non-positive-definite reference matrices, invalid reference times, asymmetric matrices, and non-finite arithmetic.
+
+Phase 3J does **not** authorize fitting a production variational mass. If Phase 3I passes, its fresh-stream confirmation still comes first. If Phase 3I fails, production use of Phase 3J requires a new separately predeclared variational scalar recovery authority. Do not silently reinterpret Phase 3I evidence with Phase 3J after observing it, and do not open `2++` or `0-+` through this mechanics surface.
+
 ## Donor boundary
 
 GLUBALL `v1.0.0` is an engineering donor only. The recorded tag target is:
@@ -402,6 +437,7 @@ python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 cargo run --release --quiet --locked --bin ym-glueball-scalar-geometry-recovery
 cargo run --release --quiet --locked --bin ym-glueball-scalar-temporal-recovery
+cargo run --quiet --locked --bin ym-glueball-scalar-variational
 ```
 
 The unified contract entry points are authoritative. Adding a new contract surface without registering it in those commands is a readiness failure.
