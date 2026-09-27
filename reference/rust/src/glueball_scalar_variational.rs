@@ -137,10 +137,7 @@ fn symmetry_within_tolerance(matrix: &Matrix2) -> bool {
     if !residual.is_finite() {
         return false;
     }
-    let scale = matrix[0][1]
-        .abs()
-        .max(matrix[1][0].abs())
-        .max(1.0);
+    let scale = matrix[0][1].abs().max(matrix[1][0].abs()).max(1.0);
     scale.is_finite() && residual <= SYMMETRY_TOLERANCE * scale
 }
 
@@ -410,10 +407,7 @@ pub fn principal_generalized_projection(
     } else {
         let scaled_smaller = midpoint - radius;
         let scaled_determinant = scaled_a * scaled_d - scaled_b * scaled_b;
-        if !scaled_smaller.is_finite()
-            || scaled_smaller == 0.0
-            || !scaled_determinant.is_finite()
-        {
+        if !scaled_smaller.is_finite() || scaled_smaller == 0.0 || !scaled_determinant.is_finite() {
             return Err(VariationalError::NonFiniteAccumulator);
         }
         scaled_determinant / scaled_smaller
@@ -424,8 +418,7 @@ pub fn principal_generalized_projection(
     }
 
     let scaled_principal_for_vector = principal_eigenvalue / eigen_scale;
-    let off_diagonal_is_resolved =
-        scaled_b.abs() > POSITIVE_DEFINITE_PIVOT_TOLERANCE;
+    let off_diagonal_is_resolved = scaled_b.abs() > POSITIVE_DEFINITE_PIVOT_TOLERANCE;
     let mut eigenvector = if off_diagonal_is_resolved {
         let first = [scaled_b, scaled_principal_for_vector - scaled_a];
         let second = [scaled_principal_for_vector - scaled_d, scaled_b];
