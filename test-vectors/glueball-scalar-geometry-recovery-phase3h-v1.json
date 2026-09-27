@@ -1,7 +1,7 @@
 {
   "contract_id": "YM-GLUEBALL-SCALAR-GEOMETRY-RECOVERY-V1",
   "vector_set": "GLUEBALL-SCALAR-GEOMETRY-RECOVERY-PHASE3H-V1",
-  "status": "phase-3h-candidate",
+  "status": "phase-3h-frozen",
   "vectors": [
     {
       "id": "phase3g-frozen-negative-baseline",
