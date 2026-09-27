@@ -1294,8 +1294,7 @@ mod tests {
 
         let midpoint = 0.5 * a + 0.5 * d;
         let radius = (0.5 * a - 0.5 * d).hypot(b);
-        let root =
-            stable_negative_midpoint_principal_root(a, d, b, midpoint, radius).unwrap();
+        let root = stable_negative_midpoint_principal_root(a, d, b, midpoint, radius).unwrap();
 
         assert_close(root, 2.000_000_000_000_000_2e307, 4.0e292);
         assert!(root.is_finite());
