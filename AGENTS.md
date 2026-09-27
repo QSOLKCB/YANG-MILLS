@@ -328,6 +328,30 @@ Agents must **not** respond to this result by increasing the chain count again u
 
 Do not open `2++` or `0-+` merely to bypass the unresolved scalar gate. Phase 3G does not establish a physical glueball mass, finite-volume mass gap, confinement, continuum QFT construction, positive continuum mass gap, or Clay solution.
 
+### Phase 3H frozen blocking-capable geometry recovery authority
+
+Phase 3H is frozen as `YM-GLUEBALL-SCALAR-GEOMETRY-RECOVERY-V1`. The first observation executed on source head `c241991e58860795d247f70d7f92b9e984c96a64` in workflow `34901768744`. All 32 chains passed accounting, acceptance, finite-statistic, and SU(3) residual diagnostics, but every one of the eight raw/stout/block scalar surfaces was `effective-mass-rejected`. The frozen receipt therefore has `primary_window_successes=0`, `transformation_stability_successes=0`, and `scalar_pipeline_validated=false`.
+
+Agents must preserve this negative result. The `ym-glueball-scalar-geometry-recovery` binary is now a deterministic replay gate: drift in the qualitative receipt is an implementation/reproducibility failure, while the negative scientific classification itself remains valid evidence.
+
+The Phase 3H failure branch forbids another chain-count escalation or threshold/window retune under the same authority. The next controlled intervention is temporal extent.
+
+### Phase 3I temporal-extent recovery candidate authority
+
+Phase 3I introduces `YM-GLUEBALL-SCALAR-TEMPORAL-RECOVERY-V1`. It tests one predeclared hypothesis only: whether increasing Euclidean temporal extent reduces periodic wraparound contamination enough to recover effective-mass admissibility.
+
+Only these inputs change from frozen Phase 3H:
+
+```text
+fine extents    : 6 x 6 x 6 x 10 -> 6 x 6 x 6 x 16
+blocked extents : 3 x 3 x 3 x 10 -> 3 x 3 x 3 x 16
+master seed     : 0x3f02202609150001 -> 0x3f03202609270001
+```
+
+The 32-chain count, `beta=5.7`, cold start, 64+4 sweep schedule, proposal angle `0.35`, one retained configuration per chain, plaquette/rectangle operators, raw/stout/block transformations, `rho=0.10`, candidate windows `[1,3]`, `[2,4]`, `[1,4]`, primary `block-1/plaquette-1x1` surface, full-covariance fit mechanics, correlator replay tolerance, and `z <= 5` stability rules remain fixed.
+
+The exact workload is `7,520,256` proposals per chain and `240,648,192` proposals across 32 chains. A negative Phase 3I spectroscopy gate must be preserved, not “fixed.” If Phase 3I fails, the next authority is a separately versioned variational scalar operator-basis experiment. Do not open `2++` or `0-+` to bypass the scalar gate.
+
 ## Donor boundary
 
 GLUBALL `v1.0.0` is an engineering donor only. The recorded tag target is:
@@ -377,6 +401,7 @@ cargo run --release --quiet --locked --bin ym-glueball-scalar-recovery
 python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 cargo run --release --quiet --locked --bin ym-glueball-scalar-geometry-recovery
+cargo run --release --quiet --locked --bin ym-glueball-scalar-temporal-recovery
 ```
 
 The unified contract entry points are authoritative. Adding a new contract surface without registering it in those commands is a readiness failure.
