@@ -19,7 +19,8 @@ use glueball_correlators::canonical_shifted_defect_configurations;
 use glueball_scalar_variational::{
     canonical_two_state_matrices, max_matrix_series_residual, principal_generalized_projection,
     scalar_variational_connected_correlator, CANONICAL_GROUND_MASS, CANONICAL_TIME_EXTENT,
-    DIAGONALIZATION_TIME, REFERENCE_TIME, VARIATIONAL_CONTRACT_ID, VARIATIONAL_STATUS,
+    DIAGONALIZATION_TIME, GAUGE_INVARIANCE_TOLERANCE, REFERENCE_TIME, VARIATIONAL_CONTRACT_ID,
+    VARIATIONAL_STATUS,
 };
 use su3_lattice::deterministic_su3_site_gauge;
 
@@ -47,6 +48,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .collect::<Result<_, _>>()?;
     let after = scalar_variational_connected_correlator(&transformed)?;
     let gauge_residual = max_matrix_series_residual(&before.matrices, &after.matrices)?;
+    if !gauge_residual.is_finite() || gauge_residual > GAUGE_INVARIANCE_TOLERANCE {
+        return Err("Phase 3J gauge-invariance regression mismatch".into());
+    }
 
     println!("contract={VARIATIONAL_CONTRACT_ID}");
     println!("status={VARIATIONAL_STATUS}");
