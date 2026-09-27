@@ -218,25 +218,33 @@ fn stable_divide_by_product(
         return Err(VariationalError::NonFiniteAccumulator);
     }
 
-    let product = first_denominator * second_denominator;
-    if product.is_finite() && product != 0.0 {
-        let value = numerator / product;
-        if value.is_finite() {
-            return Ok(value);
-        }
-    }
-
+    // Never form the denominator product directly: for subnormal factors its
+    // relative precision can collapse even when the final quotient is well
+    // represented. Divide by the larger-magnitude factor first to suppress
+    // intermediate overflow, then fall back to the opposite order only if
+    // that path underflows or becomes non-finite.
     let (large, small) = if first_denominator.abs() >= second_denominator.abs() {
         (first_denominator, second_denominator)
     } else {
         (second_denominator, first_denominator)
     };
-    let intermediate = numerator / large;
-    let value = intermediate / small;
-    if !intermediate.is_finite() || !value.is_finite() {
-        return Err(VariationalError::NonFiniteAccumulator);
+
+    let first_intermediate = numerator / large;
+    let first_value = first_intermediate / small;
+    if first_intermediate.is_finite()
+        && first_value.is_finite()
+        && (first_intermediate != 0.0 || numerator == 0.0)
+    {
+        return Ok(first_value);
     }
-    Ok(value)
+
+    let second_intermediate = numerator / small;
+    let second_value = second_intermediate / large;
+    if second_intermediate.is_finite() && second_value.is_finite() {
+        return Ok(second_value);
+    }
+
+    Err(VariationalError::NonFiniteAccumulator)
 }
 
 fn matmul(first: Matrix2, second: Matrix2) -> Matrix2 {
@@ -1128,6 +1136,13 @@ mod tests {
         let stable = stable_divide_by_product(l10, l00, l11).unwrap();
         assert!(stable.is_finite());
         assert!(stable > 0.0);
+
+        let tiny_l00 = (16.0 * minimum_subnormal).sqrt();
+        let tiny_l10 = (3.0 * minimum_subnormal) / tiny_l00;
+        let tiny_l11 = minimum_subnormal.sqrt() * (7.0_f64 / 16.0).sqrt();
+        let sequential = (tiny_l10 / tiny_l00) / tiny_l11;
+        let stable_tiny = stable_divide_by_product(tiny_l10, tiny_l00, tiny_l11).unwrap();
+        assert_eq!(stable_tiny.to_bits(), sequential.to_bits());
     }
 
     #[test]
