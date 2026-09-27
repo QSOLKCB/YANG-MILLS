@@ -52,7 +52,9 @@ Phase 3G was merged in PR #18 and is frozen as `YM-GLUEBALL-SCALAR-RECOVERY-V1`.
 
 Phase 3H was merged in PR #19 and is frozen as `YM-GLUEBALL-SCALAR-GEOMETRY-RECOVERY-V1`. Its `6 x 6 x 6 x 10` blocking-capable observation passed sampler diagnostics but all eight raw/stout/block scalar surfaces were `effective-mass-rejected`; `primary_window_successes=0`, `transformation_stability_successes=0`, and `scalar_pipeline_validated=false`. The observation head `c241991e58860795d247f70d7f92b9e984c96a64` / workflow `34901768744` is now machine-pinned and replay-checked.
 
-Phase 3I is the current candidate `YM-GLUEBALL-SCALAR-TEMPORAL-RECOVERY-V1`. It isolates temporal extent by changing only `6 x 6 x 6 x 10 -> 6 x 6 x 6 x 16` (and blocked `3 x 3 x 3 x 10 -> 3 x 3 x 3 x 16`) plus a fresh stream, while preserving 32 chains, `beta=5.7`, the 68-sweep schedule, proposal angle, operator/transformation surface, fit windows, covariance mechanics, correlator replay tolerance, and `z <= 5` stability gate. `2++` and `0-+` remain unopened. See [`docs/GLUEBALL_SCALAR_GEOMETRY_RECOVERY.md`](docs/GLUEBALL_SCALAR_GEOMETRY_RECOVERY.md) and [`docs/GLUEBALL_SCALAR_TEMPORAL_RECOVERY.md`](docs/GLUEBALL_SCALAR_TEMPORAL_RECOVERY.md).
+Phase 3I is the current candidate `YM-GLUEBALL-SCALAR-TEMPORAL-RECOVERY-V1`. It isolates temporal extent by changing only `6 x 6 x 6 x 10 -> 6 x 6 x 6 x 16` (and blocked `3 x 3 x 3 x 10 -> 3 x 3 x 3 x 16`) plus a fresh stream, while preserving 32 chains, `beta=5.7`, the 68-sweep schedule, proposal angle, operator/transformation surface, fit windows, covariance mechanics, correlator replay tolerance, and `z <= 5` stability gate. Its first production observation is still unresolved.
+
+Phase 3J is the mechanics-only candidate `YM-GLUEBALL-SCALAR-VARIATIONAL-BASIS-V1`. It adds a symmetric connected `2 x 2` cross-correlator matrix for the frozen plaquette/rectangle `A1++` basis and a bounded Cholesky-whitened GEVP with `t0=1`, `t1=2`, largest-eigenvalue selection, and `v^T C(t0) v = 1` normalization. It assumes no Phase 3I outcome and activates no production recovery. See [`docs/GLUEBALL_SCALAR_TEMPORAL_RECOVERY.md`](docs/GLUEBALL_SCALAR_TEMPORAL_RECOVERY.md) and [`docs/GLUEBALL_SCALAR_VARIATIONAL.md`](docs/GLUEBALL_SCALAR_VARIATIONAL.md). `2++` and `0-+` remain unopened.
 
 ## The target
 
@@ -299,6 +301,7 @@ python3 scripts/check_all_contracts.py
 python3 scripts/test_all_contract_validation.py
 cargo run --release --quiet --locked --bin ym-glueball-scalar-geometry-recovery
 cargo run --release --quiet --locked --bin ym-glueball-scalar-temporal-recovery
+cargo run --quiet --locked --bin ym-glueball-scalar-variational
 ```
 
 The unified contract entry points are authoritative for every currently advertised contract surface.
@@ -321,7 +324,7 @@ scripts/               fail-closed contract checks
 
 ## Roadmap
 
-The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 2B closes the published `SU(2)` plaquette validation gate. Phase 2C1 freezes a separately versioned `SU(3)` sampler, and Phase 2C2 freezes its independent published finite-lattice validation after preserving the failed V1 attempt and passing the fresh-stream V2 confirmation. Phase 3A/B freeze the scalar operator and transformation mechanics; Phase 3C freezes connected-correlator mechanics; Phase 3D freezes scalar effective-mass mechanics with jackknife uncertainty; Phase 3E freezes predeclared correlated scalar fitting; Phase 3F is the frozen first production scalar observation and preserves its six-surface effective-mass rejection. Phase 3G is frozen after its fresh-stream doubled-statistics recovery also rejected all six surfaces. Phase 3H is frozen after its blocking-capable geometry/operator-overlap recovery rejected all eight surfaces. Phase 3I is the current candidate temporal-extent recovery authority.
+The staged research plan is in [`ROADMAP.md`](ROADMAP.md). Phase 2B closes the published `SU(2)` plaquette validation gate. Phase 2C1 freezes a separately versioned `SU(3)` sampler, and Phase 2C2 freezes its independent published finite-lattice validation after preserving the failed V1 attempt and passing the fresh-stream V2 confirmation. Phase 3A/B freeze the scalar operator and transformation mechanics; Phase 3C freezes connected-correlator mechanics; Phase 3D freezes scalar effective-mass mechanics with jackknife uncertainty; Phase 3E freezes predeclared correlated scalar fitting; Phase 3F is the frozen first production scalar observation and preserves its six-surface effective-mass rejection. Phase 3G is frozen after its fresh-stream doubled-statistics recovery also rejected all six surfaces. Phase 3H is frozen after its blocking-capable geometry/operator-overlap recovery rejected all eight surfaces. Phase 3I is the unresolved candidate temporal-extent recovery authority. Phase 3J is an outcome-neutral scalar variational/GEVP mechanics candidate; production use remains gated on a later separately versioned authority.
 
 ## Licence
 
