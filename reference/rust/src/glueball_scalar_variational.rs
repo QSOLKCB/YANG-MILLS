@@ -615,12 +615,8 @@ mod tests {
         let mut matrices = canonical_two_state_matrices();
         matrices[3][0][1] += 1.0e-6;
         assert_eq!(
-            principal_generalized_projection(
-                &matrices,
-                REFERENCE_TIME,
-                DIAGONALIZATION_TIME
-            )
-            .unwrap_err(),
+            principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap_err(),
             VariationalError::MatrixNotSymmetric
         );
     }
