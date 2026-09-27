@@ -566,7 +566,11 @@ fn stable_whitened_projection(
 ) -> Result<f64, VariationalError> {
     let matrix = symmetrized_matrix(matrix)?;
     if matrix == *reference_matrix {
-        return Ok(metric_vector[0] * metric_vector[0] + metric_vector[1] * metric_vector[1]);
+        // The projection is normalized in the reference metric, so an
+        // identical matrix at any lag must replay exactly 1.0. Returning the
+        // recomputed Euclidean norm here can differ by one ulp on an
+        // ill-conditioned metric and break bitwise replay across equal lags.
+        return Ok(1.0);
     }
 
     let whitened = stable_cholesky_whitened(
