@@ -281,6 +281,63 @@ fn compensated_symmetric_determinant(
     Ok(determinant)
 }
 
+fn stable_negative_midpoint_principal_root(
+    diagonal_first: f64,
+    diagonal_second: f64,
+    off_diagonal: f64,
+    midpoint: f64,
+    radius: f64,
+) -> Result<f64, VariationalError> {
+    let smaller = midpoint - radius;
+    if smaller.is_finite() && smaller != 0.0 {
+        if let Ok(determinant) =
+            compensated_symmetric_determinant(diagonal_first, diagonal_second, off_diagonal)
+        {
+            let value = determinant / smaller;
+            if value.is_finite() && value > 0.0 {
+                return Ok(value);
+            }
+        }
+    }
+
+    // If the unscaled products or the smaller eigenvalue overflow, normalize
+    // the entire symmetric matrix first. The scaled entries stay within
+    // [-1,1], so the determinant products and smaller root are representable.
+    // Multiplying the recovered dimensionless principal root by the single
+    // matrix scale avoids ever materializing an O(scale^2) determinant.
+    let scale = diagonal_first
+        .abs()
+        .max(diagonal_second.abs())
+        .max(off_diagonal.abs());
+    if !scale.is_finite() || scale <= 0.0 {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+
+    let scaled_first = diagonal_first / scale;
+    let scaled_second = diagonal_second / scale;
+    let scaled_off_diagonal = off_diagonal / scale;
+    let scaled_midpoint = 0.5 * scaled_first + 0.5 * scaled_second;
+    let scaled_half_difference = 0.5 * scaled_first - 0.5 * scaled_second;
+    let scaled_radius = scaled_half_difference.hypot(scaled_off_diagonal);
+    let scaled_smaller = scaled_midpoint - scaled_radius;
+    if !scaled_midpoint.is_finite()
+        || !scaled_radius.is_finite()
+        || !scaled_smaller.is_finite()
+        || scaled_smaller == 0.0
+    {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+
+    let scaled_determinant =
+        compensated_symmetric_determinant(scaled_first, scaled_second, scaled_off_diagonal)?;
+    let scaled_principal = scaled_determinant / scaled_smaller;
+    let principal = scale * scaled_principal;
+    if !scaled_principal.is_finite() || !principal.is_finite() || principal <= 0.0 {
+        return Err(VariationalError::NonPositivePrincipalEigenvalue);
+    }
+    Ok(principal)
+}
+
 fn matmul(first: Matrix2, second: Matrix2) -> Matrix2 {
     let mut out = [[0.0; 2]; 2];
     for row in 0..2 {
@@ -556,17 +613,13 @@ pub fn principal_generalized_projection(
         if midpoint >= 0.0 {
             midpoint + radius
         } else {
-            let smaller = midpoint - radius;
-            if !smaller.is_finite() || smaller == 0.0 {
-                return Err(VariationalError::NonFiniteAccumulator);
-            }
-            let determinant =
-                compensated_symmetric_determinant(whitened_a, whitened_d, off_diagonal)?;
-            let value = determinant / smaller;
-            if !value.is_finite() {
-                return Err(VariationalError::NonFiniteAccumulator);
-            }
-            value
+            stable_negative_midpoint_principal_root(
+                whitened_a,
+                whitened_d,
+                off_diagonal,
+                midpoint,
+                radius,
+            )?
         }
     };
     if !principal_eigenvalue.is_finite() || principal_eigenvalue <= 0.0 {
@@ -1209,6 +1262,44 @@ mod tests {
         assert!(compensated < 0.0);
         assert!(compensated.is_finite());
         assert!(compensated.abs() < naive.abs());
+    }
+
+    #[test]
+    fn huge_finite_matrix_preserves_positive_principal_root() {
+        let identity = [[1.0, 0.0], [0.0, 1.0]];
+        let matrix = [[-8.0e307, 1.0e308], [1.0e308, -8.0e307]];
+        let matrices = vec![identity, identity, matrix];
+
+        let projection =
+            principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
+
+        assert_close(
+            projection.principal_eigenvalue,
+            2.000_000_000_000_000_2e307,
+            4.0e292,
+        );
+        let expected = core::f64::consts::FRAC_1_SQRT_2;
+        assert_close(projection.coefficients[0], expected, 2.0e-15);
+        assert_close(projection.coefficients[1], expected, 2.0e-15);
+    }
+
+    #[test]
+    fn scaled_negative_midpoint_recovery_survives_product_overflow() {
+        let a = -8.0e307_f64;
+        let d = -8.0e307_f64;
+        let b = 1.0e308_f64;
+        assert!((a * d).is_infinite());
+        assert!((b * b).is_infinite());
+
+        let midpoint = 0.5 * a + 0.5 * d;
+        let radius = (0.5 * a - 0.5 * d).hypot(b);
+        let root =
+            stable_negative_midpoint_principal_root(a, d, b, midpoint, radius).unwrap();
+
+        assert_close(root, 2.000_000_000_000_000_2e307, 4.0e292);
+        assert!(root.is_finite());
+        assert!(root > 0.0);
     }
 
     #[test]
