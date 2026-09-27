@@ -18,6 +18,7 @@ from test_glueball_scalar_fit_contract_validation import main as test_glueball_s
 from test_glueball_scalar_production_contract_validation import main as test_glueball_scalar_production_contracts
 from test_glueball_scalar_recovery_contract_validation import main as test_glueball_scalar_recovery_contracts
 from test_glueball_scalar_geometry_recovery_contract_validation import main as test_glueball_scalar_geometry_recovery_contracts
+from test_glueball_scalar_temporal_recovery_contract_validation import main as test_glueball_scalar_temporal_recovery_contracts
 
 
 def main() -> None:
@@ -38,6 +39,7 @@ def main() -> None:
     test_glueball_scalar_production_contracts()
     test_glueball_scalar_recovery_contracts()
     test_glueball_scalar_geometry_recovery_contracts()
+    test_glueball_scalar_temporal_recovery_contracts()
     print("All negative YANG-MILLS contract regression checks: passed")
 
 
