@@ -141,6 +141,14 @@ fn symmetry_within_tolerance(matrix: &Matrix2) -> bool {
     scale.is_finite() && residual <= SYMMETRY_TOLERANCE * scale
 }
 
+fn symmetrized_matrix(matrix: Matrix2) -> Result<Matrix2, VariationalError> {
+    let cross = 0.5 * matrix[0][1] + 0.5 * matrix[1][0];
+    if !cross.is_finite() {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+    Ok([[matrix[0][0], cross], [cross, matrix[1][1]]])
+}
+
 fn validate_matrix_series(matrices: &[Matrix2]) -> Result<(), VariationalError> {
     if matrices.len() < 3 || matrices.len() > MAX_TIME_EXTENT {
         return Err(VariationalError::CorrelatorShapeMismatch);
@@ -345,8 +353,8 @@ pub fn principal_generalized_projection(
         return Err(VariationalError::InvalidReferenceTimes);
     }
 
-    let c0 = matrices[reference_time];
-    let c1 = matrices[diagonalization_time];
+    let c0 = symmetrized_matrix(matrices[reference_time])?;
+    let c1 = symmetrized_matrix(matrices[diagonalization_time])?;
 
     let a = c0[0][0];
     let d = c0[1][1];
@@ -391,25 +399,20 @@ pub fn principal_generalized_projection(
 
     let whitened_a = whitened[0][0];
     let whitened_d = whitened[1][1];
-    let off_diagonal = 0.5 * (whitened[0][1] + whitened[1][0]);
-    let eigen_scale = whitened_a
-        .abs()
-        .max(whitened_d.abs())
-        .max(off_diagonal.abs());
-    if !eigen_scale.is_finite() || eigen_scale <= 0.0 {
-        return Err(VariationalError::DegeneratePrincipalEigenvector);
+    let off_diagonal = 0.5 * whitened[0][1] + 0.5 * whitened[1][0];
+    if !whitened_a.is_finite() || !whitened_d.is_finite() || !off_diagonal.is_finite() {
+        return Err(VariationalError::NonFiniteAccumulator);
     }
 
-    // Work on a unit-scaled symmetric 2x2 matrix so the largest eigenvalue
-    // can be recovered without overflow. When the midpoint is negative,
-    // computing midpoint + radius can catastrophically cancel; use the
-    // determinant/product identity against the well-resolved smaller root.
-    let scaled_a = whitened_a / eigen_scale;
-    let scaled_d = whitened_d / eigen_scale;
-    let scaled_b = off_diagonal / eigen_scale;
-    let midpoint = 0.5 * (scaled_a + scaled_d);
-    let half_difference = 0.5 * (scaled_a - scaled_d);
-    let radius = half_difference.hypot(scaled_b);
+    // Compute the symmetric 2x2 spectrum without first dividing small,
+    // representable entries by the largest matrix scale. Half-sums avoid
+    // overflow in the trace/difference, and hypot supplies its own scaling.
+    // When the midpoint is negative, midpoint + radius can catastrophically
+    // cancel; recover the larger root from determinant / smaller_root using
+    // a quotient ordering that preserves extreme diagonal dynamic ranges.
+    let midpoint = 0.5 * whitened_a + 0.5 * whitened_d;
+    let half_difference = 0.5 * whitened_a - 0.5 * whitened_d;
+    let radius = half_difference.hypot(off_diagonal);
     if !midpoint.is_finite() || !radius.is_finite() {
         return Err(VariationalError::NonFiniteAccumulator);
     }
@@ -417,32 +420,54 @@ pub fn principal_generalized_projection(
         return Err(VariationalError::DegeneratePrincipalEigenvector);
     }
 
-    let scaled_principal = if midpoint >= 0.0 {
+    let principal_eigenvalue = if midpoint >= 0.0 {
         midpoint + radius
     } else {
-        let scaled_smaller = midpoint - radius;
-        let scaled_determinant = scaled_a * scaled_d - scaled_b * scaled_b;
-        if !scaled_smaller.is_finite() || scaled_smaller == 0.0 || !scaled_determinant.is_finite() {
+        let smaller = midpoint - radius;
+        if !smaller.is_finite() || smaller == 0.0 {
             return Err(VariationalError::NonFiniteAccumulator);
         }
-        scaled_determinant / scaled_smaller
+        let diagonal_term = if whitened_a.abs() >= whitened_d.abs() {
+            whitened_d * (whitened_a / smaller)
+        } else {
+            whitened_a * (whitened_d / smaller)
+        };
+        let off_diagonal_term = off_diagonal * (off_diagonal / smaller);
+        let value = diagonal_term - off_diagonal_term;
+        if !value.is_finite() {
+            return Err(VariationalError::NonFiniteAccumulator);
+        }
+        value
     };
-    let principal_eigenvalue = scaled_principal * eigen_scale;
     if !principal_eigenvalue.is_finite() || principal_eigenvalue <= 0.0 {
         return Err(VariationalError::NonPositivePrincipalEigenvalue);
     }
 
-    let scaled_principal_for_vector = principal_eigenvalue / eigen_scale;
-    let off_diagonal_is_resolved = scaled_b != 0.0;
-    let mut eigenvector = if off_diagonal_is_resolved {
-        let first = [scaled_b, scaled_principal_for_vector - scaled_a];
-        let second = [scaled_principal_for_vector - scaled_d, scaled_b];
+    // Build the eigenvector from the better-conditioned row of (A-lambda I)
+    // using a common scale only for direction components. A diagonal matrix
+    // takes the exact coordinate direction and therefore preserves subnormal
+    // positive roots such as diag(-1e308, 1e-308).
+    let mut eigenvector = if off_diagonal != 0.0 {
+        let eigenvector_scale = whitened_a
+            .abs()
+            .max(whitened_d.abs())
+            .max(off_diagonal.abs())
+            .max(principal_eigenvalue.abs());
+        if !eigenvector_scale.is_finite() || eigenvector_scale <= 0.0 {
+            return Err(VariationalError::DegeneratePrincipalEigenvector);
+        }
+        let scaled_a = whitened_a / eigenvector_scale;
+        let scaled_d = whitened_d / eigenvector_scale;
+        let scaled_b = off_diagonal / eigenvector_scale;
+        let scaled_lambda = principal_eigenvalue / eigenvector_scale;
+        let first = [scaled_b, scaled_lambda - scaled_a];
+        let second = [scaled_lambda - scaled_d, scaled_b];
         if first[0].hypot(first[1]) >= second[0].hypot(second[1]) {
             first
         } else {
             second
         }
-    } else if scaled_a > scaled_d {
+    } else if whitened_a > whitened_d {
         [1.0, 0.0]
     } else {
         [0.0, 1.0]
@@ -824,6 +849,36 @@ mod tests {
             projection.projected_correlator[REFERENCE_TIME],
             1.0,
             NORMALIZATION_TOLERANCE,
+        );
+    }
+
+    #[test]
+    fn subnormal_positive_principal_root_survives_extreme_dynamic_range() {
+        let identity = [[1.0, 0.0], [0.0, 1.0]];
+        let matrices = vec![identity, identity, [[-1.0e308, 0.0], [0.0, 1.0e-308]]];
+
+        let projection =
+            principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
+
+        assert_eq!(projection.principal_eigenvalue, 1.0e-308);
+        assert_eq!(projection.coefficients, [0.0, 1.0]);
+        assert_eq!(
+            projection.projected_correlator,
+            vec![1.0, 1.0, 1.0e-308]
+        );
+    }
+
+    #[test]
+    fn tolerated_reference_asymmetry_is_symmetrized_before_positivity() {
+        let c0 = [[1.0, 1.0 - 1.0e-13], [1.0 + 1.0e-13, 1.0]];
+        let identity = [[1.0, 0.0], [0.0, 1.0]];
+        let matrices = vec![c0, c0, identity];
+
+        assert_eq!(
+            principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap_err(),
+            VariationalError::ReferenceMatrixNotPositiveDefinite
         );
     }
 
