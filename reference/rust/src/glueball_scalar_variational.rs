@@ -30,6 +30,7 @@ pub const POSITIVE_DEFINITE_PIVOT_TOLERANCE: f64 = 1.0e-14;
 pub const CANONICAL_TIME_EXTENT: usize = 16;
 pub const CANONICAL_GROUND_MASS: f64 = 0.4;
 pub const CANONICAL_EXCITED_MASS: f64 = 0.9;
+pub const GOLDEN_CANONICAL_PRINCIPAL_EIGENVALUE: f64 = 0.673_346_666_250_657;
 
 pub type Matrix2 = [[f64; BASIS_DIMENSION]; BASIS_DIMENSION];
 
@@ -197,6 +198,35 @@ fn matmul(first: Matrix2, second: Matrix2) -> Matrix2 {
 
 fn transpose(matrix: Matrix2) -> Matrix2 {
     [[matrix[0][0], matrix[1][0]], [matrix[0][1], matrix[1][1]]]
+}
+
+fn stable_whitened_projection(
+    matrix: Matrix2,
+    reference_matrix: &Matrix2,
+    inv_l: Matrix2,
+    metric_vector: [f64; 2],
+) -> Result<f64, VariationalError> {
+    let matrix = symmetrized_matrix(matrix)?;
+    if matrix == *reference_matrix {
+        return Ok(metric_vector[0] * metric_vector[0] + metric_vector[1] * metric_vector[1]);
+    }
+
+    let whitened = matmul(matmul(inv_l, matrix), transpose(inv_l));
+    if !matrix_finite(&whitened) {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+    if !symmetry_within_tolerance(&whitened) {
+        return Err(VariationalError::MatrixNotSymmetric);
+    }
+    let whitened = symmetrized_matrix(whitened)?;
+
+    let row0 = whitened[0][0].mul_add(metric_vector[0], whitened[0][1] * metric_vector[1]);
+    let row1 = whitened[1][0].mul_add(metric_vector[0], whitened[1][1] * metric_vector[1]);
+    let value = metric_vector[0].mul_add(row0, metric_vector[1] * row1);
+    if !value.is_finite() {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+    Ok(value)
 }
 
 fn matrix_scale_basis(matrix: Matrix2, scales: [f64; 2]) -> Matrix2 {
@@ -382,13 +412,20 @@ pub fn principal_generalized_projection(
 
     let l00 = a.sqrt();
     let l10 = c0[1][0] / l00;
-    let second_pivot = d * normalized_determinant;
-    if !second_pivot.is_finite() || second_pivot <= 0.0 {
+    let l11 = d.sqrt() * normalized_determinant.sqrt();
+    if !l00.is_finite()
+        || !l10.is_finite()
+        || !l11.is_finite()
+        || l00 <= 0.0
+        || l11 <= 0.0
+    {
         return Err(VariationalError::ReferenceMatrixNotPositiveDefinite);
     }
-    let l11 = second_pivot.sqrt();
 
-    let inv_l = [[1.0 / l00, 0.0], [-l10 / (l00 * l11), 1.0 / l11]];
+    let inv_l = [
+        [1.0 / l00, 0.0],
+        [-(l10 / l00) / l11, 1.0 / l11],
+    ];
     let whitened = matmul(matmul(inv_l, c1), transpose(inv_l));
     if !matrix_finite(&whitened) {
         return Err(VariationalError::NonFiniteAccumulator);
@@ -450,29 +487,33 @@ pub fn principal_generalized_projection(
         return Err(VariationalError::NonPositivePrincipalEigenvalue);
     }
 
-    // Build the eigenvector from the better-conditioned row of (A-lambda I)
-    // using a common scale only for direction components. A diagonal matrix
-    // takes the exact coordinate direction and therefore preserves subnormal
-    // positive roots such as diag(-1e308, 1e-308).
+    // Build the principal direction from the symmetric 2x2 radius directly,
+    // not from lambda-a/lambda-d subtraction. This preserves a unique
+    // eigenvector even when the positive eigenvalue increment rounds away.
     let mut eigenvector = if off_diagonal != 0.0 {
-        let eigenvector_scale = whitened_a
-            .abs()
-            .max(whitened_d.abs())
-            .max(off_diagonal.abs())
-            .max(principal_eigenvalue.abs());
-        if !eigenvector_scale.is_finite() || eigenvector_scale <= 0.0 {
+        let half_difference = 0.5 * whitened_a - 0.5 * whitened_d;
+        let radius = half_difference.hypot(off_diagonal);
+        if !half_difference.is_finite() || !radius.is_finite() || radius == 0.0 {
             return Err(VariationalError::DegeneratePrincipalEigenvector);
         }
-        let scaled_a = whitened_a / eigenvector_scale;
-        let scaled_d = whitened_d / eigenvector_scale;
-        let scaled_b = off_diagonal / eigenvector_scale;
-        let scaled_lambda = principal_eigenvalue / eigenvector_scale;
-        let first = [scaled_b, scaled_lambda - scaled_a];
-        let second = [scaled_lambda - scaled_d, scaled_b];
-        if first[0].hypot(first[1]) >= second[0].hypot(second[1]) {
-            first
+
+        let component_scale = radius
+            .abs()
+            .max(half_difference.abs())
+            .max(off_diagonal.abs());
+        if !component_scale.is_finite() || component_scale <= 0.0 {
+            return Err(VariationalError::DegeneratePrincipalEigenvector);
+        }
+        if half_difference >= 0.0 {
+            [
+                radius / component_scale + half_difference / component_scale,
+                off_diagonal / component_scale,
+            ]
         } else {
-            second
+            [
+                off_diagonal / component_scale,
+                radius / component_scale - half_difference / component_scale,
+            ]
         }
     } else if whitened_a > whitened_d {
         [1.0, 0.0]
@@ -505,7 +546,14 @@ pub fn principal_generalized_projection(
         coefficients[1] = -coefficients[1];
     }
 
-    let normalized_metric_norm = cholesky_metric_norm(coefficients, l00, l10, l11)?;
+    let metric_vector = [
+        l00 * coefficients[0] + l10 * coefficients[1],
+        l11 * coefficients[1],
+    ];
+    if !metric_vector[0].is_finite() || !metric_vector[1].is_finite() {
+        return Err(VariationalError::ProjectionNormalizationFailure);
+    }
+    let normalized_metric_norm = metric_vector[0].hypot(metric_vector[1]);
     let reference_projection = normalized_metric_norm * normalized_metric_norm;
     if !reference_projection.is_finite()
         || (reference_projection - 1.0).abs() > NORMALIZATION_TOLERANCE
@@ -517,16 +565,13 @@ pub fn principal_generalized_projection(
     projected_correlator
         .try_reserve_exact(matrices.len())
         .map_err(|_| VariationalError::AllocationFailed)?;
-    for (time, matrix) in matrices.iter().enumerate() {
-        let value = if time == reference_time {
-            reference_projection
-        } else {
-            quadratic_form(coefficients, matrix)
-        };
-        if !value.is_finite() {
-            return Err(VariationalError::NonFiniteAccumulator);
-        }
-        projected_correlator.push(value);
+    for &matrix in matrices {
+        projected_correlator.push(stable_whitened_projection(
+            matrix,
+            &c0,
+            inv_l,
+            metric_vector,
+        )?);
     }
 
     Ok(PrincipalProjection {
@@ -625,6 +670,12 @@ mod tests {
         assert_eq!(DIAGONALIZATION_TIME, 2);
         assert_eq!(GAUGE_INVARIANCE_TOLERANCE, 5.0e-11);
         assert_eq!(CANONICAL_TIME_EXTENT, 16);
+        assert_eq!(CANONICAL_GROUND_MASS.to_bits(), 0.4_f64.to_bits());
+        assert_eq!(CANONICAL_EXCITED_MASS.to_bits(), 0.9_f64.to_bits());
+        assert_eq!(
+            GOLDEN_CANONICAL_PRINCIPAL_EIGENVALUE.to_bits(),
+            0.673_346_666_250_657_f64.to_bits()
+        );
     }
 
     #[test]
@@ -674,13 +725,11 @@ mod tests {
             principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
                 .unwrap();
 
-        let expected_lambda =
-            periodic_weight(
-                CANONICAL_GROUND_MASS,
-                DIAGONALIZATION_TIME,
-                CANONICAL_TIME_EXTENT,
-            ) / periodic_weight(CANONICAL_GROUND_MASS, REFERENCE_TIME, CANONICAL_TIME_EXTENT);
-        assert_close(projection.principal_eigenvalue, expected_lambda, 2.0e-12);
+        assert_close(
+            projection.principal_eigenvalue,
+            GOLDEN_CANONICAL_PRINCIPAL_EIGENVALUE,
+            2.0e-15,
+        );
 
         for time in 0..CANONICAL_TIME_EXTENT {
             let expected = periodic_weight(CANONICAL_GROUND_MASS, time, CANONICAL_TIME_EXTENT)
@@ -884,6 +933,78 @@ mod tests {
                 .unwrap_err(),
             VariationalError::ReferenceMatrixNotPositiveDefinite
         );
+    }
+
+    #[test]
+    fn tiny_off_diagonal_preserves_unique_principal_direction() {
+        let identity = [[1.0, 0.0], [0.0, 1.0]];
+        let matrices = vec![
+            identity,
+            identity,
+            [[1.0, 1.0e-16], [1.0e-16, 1.0]],
+        ];
+
+        let projection =
+            principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
+        let expected = core::f64::consts::FRAC_1_SQRT_2;
+        assert_close(projection.coefficients[0], expected, 2.0e-15);
+        assert_close(projection.coefficients[1], expected, 2.0e-15);
+    }
+
+    #[test]
+    fn repeated_ill_conditioned_reference_lags_project_identically() {
+        let e = 2.0e-14;
+        let c0 = [[1.0, 1.0 - e], [1.0 - e, 1.0]];
+        let c1 = [
+            [1.0 + e / 2.0, 1.0 - 3.0 * e / 2.0],
+            [1.0 - 3.0 * e / 2.0, 1.0 + e / 2.0],
+        ];
+        let matrices = vec![c0, c0, c1];
+
+        let projection =
+            principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
+        assert_close(projection.projected_correlator[0], 1.0, NORMALIZATION_TOLERANCE);
+        assert_close(projection.projected_correlator[1], 1.0, NORMALIZATION_TOLERANCE);
+        assert_eq!(
+            projection.projected_correlator[0].to_bits(),
+            projection.projected_correlator[1].to_bits()
+        );
+    }
+
+    #[test]
+    fn uniform_min_subnormal_basis_rescaling_preserves_projection() {
+        let c0 = [[16.0, 3.0], [3.0, 1.0]];
+        let c1 = [[8.0, 1.0], [1.0, 1.0]];
+        let matrices = vec![c0, c0, c1];
+        let baseline =
+            principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
+
+        let minimum_subnormal = f64::from_bits(1);
+        let scale = minimum_subnormal.sqrt();
+        let scaled: Vec<_> = matrices
+            .iter()
+            .copied()
+            .map(|matrix| matrix_scale_basis(matrix, [scale, scale]))
+            .collect();
+        let rescaled =
+            principal_generalized_projection(&scaled, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
+
+        assert_relative_close(
+            baseline.principal_eigenvalue,
+            rescaled.principal_eigenvalue,
+            2.0e-12,
+        );
+        for (&left, &right) in baseline
+            .projected_correlator
+            .iter()
+            .zip(&rescaled.projected_correlator)
+        {
+            assert_relative_close(left, right, 2.0e-12);
+        }
     }
 
     #[test]
