@@ -995,7 +995,10 @@ mod tests {
     fn symmetrization_preserves_equal_subnormal_entries_bitwise() {
         let minimum_subnormal = f64::from_bits(1);
         let cross = 3.0 * minimum_subnormal;
-        let matrix = [[16.0 * minimum_subnormal, cross], [cross, minimum_subnormal]];
+        let matrix = [
+            [16.0 * minimum_subnormal, cross],
+            [cross, minimum_subnormal],
+        ];
         let symmetric = symmetrized_matrix(matrix).unwrap();
         assert_eq!(symmetric[0][1].to_bits(), cross.to_bits());
         assert_eq!(symmetric[1][0].to_bits(), cross.to_bits());
