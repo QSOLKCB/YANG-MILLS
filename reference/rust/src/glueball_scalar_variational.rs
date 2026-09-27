@@ -247,6 +247,43 @@ fn stable_divide_by_product(
     Err(VariationalError::NonFiniteAccumulator)
 }
 
+fn compensated_symmetric_determinant(
+    diagonal_first: f64,
+    diagonal_second: f64,
+    off_diagonal: f64,
+) -> Result<f64, VariationalError> {
+    if !diagonal_first.is_finite()
+        || !diagonal_second.is_finite()
+        || !off_diagonal.is_finite()
+    {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+
+    let diagonal_product = diagonal_first * diagonal_second;
+    let off_diagonal_square = off_diagonal * off_diagonal;
+    if !diagonal_product.is_finite() || !off_diagonal_square.is_finite() {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+
+    // Recover the low-order bits lost by each rounded product with FMA before
+    // subtracting them. This preserves determinants that are representably
+    // nonzero even when the two leading products round to the same binary64.
+    let diagonal_error = diagonal_first.mul_add(diagonal_second, -diagonal_product);
+    let off_diagonal_error = off_diagonal.mul_add(off_diagonal, -off_diagonal_square);
+    let leading = diagonal_product - off_diagonal_square;
+    let correction = diagonal_error - off_diagonal_error;
+    let determinant = leading + correction;
+    if !diagonal_error.is_finite()
+        || !off_diagonal_error.is_finite()
+        || !leading.is_finite()
+        || !correction.is_finite()
+        || !determinant.is_finite()
+    {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+    Ok(determinant)
+}
+
 fn matmul(first: Matrix2, second: Matrix2) -> Matrix2 {
     let mut out = [[0.0; 2]; 2];
     for row in 0..2 {
@@ -526,13 +563,9 @@ pub fn principal_generalized_projection(
             if !smaller.is_finite() || smaller == 0.0 {
                 return Err(VariationalError::NonFiniteAccumulator);
             }
-            let diagonal_term = if whitened_a.abs() >= whitened_d.abs() {
-                whitened_d * (whitened_a / smaller)
-            } else {
-                whitened_a * (whitened_d / smaller)
-            };
-            let off_diagonal_term = off_diagonal * (off_diagonal / smaller);
-            let value = diagonal_term - off_diagonal_term;
+            let determinant =
+                compensated_symmetric_determinant(whitened_a, whitened_d, off_diagonal)?;
+            let value = determinant / smaller;
             if !value.is_finite() {
                 return Err(VariationalError::NonFiniteAccumulator);
             }
@@ -1143,6 +1176,41 @@ mod tests {
         let sequential = (tiny_l10 / tiny_l00) / tiny_l11;
         let stable_tiny = stable_divide_by_product(tiny_l10, tiny_l00, tiny_l11).unwrap();
         assert_eq!(stable_tiny.to_bits(), sequential.to_bits());
+    }
+
+    #[test]
+    fn tiny_positive_root_survives_near_zero_determinant_cancellation() {
+        let identity = [[1.0, 0.0], [0.0, 1.0]];
+        let matrix = [
+            [-0.1, 0.761_577_310_586_390_9],
+            [0.761_577_310_586_390_9, -5.8],
+        ];
+        let matrices = vec![identity, identity, matrix];
+
+        let projection =
+            principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
+
+        assert_close(
+            projection.principal_eigenvalue,
+            1.279_778_358_347_230_5e-17,
+            1.0e-30,
+        );
+        assert!(projection.principal_eigenvalue > 0.0);
+    }
+
+    #[test]
+    fn compensated_determinant_recovers_bits_lost_by_rounded_products() {
+        let a = -0.1_f64;
+        let d = -5.8_f64;
+        let b = 0.761_577_310_586_390_9_f64;
+
+        let naive = a * d - b * b;
+        let compensated = compensated_symmetric_determinant(a, d, b).unwrap();
+
+        assert_eq!(naive, 0.0);
+        assert!(compensated < 0.0);
+        assert!(compensated.is_finite());
     }
 
     #[test]
