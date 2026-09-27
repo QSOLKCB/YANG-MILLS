@@ -1343,7 +1343,10 @@ mod tests {
         let c1 = [[-1.0e10, 0.0], [0.0, -1.0e-10]];
         assert!(symmetric_negative_definite(c1).unwrap());
 
-        let indefinite = [[-0.1, 0.761_577_310_586_390_9], [0.761_577_310_586_390_9, -5.8]];
+        let indefinite = [
+            [-0.1, 0.761_577_310_586_390_9],
+            [0.761_577_310_586_390_9, -5.8],
+        ];
         assert!(!symmetric_negative_definite(indefinite).unwrap());
     }
 
