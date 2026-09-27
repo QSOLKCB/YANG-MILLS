@@ -163,10 +163,7 @@ fn matmul(first: Matrix2, second: Matrix2) -> Matrix2 {
 }
 
 fn transpose(matrix: Matrix2) -> Matrix2 {
-    [
-        [matrix[0][0], matrix[1][0]],
-        [matrix[0][1], matrix[1][1]],
-    ]
+    [[matrix[0][0], matrix[1][0]], [matrix[0][1], matrix[1][1]]]
 }
 
 fn matrix_scale_basis(matrix: Matrix2, scales: [f64; 2]) -> Matrix2 {
@@ -183,10 +180,7 @@ fn matrix_scale_basis(matrix: Matrix2, scales: [f64; 2]) -> Matrix2 {
 }
 
 fn matrix_swap_basis(matrix: Matrix2) -> Matrix2 {
-    [
-        [matrix[1][1], matrix[1][0]],
-        [matrix[0][1], matrix[0][0]],
-    ]
+    [[matrix[1][1], matrix[1][0]], [matrix[0][1], matrix[0][0]]]
 }
 
 /// Build the finite-sample symmetric connected cross-correlator matrix
@@ -233,10 +227,7 @@ pub fn scalar_variational_connected_correlator(
     for configuration in configurations {
         for time_slice in 0..time_extent {
             let basis = scalar_a1pp_operator_basis(configuration, time_slice)?;
-            let values = [
-                basis.spatial_plaquette_1x1,
-                basis.spatial_rectangle_2x1,
-            ];
+            let values = [basis.spatial_plaquette_1x1, basis.spatial_rectangle_2x1];
             if !values.iter().all(|value| value.is_finite()) {
                 return Err(VariationalError::NonFiniteObservable);
             }
@@ -285,14 +276,8 @@ pub fn scalar_variational_connected_correlator(
         let norm = sample_count as f64;
         let cross = 0.5 * (pr / norm + rp / norm) - vacuum_means[0] * vacuum_means[1];
         let matrix = [
-            [
-                pp / norm - vacuum_means[0] * vacuum_means[0],
-                cross,
-            ],
-            [
-                cross,
-                rr / norm - vacuum_means[1] * vacuum_means[1],
-            ],
+            [pp / norm - vacuum_means[0] * vacuum_means[0], cross],
+            [cross, rr / norm - vacuum_means[1] * vacuum_means[1]],
         ];
         if !matrix_finite(&matrix) {
             return Err(VariationalError::NonFiniteAccumulator);
@@ -347,10 +332,7 @@ pub fn principal_generalized_projection(
     }
     let l11 = second_pivot.sqrt();
 
-    let inv_l = [
-        [1.0 / l00, 0.0],
-        [-l10 / (l00 * l11), 1.0 / l11],
-    ];
+    let inv_l = [[1.0 / l00, 0.0], [-l10 / (l00 * l11), 1.0 / l11]];
     let whitened = matmul(matmul(inv_l, c1), transpose(inv_l));
     if !matrix_finite(&whitened) {
         return Err(VariationalError::NonFiniteAccumulator);
@@ -365,17 +347,13 @@ pub fn principal_generalized_projection(
     if !discriminant.is_finite() || discriminant <= POSITIVE_DEFINITE_PIVOT_TOLERANCE {
         return Err(VariationalError::DegeneratePrincipalEigenvector);
     }
-    let principal_eigenvalue =
-        0.5 * (whitened[0][0] + whitened[1][1]) + discriminant;
+    let principal_eigenvalue = 0.5 * (whitened[0][0] + whitened[1][1]) + discriminant;
     if !principal_eigenvalue.is_finite() || principal_eigenvalue <= 0.0 {
         return Err(VariationalError::NonPositivePrincipalEigenvalue);
     }
 
     let mut eigenvector = if off_diagonal.abs() > POSITIVE_DEFINITE_PIVOT_TOLERANCE {
-        [
-            off_diagonal,
-            principal_eigenvalue - whitened[0][0],
-        ]
+        [off_diagonal, principal_eigenvalue - whitened[0][0]]
     } else if whitened[0][0] > whitened[1][1] {
         [1.0, 0.0]
     } else {
@@ -447,16 +425,14 @@ pub fn canonical_two_state_matrices() -> Vec<Matrix2> {
 
     (0..CANONICAL_TIME_EXTENT)
         .map(|time| {
-            let ground =
-                ground_amplitude * periodic_weight(CANONICAL_GROUND_MASS, time, CANONICAL_TIME_EXTENT);
+            let ground = ground_amplitude
+                * periodic_weight(CANONICAL_GROUND_MASS, time, CANONICAL_TIME_EXTENT);
             let excited = excited_amplitude
                 * periodic_weight(CANONICAL_EXCITED_MASS, time, CANONICAL_TIME_EXTENT);
             let mut matrix = [[0.0_f64; 2]; 2];
             for row in 0..2 {
                 for column in 0..2 {
-                    matrix[row][column] = ground
-                        * ground_coupling[row]
-                        * ground_coupling[column]
+                    matrix[row][column] = ground * ground_coupling[row] * ground_coupling[column]
                         + excited * excited_coupling[row] * excited_coupling[column];
                 }
             }
@@ -555,34 +531,21 @@ mod tests {
     #[test]
     fn canonical_two_state_gevp_isolates_ground_state() {
         let matrices = canonical_two_state_matrices();
-        let projection = principal_generalized_projection(
-            &matrices,
-            REFERENCE_TIME,
-            DIAGONALIZATION_TIME,
-        )
-        .unwrap();
+        let projection =
+            principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap();
 
-        let expected_lambda = periodic_weight(
-            CANONICAL_GROUND_MASS,
-            DIAGONALIZATION_TIME,
-            CANONICAL_TIME_EXTENT,
-        ) / periodic_weight(
-            CANONICAL_GROUND_MASS,
-            REFERENCE_TIME,
-            CANONICAL_TIME_EXTENT,
-        );
+        let expected_lambda =
+            periodic_weight(
+                CANONICAL_GROUND_MASS,
+                DIAGONALIZATION_TIME,
+                CANONICAL_TIME_EXTENT,
+            ) / periodic_weight(CANONICAL_GROUND_MASS, REFERENCE_TIME, CANONICAL_TIME_EXTENT);
         assert_close(projection.principal_eigenvalue, expected_lambda, 2.0e-12);
 
         for time in 0..CANONICAL_TIME_EXTENT {
-            let expected = periodic_weight(
-                CANONICAL_GROUND_MASS,
-                time,
-                CANONICAL_TIME_EXTENT,
-            ) / periodic_weight(
-                CANONICAL_GROUND_MASS,
-                REFERENCE_TIME,
-                CANONICAL_TIME_EXTENT,
-            );
+            let expected = periodic_weight(CANONICAL_GROUND_MASS, time, CANONICAL_TIME_EXTENT)
+                / periodic_weight(CANONICAL_GROUND_MASS, REFERENCE_TIME, CANONICAL_TIME_EXTENT);
             assert_close(projection.projected_correlator[time], expected, 2.0e-11);
         }
     }
@@ -618,11 +581,7 @@ mod tests {
     #[test]
     fn projection_is_invariant_under_basis_permutation() {
         let matrices = canonical_two_state_matrices();
-        let swapped: Vec<_> = matrices
-            .iter()
-            .copied()
-            .map(matrix_swap_basis)
-            .collect();
+        let swapped: Vec<_> = matrices.iter().copied().map(matrix_swap_basis).collect();
         let first =
             principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
                 .unwrap();
@@ -648,12 +607,8 @@ mod tests {
         let mut matrices = canonical_two_state_matrices();
         matrices[REFERENCE_TIME] = [[1.0, 1.0], [1.0, 1.0]];
         assert_eq!(
-            principal_generalized_projection(
-                &matrices,
-                REFERENCE_TIME,
-                DIAGONALIZATION_TIME
-            )
-            .unwrap_err(),
+            principal_generalized_projection(&matrices, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap_err(),
             VariationalError::ReferenceMatrixNotPositiveDefinite
         );
 
@@ -681,12 +636,8 @@ mod tests {
         let mut nonfinite = matrices;
         nonfinite[0][0][0] = f64::NAN;
         assert_eq!(
-            principal_generalized_projection(
-                &nonfinite,
-                REFERENCE_TIME,
-                DIAGONALIZATION_TIME
-            )
-            .unwrap_err(),
+            principal_generalized_projection(&nonfinite, REFERENCE_TIME, DIAGONALIZATION_TIME)
+                .unwrap_err(),
             VariationalError::NonFiniteAccumulator
         );
     }
