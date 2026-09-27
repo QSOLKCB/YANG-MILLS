@@ -281,6 +281,27 @@ fn compensated_symmetric_determinant(
     Ok(determinant)
 }
 
+fn symmetric_negative_definite(matrix: Matrix2) -> Result<bool, VariationalError> {
+    let matrix = symmetrized_matrix(matrix)?;
+    let scale = matrix
+        .iter()
+        .flatten()
+        .map(|value| value.abs())
+        .fold(0.0_f64, f64::max);
+    if !scale.is_finite() {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+    if scale == 0.0 {
+        return Ok(false);
+    }
+
+    let a = matrix[0][0] / scale;
+    let d = matrix[1][1] / scale;
+    let b = matrix[0][1] / scale;
+    let determinant = compensated_symmetric_determinant(a, d, b)?;
+    Ok(a < 0.0 && determinant > 0.0)
+}
+
 fn stable_negative_midpoint_principal_root(
     diagonal_first: f64,
     diagonal_second: f64,
@@ -351,51 +372,6 @@ fn matmul(first: Matrix2, second: Matrix2) -> Matrix2 {
 
 fn transpose(matrix: Matrix2) -> Matrix2 {
     [[matrix[0][0], matrix[1][0]], [matrix[0][1], matrix[1][1]]]
-}
-
-fn stable_scaled_quadratic_value(
-    vector: [f64; 2],
-    matrix: Matrix2,
-) -> Result<f64, VariationalError> {
-    if !vector[0].is_finite() || !vector[1].is_finite() || !matrix_finite(&matrix) {
-        return Err(VariationalError::NonFiniteAccumulator);
-    }
-
-    let vector_scale = vector[0].abs().max(vector[1].abs());
-    if !vector_scale.is_finite() || vector_scale <= 0.0 {
-        return Err(VariationalError::ProjectionNormalizationFailure);
-    }
-    let matrix_scale = matrix
-        .iter()
-        .flatten()
-        .map(|value| value.abs())
-        .fold(0.0_f64, f64::max);
-    if !matrix_scale.is_finite() {
-        return Err(VariationalError::NonFiniteAccumulator);
-    }
-    if matrix_scale == 0.0 {
-        return Ok(0.0);
-    }
-
-    let x = vector[0] / vector_scale;
-    let y = vector[1] / vector_scale;
-    let a = matrix[0][0] / matrix_scale;
-    let b = stable_average(matrix[0][1], matrix[1][0])? / matrix_scale;
-    let d = matrix[1][1] / matrix_scale;
-
-    let xx = x * x;
-    let xy = x * y;
-    let yy = y * y;
-    if !xx.is_finite() || !xy.is_finite() || !yy.is_finite() {
-        return Err(VariationalError::NonFiniteAccumulator);
-    }
-
-    let first = a.mul_add(xx, 2.0 * b * xy);
-    let value = d.mul_add(yy, first);
-    if !first.is_finite() || !value.is_finite() {
-        return Err(VariationalError::NonFiniteAccumulator);
-    }
-    Ok(value)
 }
 
 fn stable_whitened_projection(
@@ -583,6 +559,9 @@ pub fn principal_generalized_projection(
 
     let c0 = symmetrized_matrix(matrices[reference_time])?;
     let c1 = symmetrized_matrix(matrices[diagonalization_time])?;
+    if symmetric_negative_definite(c1)? {
+        return Err(VariationalError::NonPositivePrincipalEigenvalue);
+    }
 
     let a = c0[0][0];
     let d = c0[1][1];
@@ -728,11 +707,6 @@ pub fn principal_generalized_projection(
     } else if coefficients[1] < 0.0 {
         coefficients[0] = -coefficients[0];
         coefficients[1] = -coefficients[1];
-    }
-
-    let principal_rayleigh = stable_scaled_quadratic_value(coefficients, c1)?;
-    if principal_rayleigh <= 0.0 {
-        return Err(VariationalError::NonPositivePrincipalEigenvalue);
     }
 
     let metric_vector = [
@@ -1365,13 +1339,12 @@ mod tests {
     }
 
     #[test]
-    fn stable_rayleigh_check_detects_negative_principal_direction() {
+    fn scaled_inertia_check_detects_negative_definite_matrix() {
         let c1 = [[-1.0e10, 0.0], [0.0, -1.0e-10]];
-        let vector = [8.712_997_7e-18, 1.0];
-        let value = stable_scaled_quadratic_value(vector, c1).unwrap();
+        assert!(symmetric_negative_definite(c1).unwrap());
 
-        assert!(value.is_finite());
-        assert!(value < 0.0);
+        let indefinite = [[-0.1, 0.761_577_310_586_390_9], [0.761_577_310_586_390_9, -5.8]];
+        assert!(!symmetric_negative_definite(indefinite).unwrap());
     }
 
     #[test]
