@@ -1,0 +1,61 @@
+{
+  "contract_id": "YM-GLUEBALL-SCALAR-VARIATIONAL-BASIS-V1",
+  "vector_set": "GLUEBALL-SCALAR-VARIATIONAL-PHASE3J-V1",
+  "status": "phase-3j-candidate",
+  "vectors": [
+    {
+      "id": "two-operator-basis",
+      "basis_dimension": 2,
+      "basis": [
+        "plaquette-1x1",
+        "rectangle-2x1"
+      ],
+      "reference_time": 1,
+      "diagonalization_time": 2,
+      "claim_class": "C0"
+    },
+    {
+      "id": "canonical-two-state-gevp",
+      "time_extent": 16,
+      "ground_mass": 0.4,
+      "excited_mass": 0.9,
+      "ground_amplitude": 1.2,
+      "excited_amplitude": 0.8,
+      "ground_coupling": [
+        1,
+        0.5
+      ],
+      "excited_coupling": [
+        0.25,
+        1
+      ],
+      "expected_principal_eigenvalue": 0.673346666250657,
+      "projected_reference_value": 1,
+      "physical_ensemble": false,
+      "claim_class": "C0"
+    },
+    {
+      "id": "variational-invariants",
+      "diagonal_replays_phase3c": true,
+      "gauge_invariant": true,
+      "basis_permutation_invariant": true,
+      "independent_basis_rescaling_invariant": true,
+      "reference_matrix_positive_definite_required": true,
+      "asymmetric_matrix_rejected": true,
+      "non_finite_input_rejected": true,
+      "claim_class": "C0"
+    },
+    {
+      "id": "activation-boundary",
+      "phase3i_outcome_assumed": false,
+      "production_recovery_activated": false,
+      "later_production_use_requires_new_authority": true,
+      "tensor_2pp_channel_enabled": false,
+      "pseudoscalar_0mp_channel_enabled": false,
+      "physical_glueball_mass_claimed": false,
+      "positive_continuum_mass_gap_proved": false,
+      "clay_solution_claimed": false,
+      "claim_class": "C0"
+    }
+  ]
+}
