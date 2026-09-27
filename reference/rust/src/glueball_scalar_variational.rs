@@ -146,11 +146,26 @@ fn symmetry_within_tolerance(matrix: &Matrix2) -> bool {
     scale.is_finite() && residual <= SYMMETRY_TOLERANCE * scale
 }
 
-fn symmetrized_matrix(matrix: Matrix2) -> Result<Matrix2, VariationalError> {
-    let cross = 0.5 * matrix[0][1] + 0.5 * matrix[1][0];
-    if !cross.is_finite() {
+fn stable_average(first: f64, second: f64) -> Result<f64, VariationalError> {
+    if !first.is_finite() || !second.is_finite() {
         return Err(VariationalError::NonFiniteAccumulator);
     }
+    if first.to_bits() == second.to_bits() {
+        return Ok(first);
+    }
+    let difference = second - first;
+    if !difference.is_finite() {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+    let average = first + 0.5 * difference;
+    if !average.is_finite() {
+        return Err(VariationalError::NonFiniteAccumulator);
+    }
+    Ok(average)
+}
+
+fn symmetrized_matrix(matrix: Matrix2) -> Result<Matrix2, VariationalError> {
+    let cross = stable_average(matrix[0][1], matrix[1][0])?;
     Ok([[matrix[0][0], cross], [cross, matrix[1][1]]])
 }
 
@@ -430,9 +445,10 @@ pub fn principal_generalized_projection(
         return Err(VariationalError::MatrixNotSymmetric);
     }
 
+    let whitened = symmetrized_matrix(whitened)?;
     let whitened_a = whitened[0][0];
     let whitened_d = whitened[1][1];
-    let off_diagonal = 0.5 * whitened[0][1] + 0.5 * whitened[1][0];
+    let off_diagonal = whitened[0][1];
     if !whitened_a.is_finite() || !whitened_d.is_finite() || !off_diagonal.is_finite() {
         return Err(VariationalError::NonFiniteAccumulator);
     }
@@ -973,6 +989,16 @@ mod tests {
             projection.projected_correlator[0].to_bits(),
             projection.projected_correlator[1].to_bits()
         );
+    }
+
+    #[test]
+    fn symmetrization_preserves_equal_subnormal_entries_bitwise() {
+        let minimum_subnormal = f64::from_bits(1);
+        let cross = 3.0 * minimum_subnormal;
+        let matrix = [[16.0 * minimum_subnormal, cross], [cross, minimum_subnormal]];
+        let symmetric = symmetrized_matrix(matrix).unwrap();
+        assert_eq!(symmetric[0][1].to_bits(), cross.to_bits());
+        assert_eq!(symmetric[1][0].to_bits(), cross.to_bits());
     }
 
     #[test]
