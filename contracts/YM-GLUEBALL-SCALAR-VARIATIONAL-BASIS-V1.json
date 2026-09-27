@@ -1,0 +1,99 @@
+{
+  "contract_id": "YM-GLUEBALL-SCALAR-VARIATIONAL-BASIS-V1",
+  "status": "phase-3j-candidate",
+  "scope": "mechanics-only two-operator scalar A1++ connected cross-correlator and generalized-eigenvalue projection; no production recovery activation",
+  "depends_on": [
+    {
+      "contract_id": "YM-GLUEBALL-OPERATORS-V1",
+      "required_status": "phase-3a-frozen"
+    },
+    {
+      "contract_id": "YM-GLUEBALL-CONNECTED-CORRELATOR-V1",
+      "required_status": "phase-3c-frozen"
+    }
+  ],
+  "lifecycle": {
+    "phase3i_outcome_assumed": false,
+    "production_recovery_activated": false,
+    "may_merge_before_phase3i_observation": true,
+    "later_production_use_requires_separate_versioned_authority": true
+  },
+  "basis": {
+    "dimension": 2,
+    "elements": [
+      "plaquette-1x1",
+      "rectangle-2x1"
+    ],
+    "finite_lattice_irrep": "A1++",
+    "continuum_channel_intent": "0++",
+    "basis_order_is_physical": false,
+    "independent_basis_rescaling_must_not_change_principal_projected_correlator": true
+  },
+  "correlator_matrix": {
+    "estimator": "symmetric connected periodic cross-correlator",
+    "formula": "C_ij(tau)=0.5*(<O_i(t)O_j(t+tau)>+<O_j(t)O_i(t+tau)>)-<O_i><O_j>",
+    "all_configurations_equal_weight": true,
+    "all_periodic_time_origins_equal_weight": true,
+    "diagonal_entries_must_replay_phase3c": true,
+    "matrix_symmetry_tolerance": 2e-12,
+    "maximum_configurations": 64,
+    "maximum_time_extent": 64
+  },
+  "generalized_eigenproblem": {
+    "equation": "C(t1) v = lambda C(t0) v",
+    "reference_time": 1,
+    "diagonalization_time": 2,
+    "principal_selection": "largest generalized eigenvalue",
+    "whitening": "Cholesky C(t0)=L L^T; diagonalize L^-1 C(t1) L^-T",
+    "reference_matrix_must_be_positive_definite": true,
+    "positive_definite_pivot_tolerance": 1e-14,
+    "eigenvalue_must_be_positive": true,
+    "eigenvector_sign_convention": "first non-negligible coefficient positive",
+    "normalization": "v^T C(t0) v = 1",
+    "normalization_tolerance": 2e-12
+  },
+  "canonical_fixture": {
+    "kind": "deterministic two-state periodic correlator matrix",
+    "time_extent": 16,
+    "ground_mass": 0.4,
+    "excited_mass": 0.9,
+    "ground_amplitude": 1.2,
+    "excited_amplitude": 0.8,
+    "ground_coupling": [
+      1,
+      0.5
+    ],
+    "excited_coupling": [
+      0.25,
+      1
+    ],
+    "reference_time": 1,
+    "diagonalization_time": 2,
+    "expected_principal_eigenvalue": 0.673346666250657,
+    "fixture_is_physical_ensemble": false,
+    "fixture_is_glueball_mass_measurement": false
+  },
+  "invariants": {
+    "gauge_invariance_checked": true,
+    "basis_permutation_invariance_checked": true,
+    "basis_rescaling_invariance_checked": true,
+    "asymmetric_matrix_rejected": true,
+    "non_positive_definite_reference_rejected": true,
+    "non_finite_input_rejected": true,
+    "invalid_reference_times_rejected": true
+  },
+  "decision_boundary": {
+    "if_phase3i_passes": "Phase 3J remains mechanics-only; Phase 3I requires fresh-stream confirmation before production variational use or new channels",
+    "if_phase3i_fails": "Phase 3J may become a prerequisite for a new separately predeclared variational scalar recovery authority",
+    "tensor_2pp_channel_enabled": false,
+    "pseudoscalar_0mp_channel_enabled": false
+  },
+  "claim_boundary": {
+    "variational_fixture_is_physical_glueball_mass": false,
+    "finite_volume_mass_gap_established": false,
+    "confinement_established": false,
+    "continuum_qft_constructed": false,
+    "positive_continuum_mass_gap_proved": false,
+    "clay_solution_claimed": false
+  }
+}
