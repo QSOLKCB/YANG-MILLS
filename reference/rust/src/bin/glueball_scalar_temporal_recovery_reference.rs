@@ -18,12 +18,12 @@ mod glueball_scalar_fit;
 mod glueball_scalar_geometry_recovery;
 #[path = "../glueball_scalar_geometry_recovery_receipt.rs"]
 mod glueball_scalar_geometry_recovery_receipt;
-#[path = "../glueball_scalar_temporal_recovery.rs"]
-mod glueball_scalar_temporal_recovery;
 #[path = "../glueball_scalar_production.rs"]
 mod glueball_scalar_production;
 #[path = "../glueball_scalar_recovery.rs"]
 mod glueball_scalar_recovery;
+#[path = "../glueball_scalar_temporal_recovery.rs"]
+mod glueball_scalar_temporal_recovery;
 #[path = "../glueball_smearing.rs"]
 mod glueball_smearing;
 #[path = "../path_holonomy.rs"]
@@ -37,17 +37,18 @@ mod su3_ensemble;
 #[path = "../su3_lattice.rs"]
 mod su3_lattice;
 
-use glueball_scalar_temporal_recovery::{
-    run_scalar_temporal_recovery_analysis, BETA, BLOCKED_EXTENTS, CHAIN_COUNT,
-    EXPECTED_PROPOSALS_PER_CHAIN, EXPECTED_TOTAL_PROPOSALS, EXTENTS, TEMPORAL_RECOVERY_CONTRACT_ID,
-    TEMPORAL_RECOVERY_STATUS, MASTER_SEED, POST_THERMALIZATION_SWEEPS, PRIMARY_TRANSFORMATION,
-    PROPOSAL_ANGLE, THERMALIZATION_SWEEPS, TOTAL_SWEEPS_PER_CHAIN, TRANSFORMATION_LABELS,
-};
 use glueball_scalar_geometry_recovery_receipt::{
     OBSERVATION_HEAD as PHASE3H_OBSERVATION_HEAD,
     OBSERVATION_WORKFLOW_RUN_ID as PHASE3H_OBSERVATION_WORKFLOW_RUN_ID,
 };
 use glueball_scalar_production::{OperatorKind, CANDIDATE_WINDOWS, STABILITY_MAX_Z, STOUT_LEVELS};
+use glueball_scalar_temporal_recovery::{
+    run_scalar_temporal_recovery_analysis, BETA, BLOCKED_EXTENTS, CHAIN_COUNT,
+    EXPECTED_PROPOSALS_PER_CHAIN, EXPECTED_TOTAL_PROPOSALS, EXTENTS, MASTER_SEED,
+    POST_THERMALIZATION_SWEEPS, PRIMARY_TRANSFORMATION, PROPOSAL_ANGLE,
+    TEMPORAL_RECOVERY_CONTRACT_ID, TEMPORAL_RECOVERY_STATUS, THERMALIZATION_SWEEPS,
+    TOTAL_SWEEPS_PER_CHAIN, TRANSFORMATION_LABELS,
+};
 
 fn print_optional(label: &str, value: Option<f64>) {
     match value {
