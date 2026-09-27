@@ -56,7 +56,9 @@ fn print_optional(label: &str, value: Option<f64>) {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let summary = run_scalar_geometry_recovery_analysis()?;
     if !observed_phase3h_receipt_matches(&summary) {
-        return Err("Phase 3H deterministic replay no longer matches the pinned observation receipt".into());
+        return Err(
+            "Phase 3H deterministic replay no longer matches the pinned observation receipt".into(),
+        );
     }
 
     println!("contract={GEOMETRY_RECOVERY_CONTRACT_ID}");
