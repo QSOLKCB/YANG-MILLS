@@ -81,6 +81,24 @@ C_var(tau) = v^T C(tau) v.
 
 Phase 3J does not yet feed this projected series into a production mass fit.
 
+### Diagonal-metric numerical preservation
+
+When `C(t0)` is diagonal, Cholesky whitening reduces to entrywise division by
+the reference diagonal entries and their geometric mean. The implementation
+keeps those normalized entries directly, without an unnecessary matrix-wide
+rescaling that can erase a small representable entry next to a large one.
+This is an implementation-only correction to the existing GEVP and projection
+formulas; the contract, reference times, tolerances, and phase gates are unchanged.
+
+Regressions cover identity-metric whitening and projected values at every lag,
+including repeated diagonalization matrices, negative projected values at other
+lags, basis permutation, and exact power-of-two basis rescaling. The fixtures
+range from the smallest positive binary64 subnormal to ordinary small numbers
+beside the largest finite binary64 value. Exact comparisons are confined to
+these analytically exact fixtures, not a cross-platform bitwise guarantee for
+general numerical output. The correction does not establish stability for all
+ill-conditioned non-diagonal metrics or remove existing fail-closed guards.
+
 ## Canonical fixture
 
 The deterministic mechanics fixture contains two periodic states on `N_t = 16`:
