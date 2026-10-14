@@ -510,6 +510,17 @@ fn stable_cholesky_whitened(
         return Err(VariationalError::NonFiniteAccumulator);
     }
 
+    // A diagonal reference metric needs only the entrywise divisions above.
+    // Matrix-wide scaling is unnecessary here and can round a representable
+    // small entry to zero (or lose relative precision) beside a large one.
+    // Keep every normalized entry, including subnormals, for all time lags.
+    if reference_off_diagonal == 0.0 {
+        return Ok([
+            [normalized_first, normalized_off_diagonal],
+            [normalized_off_diagonal, normalized_second],
+        ]);
+    }
+
     let scale = normalized_first
         .abs()
         .max(normalized_second.abs())
@@ -1238,6 +1249,60 @@ mod tests {
             1.0,
             NORMALIZATION_TOLERANCE,
         );
+    }
+
+    #[test]
+    fn diagonal_metric_whitening_preserves_representable_entries() {
+        let tiny_values = [f64::from_bits(1), 1.0e-308, 1.0e-100, 1.0e-10];
+        for tiny in tiny_values {
+            let matrix = [[-f64::MAX, tiny], [tiny, tiny]];
+            for input in [matrix, matrix_swap_basis(matrix)] {
+                let whitened = stable_cholesky_whitened(input, 1.0, 1.0, 1.0, 0.0, 1.0).unwrap();
+                assert_eq!(whitened, input, "identity whitening changed {input:?}");
+            }
+        }
+    }
+
+    #[test]
+    fn diagonal_metric_projection_preserves_small_values_at_every_lag() {
+        for tiny in [f64::from_bits(1), 1.0e-308, 1.0e-100, 1.0e-10] {
+            let identity = [[1.0, 0.0], [0.0, 1.0]];
+            let diagonalization = [[-f64::MAX, 0.0], [0.0, tiny]];
+            let later = [[-f64::MAX, 0.0], [0.0, -tiny]];
+            let matrices = vec![diagonalization, identity, diagonalization, later];
+            for scales in [[1.0, 1.0], [0.5, 2.0], [-0.5, -2.0]] {
+                let scaled: Vec<_> = matrices
+                    .iter()
+                    .copied()
+                    .map(|matrix| matrix_scale_basis(matrix, scales))
+                    .collect();
+                for swap in [false, true] {
+                    let input: Vec<_> = scaled
+                        .iter()
+                        .copied()
+                        .map(|matrix| {
+                            if swap {
+                                matrix_swap_basis(matrix)
+                            } else {
+                                matrix
+                            }
+                        })
+                        .collect();
+                    let projection = principal_generalized_projection(
+                        &input,
+                        REFERENCE_TIME,
+                        DIAGONALIZATION_TIME,
+                    )
+                    .unwrap();
+                    assert_eq!(projection.principal_eigenvalue, tiny);
+                    assert_eq!(
+                        projection.projected_correlator,
+                        vec![tiny, 1.0, tiny, -tiny],
+                        "tiny={tiny:e}, scales={scales:?}, swap={swap}"
+                    );
+                }
+            }
+        }
     }
 
     #[test]
