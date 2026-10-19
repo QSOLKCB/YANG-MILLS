@@ -167,3 +167,61 @@ fn positive_subnormal_variance_cannot_report_zero_uncertainty() {
         EfficiencyError::NonFiniteResult
     );
 }
+
+#[test]
+fn executable_preserves_complete_chain_evidence() {
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_ym-sampling-efficiency"))
+        .output()
+        .expect("run sampling-efficiency reference");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    let fields: std::collections::HashMap<_, _> = stdout
+        .lines()
+        .filter_map(|line| line.split_once('='))
+        .collect();
+    for key in [
+        "contract",
+        "sampler_id",
+        "proposal_id",
+        "rng_id",
+        "stream_id",
+        "config",
+        "derived_seed",
+        "total_sweeps",
+        "metropolis_proposals",
+        "metropolis_accepts",
+        "metropolis_acceptance",
+        "measurements",
+        "mean_plaquette",
+        "variance",
+        "autocorrelation",
+        "positive_window_lag",
+        "tau_int",
+        "autocorrelation_ess",
+        "standard_error",
+        "final_link_unitarity_residual",
+        "final_link_determinant_residual",
+    ] {
+        assert!(fields.contains_key(key), "missing chain evidence {key}");
+    }
+    assert_eq!(fields["proposal_id"], "YM-SU3-GENERATOR-METROPOLIS-V1");
+    assert_eq!(fields["rng_id"], "SPLITMIX64-V1");
+    assert_eq!(fields["total_sweeps"], "20");
+    assert_eq!(fields["metropolis_proposals"], "10240");
+    assert_eq!(fields["metropolis_accepts"], "10240");
+    assert_eq!(fields["autocorrelation_window_truncated"], "true");
+    let parse = |key| fields[key].parse::<f64>().unwrap();
+    assert_eq!(parse("metropolis_acceptance"), 1.0);
+    for key in [
+        "final_link_unitarity_residual",
+        "final_link_determinant_residual",
+    ] {
+        assert!(parse(key).is_finite() && parse(key) <= 5e-12);
+    }
+    assert!(parse("variance") > 0.0 && parse("standard_error") > 0.0);
+    assert_eq!(fields["mass_gap_proved"], "false");
+}

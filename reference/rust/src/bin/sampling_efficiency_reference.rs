@@ -49,7 +49,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("evidence_class=mechanics-regression-not-equilibrium-validation");
     println!("observable=average-plaquette-not-topological-charge");
     println!("sampler_id={}", chain.sampler_id);
+    println!("proposal_id={}", chain.proposal_id);
+    println!("rng_id={}", chain.rng_id);
     println!("stream_id={}", chain.stream_id);
+    println!("total_sweeps={}", chain.total_sweeps);
+    println!("metropolis_proposals={}", chain.metropolis_proposals);
+    println!("metropolis_accepts={}", chain.metropolis_accepts);
+    println!(
+        "metropolis_acceptance={:.17e}",
+        chain.mean_metropolis_acceptance
+    );
+    println!("mean_plaquette={:.17e}", chain.diagnostics.mean);
+    println!("variance={:.17e}", chain.diagnostics.variance);
+    println!("standard_error={:.17e}", chain.diagnostics.standard_error);
+    println!(
+        "final_link_unitarity_residual={:.17e}",
+        chain.final_link_unitarity_residual
+    );
+    println!(
+        "final_link_determinant_residual={:.17e}",
+        chain.final_link_determinant_residual
+    );
     println!("config={config:?}");
     println!("derived_seed={:016x}", chain.derived_seed);
     println!("measurements={:?}", chain.measurements);
