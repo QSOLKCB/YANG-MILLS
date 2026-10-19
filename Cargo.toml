@@ -102,3 +102,7 @@ path = "reference/rust/src/bin/glueball_scalar_variational_reference.rs"
 lto = "thin"
 codegen-units = 1
 panic = "abort"
+
+[[bin]]
+name = "ym-sampling-efficiency"
+path = "reference/rust/src/bin/sampling_efficiency_reference.rs"

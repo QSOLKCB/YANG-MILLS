@@ -1,0 +1,14 @@
+name: Sampling efficiency reporting
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  reporting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup show
+      - run: cargo test --locked --test sampling_efficiency
+      - run: cargo run --quiet --locked --bin ym-sampling-efficiency
+      - run: python3 scripts/check_all_contracts.py
+      - run: python3 scripts/test_all_contract_validation.py

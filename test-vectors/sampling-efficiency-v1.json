@@ -1,0 +1,41 @@
+{
+  "fixture_id": "YM-SAMPLING-EFFICIENCY-REGRESSION-V1",
+  "evidence_class": "analytic mechanics, not Monte Carlo physics",
+  "tolerance": 1e-12,
+  "values": [
+    0,
+    1,
+    0,
+    1
+  ],
+  "max_lag": 2,
+  "cost": {
+    "setup": 4,
+    "thermalization": 8,
+    "sampling": 20
+  },
+  "unit_weights": {
+    "tau_int": 0.5,
+    "autocorrelation_ess": 4,
+    "weight_efficiency": 1,
+    "combined_ess_proxy": 4,
+    "sampling_cost_per_proxy": 5,
+    "total_cost_per_proxy": 8
+  },
+  "weights_1_1_1_3": {
+    "weight_efficiency": 0.75,
+    "weight_only_ess": 3,
+    "combined_ess_proxy": 3,
+    "total_cost_per_proxy": 10.666666666666666
+  },
+  "correlated_values": [
+    0,
+    0,
+    0,
+    1,
+    1,
+    1
+  ],
+  "correlated_max_lag": 3,
+  "correlated_tau_int": 1.1
+}

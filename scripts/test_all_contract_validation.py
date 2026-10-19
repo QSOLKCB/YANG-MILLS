@@ -22,6 +22,8 @@ from test_glueball_scalar_temporal_recovery_contract_validation import main as t
 from test_glueball_scalar_variational_contract_validation import main as test_glueball_scalar_variational_contracts
 
 
+from test_sampling_efficiency_contract_validation import main as test_sampling_efficiency
+
 def main() -> None:
     test_core_contracts()
     test_su3_contracts()
@@ -42,6 +44,7 @@ def main() -> None:
     test_glueball_scalar_geometry_recovery_contracts()
     test_glueball_scalar_temporal_recovery_contracts()
     test_glueball_scalar_variational_contracts()
+    test_sampling_efficiency()
     print("All negative YANG-MILLS contract regression checks: passed")
 
 
