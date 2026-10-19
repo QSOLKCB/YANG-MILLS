@@ -1,0 +1,71 @@
+{
+  "contract_id": "YM-SAMPLING-EFFICIENCY-V1",
+  "status": "reporting-mechanics-candidate",
+  "change_class": "additive new reporting authority; frozen samplers and physics gates unchanged",
+  "source": {
+    "url": "https://arxiv.org/abs/2610.20747v1",
+    "equations": [
+      "14",
+      "16"
+    ],
+    "comparison": "Figure 5",
+    "role": "metric inspiration only; no reproduction or algorithm implementation"
+  },
+  "limits": {
+    "min_samples": 2,
+    "max_samples": 4096,
+    "min_lag": 1,
+    "max_lag": 256,
+    "lag_must_be_less_than_sample_count": true
+  },
+  "autocorrelation": {
+    "authority": "YM-SU2-ENSEMBLE-V1 diagnostic arithmetic reused without mutation",
+    "units": "retained measurement intervals",
+    "estimator": "positive-window; tau=0.5+sum positive rho until first nonpositive lag",
+    "ess": "N/(2*tau)",
+    "zero_variance": "reject; mixing unidentifiable",
+    "max_lag": "predeclare; inspect truncation and estimator sensitivity before scientific use"
+  },
+  "reweighting": {
+    "input": "optional finite log weights with one weight per measurement; omitted means unit weights",
+    "estimator": "(sum(exp(logw-max(logw))))^2 / (N*sum(exp(2*(logw-max(logw)))))",
+    "weight_only_ess": "N*reweighting_efficiency",
+    "not_autocorrelation_ess": true
+  },
+  "cost": {
+    "components": [
+      "setup",
+      "thermalization",
+      "sampling"
+    ],
+    "components_same_explicit_unit": true,
+    "setup_and_thermalization_nonnegative": true,
+    "sampling_strictly_positive": true,
+    "total": "setup+thermalization+sampling",
+    "combined_ess_proxy": "autocorrelation_ess*reweighting_efficiency",
+    "sampling_cost_per_effective_sample_proxy": "sampling/combined_ess_proxy",
+    "total_cost_per_effective_sample_proxy": "total/combined_ess_proxy",
+    "proxy_not_validated_weighted_estimator_ess": true,
+    "includes_variance_factor_from_equation16": false
+  },
+  "claim_boundary": {
+    "flow_implemented": false,
+    "topology_observable_implemented": false,
+    "topological_freezing_resolved": false,
+    "new_production_recovery": false,
+    "mass_gap_proved": false
+  },
+  "canonical_runtime": {
+    "basis": "existing Phase 2C1 beta-zero 16-measurement mechanics chain",
+    "observable": "average plaquette",
+    "cost_unit": "generator proposals",
+    "setup": 0,
+    "thermalization": 2048,
+    "sampling": 8192,
+    "total": 10240,
+    "scope": "sampler proposals only; excludes analysis, IO, wall time, and hardware comparisons",
+    "weights": "unit",
+    "equilibrium_validation": false
+  },
+  "failure_policy": "reject malformed, nonfinite, degenerate, overflowing or nonpositive results; no silent fallback"
+}

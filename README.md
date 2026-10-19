@@ -56,6 +56,10 @@ Phase 3I is the current candidate `YM-GLUEBALL-SCALAR-TEMPORAL-RECOVERY-V1`. It 
 
 Phase 3J is the mechanics-only candidate `YM-GLUEBALL-SCALAR-VARIATIONAL-BASIS-V1`. It adds a symmetric connected `2 x 2` cross-correlator matrix for the frozen plaquette/rectangle `A1++` basis and a bounded Cholesky-whitened GEVP with `t0=1`, `t1=2`, largest-eigenvalue selection, and `v^T C(t0) v = 1` normalization. It assumes no Phase 3I outcome and activates no production recovery. See [`docs/GLUEBALL_SCALAR_TEMPORAL_RECOVERY.md`](docs/GLUEBALL_SCALAR_TEMPORAL_RECOVERY.md) and [`docs/GLUEBALL_SCALAR_VARIATIONAL.md`](docs/GLUEBALL_SCALAR_VARIATIONAL.md). `2++` and `0-+` remain unopened.
 
+## Sampling-efficiency reporting
+
+The additive `YM-SAMPLING-EFFICIENCY-V1` candidate reports autocorrelation, weight-only reweighting efficiency, and sampling/total cost per effective-sample proxy without changing any frozen sampler or phase gate. See [sampling-efficiency reporting](docs/SAMPLING_EFFICIENCY.md). Run `cargo run --quiet --locked --bin ym-sampling-efficiency`; the bounded reference uses the existing Phase 2C1 mechanics chain, not new production physics.
+
 ## The target
 
 The Clay Mathematics Institute problem asks, in substance, for a non-trivial quantum Yang–Mills theory on four-dimensional Euclidean space for any compact simple gauge group, together with a strictly positive mass gap. See [`docs/CLAY_PROBLEM.md`](docs/CLAY_PROBLEM.md).

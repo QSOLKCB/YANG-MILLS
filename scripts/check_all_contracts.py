@@ -22,6 +22,8 @@ from check_glueball_scalar_temporal_recovery_contracts import main as check_glue
 from check_glueball_scalar_variational_contracts import main as check_glueball_scalar_variational_contracts
 
 
+from check_sampling_efficiency_contracts import main as check_sampling_efficiency
+
 def main() -> None:
     check_core_contracts()
     check_su3_contracts()
@@ -42,6 +44,7 @@ def main() -> None:
     check_glueball_scalar_geometry_recovery_contracts()
     check_glueball_scalar_temporal_recovery_contracts()
     check_glueball_scalar_variational_contracts()
+    check_sampling_efficiency()
     print("All YANG-MILLS contract checks: passed")
 
 
